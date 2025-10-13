@@ -19,14 +19,18 @@ import {
 } from "@/lib/api";
 
 interface Status {
-  tenantId: string;
-  connections: {
-    microsoft: boolean;
-    gmail: boolean;
-  };
-  lastSync: {
-    outlook: string | null;
-    gmail: string | null;
+  tenant_id: string;
+  providers: {
+    outlook: {
+      configured: boolean;
+      connected: boolean;
+      connection_id: string | null;
+    };
+    gmail: {
+      configured: boolean;
+      connected: boolean;
+      connection_id: string | null;
+    };
   };
 }
 
@@ -64,7 +68,7 @@ export function ConnectCard() {
     setLoadingConnect((prev) => ({ ...prev, [provider]: true }));
     try {
       const result = await startConnect(provider, tenantId);
-      window.location.href = result.url;
+      window.location.href = result.auth_url;
     } catch (error) {
       setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
       toast({
@@ -120,11 +124,6 @@ export function ConnectCard() {
     }
   };
 
-  const formatDate = (dateString: string | null) => {
-    if (!dateString) return "Never";
-    return new Date(dateString).toLocaleString();
-  };
-
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
@@ -178,48 +177,30 @@ export function ConnectCard() {
               <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Tenant ID:</span>
-                  <span className="font-medium">{status.tenantId}</span>
+                  <span className="font-medium">{status.tenant_id}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Microsoft:</span>
-                  <span
-                    className={
-                      status.connections.microsoft
-                        ? "text-green-600 font-medium"
-                        : "text-muted-foreground"
-                    }
-                  >
-                    {status.connections.microsoft ? "Connected" : "Not Connected"}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Gmail:</span>
-                  <span
-                    className={
-                      status.connections.gmail
-                        ? "text-green-600 font-medium"
-                        : "text-muted-foreground"
-                    }
-                  >
-                    {status.connections.gmail ? "Connected" : "Not Connected"}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <h3 className="text-sm font-medium">Last Sync</h3>
-              <div className="rounded-lg border bg-muted/50 p-4 space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Outlook:</span>
-                  <span className="font-mono text-xs">
-                    {formatDate(status.lastSync.outlook)}
+                  <span
+                    className={
+                      status.providers.outlook.connected
+                        ? "text-green-600 font-medium"
+                        : "text-muted-foreground"
+                    }
+                  >
+                    {status.providers.outlook.connected ? "Connected" : "Not Connected"}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Gmail:</span>
-                  <span className="font-mono text-xs">
-                    {formatDate(status.lastSync.gmail)}
+                  <span
+                    className={
+                      status.providers.gmail.connected
+                        ? "text-green-600 font-medium"
+                        : "text-muted-foreground"
+                    }
+                  >
+                    {status.providers.gmail.connected ? "Connected" : "Not Connected"}
                   </span>
                 </div>
               </div>
@@ -233,7 +214,7 @@ export function ConnectCard() {
             <Button
               onClick={handleSyncOutlook}
               disabled={
-                loadingSync.outlook || !status?.connections.microsoft
+                loadingSync.outlook || !status?.providers.outlook.connected
               }
               variant="outline"
               className="flex-1"
@@ -242,7 +223,7 @@ export function ConnectCard() {
             </Button>
             <Button
               onClick={handleSyncGmail}
-              disabled={loadingSync.gmail || !status?.connections.gmail}
+              disabled={loadingSync.gmail || !status?.providers.gmail.connected}
               variant="outline"
               className="flex-1"
             >

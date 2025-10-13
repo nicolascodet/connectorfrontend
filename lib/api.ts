@@ -36,19 +36,23 @@ export async function apiGet(
 export async function startConnect(
   provider: "microsoft" | "gmail",
   tenantId: string
-): Promise<{ url: string }> {
+): Promise<{ auth_url: string; provider: string; tenant_id: string }> {
   return apiGet("/connect/start", { provider, tenantId });
 }
 
 export async function fetchStatus(tenantId: string): Promise<{
-  tenantId: string;
-  connections: {
-    microsoft: boolean;
-    gmail: boolean;
-  };
-  lastSync: {
-    outlook: string | null;
-    gmail: string | null;
+  tenant_id: string;
+  providers: {
+    outlook: {
+      configured: boolean;
+      connected: boolean;
+      connection_id: string | null;
+    };
+    gmail: {
+      configured: boolean;
+      connected: boolean;
+      connection_id: string | null;
+    };
   };
 }> {
   return apiGet("/status", { tenantId });
