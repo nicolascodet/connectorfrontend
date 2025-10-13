@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { handleOAuthCallback } from "@/lib/api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-export default function CallbackPage() {
+function CallbackContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const [status, setStatus] = useState<"processing" | "success" | "error">("processing");
@@ -95,5 +95,31 @@ export default function CallbackPage() {
         </CardContent>
       </Card>
     </main>
+  );
+}
+
+export default function CallbackPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Loading...</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="flex flex-col items-center space-y-4">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+                <p className="text-center text-muted-foreground">
+                  Preparing callback...
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </main>
+      }
+    >
+      <CallbackContent />
+    </Suspense>
   );
 }
