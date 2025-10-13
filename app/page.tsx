@@ -96,22 +96,56 @@ function HomeContent() {
             connectionId,
           });
 
-          toast({
-            title: "Connection Successful",
-            description: `${providerConfigKey} connected successfully!`,
-          });
+          // Check if opened in popup window
+          if (window.opener) {
+            // Send success message to parent window
+            window.opener.postMessage(
+              {
+                type: "oauth-success",
+                provider: providerConfigKey,
+                tenantId: connectionId,
+              },
+              window.location.origin
+            );
+            // Close popup after short delay
+            setTimeout(() => {
+              window.close();
+            }, 500);
+          } else {
+            // Not in popup, show toast and clean URL
+            toast({
+              title: "Connection Successful",
+              description: `${providerConfigKey} connected successfully!`,
+            });
+            router.replace("/");
+          }
         } catch (error) {
-          toast({
-            variant: "destructive",
-            title: "Connection Failed",
-            description:
-              error instanceof Error
-                ? error.message
-                : "Failed to save connection",
-          });
-        } finally {
-          // Clean up URL params
-          router.replace("/");
+          if (window.opener) {
+            // In popup, send error to parent
+            window.opener.postMessage(
+              {
+                type: "oauth-error",
+                error:
+                  error instanceof Error
+                    ? error.message
+                    : "Failed to save connection",
+              },
+              window.location.origin
+            );
+            setTimeout(() => {
+              window.close();
+            }, 1000);
+          } else {
+            toast({
+              variant: "destructive",
+              title: "Connection Failed",
+              description:
+                error instanceof Error
+                  ? error.message
+                  : "Failed to save connection",
+            });
+            router.replace("/");
+          }
         }
       }
     }

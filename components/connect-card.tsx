@@ -68,8 +68,58 @@ export function ConnectCard() {
     setLoadingConnect((prev) => ({ ...prev, [provider]: true }));
     try {
       const result = await startConnect(provider, tenantId);
-      // Backend handles tenant ID tracking and redirects back to home page
-      window.location.href = result.auth_url;
+
+      // Open OAuth in popup window
+      const popup = window.open(
+        result.auth_url,
+        "oauth",
+        "width=600,height=700,left=100,top=100"
+      );
+
+      // Poll to check if popup is closed
+      const checkPopup = setInterval(() => {
+        if (!popup || popup.closed) {
+          clearInterval(checkPopup);
+          setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
+          // Refresh status after popup closes
+          loadStatus();
+        }
+      }, 500);
+
+      // Listen for messages from popup
+      const messageHandler = (event: MessageEvent) => {
+        // Verify message origin for security
+        if (event.origin !== window.location.origin) return;
+
+        if (event.data.type === "oauth-success") {
+          clearInterval(checkPopup);
+          setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
+          toast({
+            title: "Connection Successful",
+            description: `${event.data.provider} connected successfully!`,
+          });
+          loadStatus();
+          window.removeEventListener("message", messageHandler);
+        } else if (event.data.type === "oauth-error") {
+          clearInterval(checkPopup);
+          setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
+          toast({
+            variant: "destructive",
+            title: "Connection Failed",
+            description: event.data.error || "Failed to save connection",
+          });
+          window.removeEventListener("message", messageHandler);
+        }
+      };
+
+      window.addEventListener("message", messageHandler);
+
+      // Cleanup after 5 minutes
+      setTimeout(() => {
+        clearInterval(checkPopup);
+        window.removeEventListener("message", messageHandler);
+        setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
+      }, 300000);
     } catch (error) {
       setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
       toast({
