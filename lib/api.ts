@@ -65,3 +65,28 @@ export async function syncOutlookOnce(tenantId: string): Promise<any> {
 export async function syncGmailOnce(tenantId: string): Promise<any> {
   return apiGet("/sync/once/gmail", { tenantId });
 }
+
+export async function handleOAuthCallback(data: {
+  tenantId: string;
+  providerConfigKey: string;
+  connectionId: string;
+}): Promise<any> {
+  const url = new URL("/nango/oauth/callback", BACKEND_URL);
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error");
+    throw new Error(
+      `OAuth callback failed: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  return response.json();
+}

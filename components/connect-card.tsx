@@ -67,10 +67,15 @@ export function ConnectCard() {
   const handleConnect = async (provider: "microsoft" | "gmail") => {
     setLoadingConnect((prev) => ({ ...prev, [provider]: true }));
     try {
+      // Store tenant ID in localStorage for OAuth callback
+      localStorage.setItem("nango_tenant_id", tenantId);
+
       const result = await startConnect(provider, tenantId);
       window.location.href = result.auth_url;
     } catch (error) {
       setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
+      // Clean up if connection fails
+      localStorage.removeItem("nango_tenant_id");
       toast({
         variant: "destructive",
         title: "Connection Failed",
