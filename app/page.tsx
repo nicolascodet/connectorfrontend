@@ -95,6 +95,11 @@ function HomeContent() {
       const connectionId = searchParams.get("connectionId");
       const providerConfigKey = searchParams.get("providerConfigKey");
 
+      // Wait for auth to finish loading
+      if (loading) {
+        return;
+      }
+
       if (connectionId && providerConfigKey && user) {
         try {
           // Call backend to save the connection
@@ -158,7 +163,7 @@ function HomeContent() {
     }
 
     processOAuthCallback();
-  }, [searchParams, router, user]);
+  }, [searchParams, router, user, loading]);
 
   if (loading) {
     return (
