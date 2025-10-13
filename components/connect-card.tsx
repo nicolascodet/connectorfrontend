@@ -9,8 +9,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context";
 import {
   startConnect,
   fetchStatus,
@@ -35,7 +35,7 @@ interface Status {
 }
 
 export function ConnectCard() {
-  const [tenantId, setTenantId] = useState("acme");
+  const { user, signOut } = useAuth();
   const [status, setStatus] = useState<Status | null>(null);
   const [loadingConnect, setLoadingConnect] = useState<{
     microsoft: boolean;
@@ -52,7 +52,7 @@ export function ConnectCard() {
 
   const loadStatus = async () => {
     try {
-      const data = await fetchStatus(tenantId);
+      const data = await fetchStatus();
       setStatus(data);
     } catch (error) {
       toast({
@@ -67,7 +67,7 @@ export function ConnectCard() {
   const handleConnect = async (provider: "microsoft" | "gmail") => {
     setLoadingConnect((prev) => ({ ...prev, [provider]: true }));
     try {
-      const result = await startConnect(provider, tenantId);
+      const result = await startConnect(provider);
 
       // Open OAuth in popup window
       const popup = window.open(
@@ -136,7 +136,7 @@ export function ConnectCard() {
   const handleSyncOutlook = async () => {
     setLoadingSync((prev) => ({ ...prev, outlook: true }));
     try {
-      const result = await syncOutlookOnce(tenantId);
+      const result = await syncOutlookOnce();
       await loadStatus();
       toast({
         title: "Sync Complete",
@@ -157,7 +157,7 @@ export function ConnectCard() {
   const handleSyncGmail = async () => {
     setLoadingSync((prev) => ({ ...prev, gmail: true }));
     try {
-      const result = await syncGmailOnce(tenantId);
+      const result = await syncGmailOnce();
       await loadStatus();
       toast({
         title: "Sync Complete",
@@ -175,30 +175,37 @@ export function ConnectCard() {
     }
   };
 
+  const handleLogout = async () => {
+    await signOut();
+    toast({
+      title: "Logged out",
+      description: "You have been logged out successfully",
+    });
+  };
+
   return (
     <Card className="w-full max-w-2xl">
       <CardHeader>
-        <CardTitle>Nango Connect</CardTitle>
-        <CardDescription>
-          Connect your Microsoft and Gmail accounts
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-2">
-          <label htmlFor="tenantId" className="text-sm font-medium">
-            Tenant ID
-          </label>
-          <div className="flex gap-2">
-            <Input
-              id="tenantId"
-              value={tenantId}
-              onChange={(e) => setTenantId(e.target.value)}
-              placeholder="Enter tenant ID"
-            />
-            <Button onClick={loadStatus} variant="outline">
-              Refresh
+        <div className="flex justify-between items-start">
+          <div>
+            <CardTitle>Nango Connect</CardTitle>
+            <CardDescription>
+              Connect your Microsoft and Gmail accounts
+            </CardDescription>
+          </div>
+          <div className="text-right">
+            <p className="text-sm text-muted-foreground">{user?.email}</p>
+            <Button onClick={handleLogout} variant="ghost" size="sm" className="mt-1">
+              Logout
             </Button>
           </div>
+        </div>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        <div className="flex justify-end">
+          <Button onClick={loadStatus} variant="outline" size="sm">
+            Refresh Status
+          </Button>
         </div>
 
         <div className="space-y-2">

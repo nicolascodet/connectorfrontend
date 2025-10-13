@@ -1,7 +1,25 @@
+import { supabase } from "./supabase";
+
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
 if (!BACKEND_URL) {
   throw new Error("NEXT_PUBLIC_BACKEND_URL environment variable is not set");
+}
+
+async function getAuthHeaders(): Promise<HeadersInit> {
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+
+  if (session?.access_token) {
+    headers["Authorization"] = `Bearer ${session.access_token}`;
+  }
+
+  return headers;
 }
 
 export async function apiGet(
@@ -16,11 +34,11 @@ export async function apiGet(
     });
   }
 
+  const headers = await getAuthHeaders();
+
   const response = await fetch(url.toString(), {
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
   });
 
   if (!response.ok) {
@@ -34,13 +52,12 @@ export async function apiGet(
 }
 
 export async function startConnect(
-  provider: "microsoft" | "gmail",
-  tenantId: string
+  provider: "microsoft" | "gmail"
 ): Promise<{ auth_url: string; provider: string; tenant_id: string }> {
-  return apiGet("/connect/start", { provider, tenantId });
+  return apiGet("/connect/start", { provider });
 }
 
-export async function fetchStatus(tenantId: string): Promise<{
+export async function fetchStatus(): Promise<{
   tenant_id: string;
   providers: {
     outlook: {
@@ -55,29 +72,27 @@ export async function fetchStatus(tenantId: string): Promise<{
     };
   };
 }> {
-  return apiGet("/status", { tenantId });
+  return apiGet("/status");
 }
 
-export async function syncOutlookOnce(tenantId: string): Promise<any> {
-  return apiGet("/sync/once/outlook", { tenantId });
+export async function syncOutlookOnce(): Promise<any> {
+  return apiGet("/sync/once/outlook");
 }
 
-export async function syncGmailOnce(tenantId: string): Promise<any> {
-  return apiGet("/sync/once/gmail", { tenantId });
+export async function syncGmailOnce(): Promise<any> {
+  return apiGet("/sync/once/gmail");
 }
 
 export async function handleOAuthCallback(data: {
-  tenantId: string;
-  providerConfigKey: string;
   connectionId: string;
+  providerConfigKey: string;
 }): Promise<any> {
   const url = new URL("/nango/oauth/callback", BACKEND_URL);
+  const headers = await getAuthHeaders();
 
   const response = await fetch(url.toString(), {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
+    headers,
     body: JSON.stringify(data),
   });
 

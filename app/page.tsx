@@ -77,10 +77,18 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { ConnectCard } from "@/components/connect-card";
 import { handleOAuthCallback } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
+import { useAuth } from "@/contexts/auth-context";
 
 function HomeContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const { user, loading } = useAuth();
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push("/login");
+    }
+  }, [user, loading, router]);
 
   useEffect(() => {
     async function processOAuthCallback() {
@@ -91,9 +99,8 @@ function HomeContent() {
         try {
           // Call backend to save the connection
           await handleOAuthCallback({
-            tenantId: connectionId,
-            providerConfigKey,
             connectionId,
+            providerConfigKey,
           });
 
           // Check if opened in popup window
@@ -103,7 +110,6 @@ function HomeContent() {
               {
                 type: "oauth-success",
                 provider: providerConfigKey,
-                tenantId: connectionId,
               },
               window.location.origin
             );
@@ -152,6 +158,18 @@ function HomeContent() {
 
     processOAuthCallback();
   }, [searchParams, router]);
+
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary" />
+      </div>
+    );
+  }
+
+  if (!user) {
+    return null;
+  }
 
   return <ConnectCard />;
 }
