@@ -84,6 +84,7 @@ export async function syncGmailOnce(): Promise<any> {
 }
 
 export async function handleOAuthCallback(data: {
+  tenantId: string;
   connectionId: string;
   providerConfigKey: string;
 }): Promise<any> {

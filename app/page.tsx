@@ -95,10 +95,11 @@ function HomeContent() {
       const connectionId = searchParams.get("connectionId");
       const providerConfigKey = searchParams.get("providerConfigKey");
 
-      if (connectionId && providerConfigKey) {
+      if (connectionId && providerConfigKey && user) {
         try {
           // Call backend to save the connection
           await handleOAuthCallback({
+            tenantId: user.id,
             connectionId,
             providerConfigKey,
           });
@@ -157,7 +158,7 @@ function HomeContent() {
     }
 
     processOAuthCallback();
-  }, [searchParams, router]);
+  }, [searchParams, router, user]);
 
   if (loading) {
     return (
