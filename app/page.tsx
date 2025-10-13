@@ -37,22 +37,18 @@ Make sure to set the `NEXT_PUBLIC_BACKEND_URL` environment variable in Vercel pr
 
 ## Nango Configuration
 
-**IMPORTANT**: Configure your Nango OAuth redirect URL to point to this frontend:
-
-In Nango dashboard (https://app.nango.dev):
-1. Go to each integration (Microsoft/Gmail)
-2. Set OAuth Redirect URL to: `https://your-frontend-url.vercel.app/callback`
-3. Or for local dev: `http://localhost:3000/callback`
+Backend handles Nango configuration. The OAuth redirect URL is set to:
+- Production: `https://connectorfrontend.vercel.app`
+- The backend appends query params: `?connectionId=TENANT&providerConfigKey=PROVIDER`
 
 ## OAuth Flow
 
 1. User clicks "Connect Microsoft" or "Connect Gmail"
-2. Frontend stores tenant ID in localStorage
-3. Frontend calls backend `/connect/start` to get Nango OAuth URL
-4. User redirects to Nango for OAuth
-5. After OAuth success, Nango redirects to `/callback` page
-6. Callback page calls backend `/nango/oauth/callback` to save connection
-7. User redirects back to main page
+2. Frontend calls backend `/connect/start` to get Nango OAuth URL
+3. User redirects to Nango for OAuth
+4. After OAuth success, Nango redirects to home page with query params
+5. Frontend detects params and calls backend `/nango/oauth/callback`
+6. Connection saved and user sees success toast
 
 ## Backend API Endpoints
 
@@ -76,12 +72,62 @@ In Nango dashboard (https://app.nango.dev):
 
 "use client";
 
+import { Suspense, useEffect } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
 import { ConnectCard } from "@/components/connect-card";
+import { handleOAuthCallback } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
+
+function HomeContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  useEffect(() => {
+    async function processOAuthCallback() {
+      const connectionId = searchParams.get("connectionId");
+      const providerConfigKey = searchParams.get("providerConfigKey");
+
+      if (connectionId && providerConfigKey) {
+        try {
+          // Call backend to save the connection
+          await handleOAuthCallback({
+            tenantId: connectionId,
+            providerConfigKey,
+            connectionId,
+          });
+
+          toast({
+            title: "Connection Successful",
+            description: `${providerConfigKey} connected successfully!`,
+          });
+        } catch (error) {
+          toast({
+            variant: "destructive",
+            title: "Connection Failed",
+            description:
+              error instanceof Error
+                ? error.message
+                : "Failed to save connection",
+          });
+        } finally {
+          // Clean up URL params
+          router.replace("/");
+        }
+      }
+    }
+
+    processOAuthCallback();
+  }, [searchParams, router]);
+
+  return <ConnectCard />;
+}
 
 export default function Home() {
   return (
     <main className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100">
-      <ConnectCard />
+      <Suspense fallback={<ConnectCard />}>
+        <HomeContent />
+      </Suspense>
     </main>
   );
 }
