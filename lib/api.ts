@@ -105,3 +105,43 @@ export async function handleOAuthCallback(data: {
 
   return response.json();
 }
+
+export async function searchOptimized(data: {
+  query: string;
+  vector_limit?: number;
+  graph_limit?: number;
+  conversation_history?: Array<{ role: string; content: string }>;
+}): Promise<{
+  success: boolean;
+  query: string;
+  answer: string;
+  vector_results: Array<any>;
+  graph_results: Array<any>;
+  num_episodes: number;
+  message: string;
+}> {
+  const url = new URL("/api/search-optimized", BACKEND_URL);
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-API-Key": "cortex_dev_key_12345",
+    },
+    body: JSON.stringify({
+      query: data.query,
+      vector_limit: data.vector_limit || 5,
+      graph_limit: data.graph_limit || 10,
+      conversation_history: data.conversation_history || [],
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error");
+    throw new Error(
+      `Search failed: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  return response.json();
+}
