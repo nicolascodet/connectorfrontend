@@ -76,7 +76,7 @@ export async function fetchStatus(): Promise<{
 }
 
 export async function syncOutlookOnce(): Promise<any> {
-  return apiGet("/sync/once/outlook");
+  return apiGet("/sync/once");
 }
 
 export async function syncGmailOnce(): Promise<any> {
