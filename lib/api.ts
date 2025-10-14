@@ -7,10 +7,6 @@ if (!BACKEND_URL) {
   throw new Error("NEXT_PUBLIC_BACKEND_URL environment variable is not set");
 }
 
-if (!CORTEX_URL) {
-  throw new Error("NEXT_PUBLIC_CORTEX_URL environment variable is not set");
-}
-
 async function getAuthHeaders(): Promise<HeadersInit> {
   const {
     data: { session },
@@ -125,6 +121,10 @@ export async function searchOptimized(data: {
   num_episodes: number;
   message: string;
 }> {
+  if (!CORTEX_URL) {
+    throw new Error("NEXT_PUBLIC_CORTEX_URL environment variable is not set");
+  }
+
   const url = new URL("/api/search-optimized", CORTEX_URL);
 
   const response = await fetch(url.toString(), {
