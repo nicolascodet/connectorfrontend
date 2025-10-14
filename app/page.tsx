@@ -102,9 +102,8 @@ function HomeContent() {
 
       if (connectionId && providerConfigKey && user) {
         try {
-          // Call backend to save the connection
+          // Call backend to save the connection (backend gets user from JWT)
           await handleOAuthCallback({
-            tenantId: user.id,
             connectionId,
             providerConfigKey,
           });
