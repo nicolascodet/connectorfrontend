@@ -120,7 +120,7 @@ export async function searchOptimized(data: {
   num_episodes: number;
   message: string;
 }> {
-  const url = new URL("/api/search-optimized", BACKEND_URL);
+  const url = new URL("/api/v1/search", BACKEND_URL);
 
   const response = await fetch(url.toString(), {
     method: "POST",
@@ -131,7 +131,7 @@ export async function searchOptimized(data: {
     body: JSON.stringify({
       query: data.query,
       vector_limit: data.vector_limit || 5,
-      graph_limit: data.graph_limit || 10,
+      graph_limit: data.graph_limit || 5,
       conversation_history: data.conversation_history || [],
     }),
   });
