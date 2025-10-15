@@ -122,10 +122,13 @@ export async function searchOptimized(data: {
   message: string;
 }> {
   const url = new URL("/api/v1/search", BACKEND_URL);
-  const headers = await getAuthHeaders();
+  const baseHeaders = await getAuthHeaders();
 
   // Add X-API-Key to the headers
-  headers["X-API-Key"] = "cortex_dev_key_12345";
+  const headers = {
+    ...baseHeaders,
+    "X-API-Key": "cortex_dev_key_12345",
+  };
 
   const response = await fetch(url.toString(), {
     method: "POST",
