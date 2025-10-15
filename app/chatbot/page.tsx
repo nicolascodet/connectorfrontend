@@ -71,7 +71,7 @@ export default function ChatbotPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-purple-800 p-8">
+    <main className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 p-8">
       <div className="max-w-5xl mx-auto h-[90vh] flex flex-col">
         <div className="glass-card rounded-3xl p-8 flex-1 flex flex-col backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
           <div className="mb-6">

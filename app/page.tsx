@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { handleOAuthCallback, fetchStatus, startConnect, searchOptimized } from "@/lib/api";
+import { handleOAuthCallback, fetchStatus, startConnect, searchOptimized, syncGmailOnce } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
@@ -39,6 +39,7 @@ function HomeContent() {
     microsoft: boolean;
     gmail: boolean;
   }>({ microsoft: false, gmail: false });
+  const [loadingSync, setLoadingSync] = useState<{ gmail: boolean }>({ gmail: false });
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loadingChat, setLoadingChat] = useState(false);
@@ -181,6 +182,26 @@ function HomeContent() {
     }
   };
 
+  const handleSyncGmail = async () => {
+    setLoadingSync((prev) => ({ ...prev, gmail: true }));
+    try {
+      const result = await syncGmailOnce();
+      await loadStatus();
+      toast({
+        title: "Sync Complete",
+        description: result.message || "Gmail synced successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Sync Failed",
+        description: error instanceof Error ? error.message : "Failed to sync Gmail",
+      });
+    } finally {
+      setLoadingSync((prev) => ({ ...prev, gmail: false }));
+    }
+  };
+
   const handleLogout = async () => {
     await signOut();
     toast({ title: "Logged out", description: "You have been logged out successfully" });
@@ -237,7 +258,7 @@ function HomeContent() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-purple-800 p-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 p-6">
       <div className="max-w-7xl mx-auto space-y-6">
         {/* Header */}
         <div className="glass-card rounded-3xl p-6 backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
@@ -282,14 +303,6 @@ function HomeContent() {
 
               <div className="space-y-3">
                 <Button
-                  onClick={() => handleConnect("microsoft")}
-                  disabled={loadingConnect.microsoft}
-                  className="w-full rounded-xl py-6 glass-button text-white hover:scale-105 transition-transform"
-                >
-                  <Mail className="h-5 w-5 mr-2" />
-                  {loadingConnect.microsoft ? "Connecting..." : "Connect Microsoft"}
-                </Button>
-                <Button
                   onClick={() => handleConnect("gmail")}
                   disabled={loadingConnect.gmail}
                   className="w-full rounded-xl py-6 glass-button text-white hover:scale-105 transition-transform"
@@ -306,18 +319,6 @@ function HomeContent() {
                 <h3 className="text-lg font-semibold text-white mb-4">Status</h3>
                 <div className="space-y-3">
                   <div className="flex justify-between items-center py-2 px-4 rounded-xl bg-white/5 border border-white/10">
-                    <span className="text-white/80 text-sm">Outlook</span>
-                    <span
-                      className={`text-sm font-medium ${
-                        status.providers.outlook.connected
-                          ? "text-green-400"
-                          : "text-white/50"
-                      }`}
-                    >
-                      {status.providers.outlook.connected ? "● Connected" : "○ Not Connected"}
-                    </span>
-                  </div>
-                  <div className="flex justify-between items-center py-2 px-4 rounded-xl bg-white/5 border border-white/10">
                     <span className="text-white/80 text-sm">Gmail</span>
                     <span
                       className={`text-sm font-medium ${
@@ -330,6 +331,20 @@ function HomeContent() {
                     </span>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* Sync Actions */}
+            {status && status.providers.gmail.connected && (
+              <div className="glass-card rounded-3xl p-6 backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
+                <h3 className="text-lg font-semibold text-white mb-4">Manual Sync</h3>
+                <Button
+                  onClick={handleSyncGmail}
+                  disabled={loadingSync.gmail}
+                  className="w-full rounded-xl py-4 bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
+                >
+                  {loadingSync.gmail ? "Syncing..." : "Sync Gmail Once"}
+                </Button>
               </div>
             )}
           </div>
@@ -416,7 +431,7 @@ function HomeContent() {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-purple-800"><Loader2 className="h-12 w-12 animate-spin text-white" /></div>}>
+    <Suspense fallback={<div className="flex justify-center items-center min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900"><Loader2 className="h-12 w-12 animate-spin text-white" /></div>}>
       <HomeContent />
     </Suspense>
   );
