@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { handleOAuthCallback, fetchStatus, startConnect, searchOptimized, syncGmailOnce } from "@/lib/api";
+import { handleOAuthCallback, fetchStatus, startConnect, searchOptimized } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,6 @@ function HomeContent() {
     microsoft: boolean;
     gmail: boolean;
   }>({ microsoft: false, gmail: false });
-  const [loadingSync, setLoadingSync] = useState<{ gmail: boolean }>({ gmail: false });
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loadingChat, setLoadingChat] = useState(false);
@@ -182,26 +181,6 @@ function HomeContent() {
     }
   };
 
-  const handleSyncGmail = async () => {
-    setLoadingSync((prev) => ({ ...prev, gmail: true }));
-    try {
-      const result = await syncGmailOnce();
-      await loadStatus();
-      toast({
-        title: "Sync Complete",
-        description: result.message || "Gmail synced successfully",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Sync Failed",
-        description: error instanceof Error ? error.message : "Failed to sync Gmail",
-      });
-    } finally {
-      setLoadingSync((prev) => ({ ...prev, gmail: false }));
-    }
-  };
-
   const handleLogout = async () => {
     await signOut();
     toast({ title: "Logged out", description: "You have been logged out successfully" });
@@ -334,19 +313,6 @@ function HomeContent() {
               </div>
             )}
 
-            {/* Sync Actions */}
-            {status && status.providers.gmail.connected && (
-              <div className="glass-card rounded-3xl p-6 backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
-                <h3 className="text-lg font-semibold text-white mb-4">Manual Sync</h3>
-                <Button
-                  onClick={handleSyncGmail}
-                  disabled={loadingSync.gmail}
-                  className="w-full rounded-xl py-4 bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
-                >
-                  {loadingSync.gmail ? "Syncing..." : "Sync Gmail Once"}
-                </Button>
-              </div>
-            )}
           </div>
 
           {/* Right Column - Chat */}
