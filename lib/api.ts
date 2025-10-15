@@ -111,6 +111,7 @@ export async function searchOptimized(data: {
   vector_limit?: number;
   graph_limit?: number;
   conversation_history?: Array<{ role: string; content: string }>;
+  include_full_emails?: boolean;
 }): Promise<{
   success: boolean;
   query: string;
@@ -133,6 +134,7 @@ export async function searchOptimized(data: {
       vector_limit: data.vector_limit || 5,
       graph_limit: data.graph_limit || 5,
       conversation_history: data.conversation_history || [],
+      include_full_emails: data.include_full_emails !== false,
     }),
   });
 
