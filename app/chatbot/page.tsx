@@ -3,13 +3,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { searchOptimized } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { Send, Loader2 } from "lucide-react";
@@ -78,19 +71,23 @@ export default function ChatbotPage() {
   };
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-4 bg-gradient-to-br from-gray-50 to-gray-100">
-      <Card className="w-full max-w-3xl h-[600px] flex flex-col">
-        <CardHeader>
-          <CardTitle>Cortex Search</CardTitle>
-          <CardDescription>
-            Ask questions about your data
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="flex-1 flex flex-col overflow-hidden">
-          <div className="flex-1 overflow-y-auto space-y-4 mb-4">
+    <main className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-purple-800 p-8">
+      <div className="max-w-5xl mx-auto h-[90vh] flex flex-col">
+        <div className="glass-card rounded-3xl p-8 flex-1 flex flex-col backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
+          <div className="mb-6">
+            <h1 className="text-4xl font-bold text-white mb-2">Search Your Data</h1>
+            <p className="text-white/70">Ask questions about your emails and documents</p>
+          </div>
+
+          <div className="flex-1 overflow-y-auto space-y-4 mb-6 scrollbar-hide">
             {messages.length === 0 ? (
-              <div className="flex items-center justify-center h-full text-muted-foreground">
-                <p>Start a conversation by asking a question</p>
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
+                    <Send className="h-8 w-8 text-white/70" />
+                  </div>
+                  <p className="text-white/60 text-lg">Start a conversation by asking a question</p>
+                </div>
               </div>
             ) : (
               <>
@@ -102,13 +99,13 @@ export default function ChatbotPage() {
                     }`}
                   >
                     <div
-                      className={`max-w-[80%] rounded-lg px-4 py-2 ${
+                      className={`max-w-[80%] rounded-2xl px-6 py-3 backdrop-blur-md ${
                         message.role === "user"
-                          ? "bg-primary text-primary-foreground"
-                          : "bg-muted"
+                          ? "bg-blue-500/80 text-white border border-blue-400/30"
+                          : "bg-white/20 text-white border border-white/20"
                       }`}
                     >
-                      <p className="text-sm whitespace-pre-wrap">
+                      <p className="text-sm whitespace-pre-wrap leading-relaxed">
                         {message.content}
                       </p>
                     </div>
@@ -116,8 +113,8 @@ export default function ChatbotPage() {
                 ))}
                 {loading && (
                   <div className="flex justify-start">
-                    <div className="bg-muted rounded-lg px-4 py-2">
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                    <div className="bg-white/20 backdrop-blur-md rounded-2xl px-6 py-3 border border-white/20">
+                      <Loader2 className="h-5 w-5 animate-spin text-white" />
                     </div>
                   </div>
                 )}
@@ -126,24 +123,28 @@ export default function ChatbotPage() {
             )}
           </div>
 
-          <form onSubmit={handleSubmit} className="flex gap-2">
+          <form onSubmit={handleSubmit} className="flex gap-3">
             <Input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask a question..."
               disabled={loading}
-              className="flex-1"
+              className="flex-1 bg-white/10 backdrop-blur-md border-white/20 text-white placeholder:text-white/50 rounded-2xl px-6 py-6 text-base focus:bg-white/15 focus:border-white/30"
             />
-            <Button type="submit" disabled={loading || !input.trim()}>
+            <Button
+              type="submit"
+              disabled={loading || !input.trim()}
+              className="rounded-2xl px-8 bg-blue-500 hover:bg-blue-600 text-white border-0 shadow-lg"
+            >
               {loading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
+                <Loader2 className="h-5 w-5 animate-spin" />
               ) : (
-                <Send className="h-4 w-4" />
+                <Send className="h-5 w-5" />
               )}
             </Button>
           </form>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </main>
   );
 }
