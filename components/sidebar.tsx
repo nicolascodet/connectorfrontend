@@ -46,7 +46,7 @@ export default function Sidebar({ user }: SidebarProps) {
   ];
 
   return (
-    <div className="w-64 h-screen bg-white/5 backdrop-blur-xl border-r border-white/10 flex flex-col">
+    <div className="w-64 h-screen bg-gray-900/95 backdrop-blur-xl border-r border-white/10 flex flex-col">
       {/* Logo */}
       <div className="p-6">
         <div className="flex items-center gap-3">
