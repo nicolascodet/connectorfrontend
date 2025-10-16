@@ -1,16 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   MessageSquarePlus,
   ChevronDown,
   LogOut,
   Plug,
+  BarChart3,
+  Clock,
+  Bot,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
+import { getChatHistory, createNewChat, type ChatHistoryItem } from "@/lib/api";
+import { toast } from "@/hooks/use-toast";
 
 interface SidebarProps {
   user?: any;
@@ -18,54 +23,136 @@ interface SidebarProps {
 
 export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const { signOut } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
+  const [loadingChats, setLoadingChats] = useState(false);
 
   const navigation = [
-    { name: "New chat", href: "/", icon: MessageSquarePlus },
+    { name: "Views", href: "/views", icon: BarChart3 },
+    { name: "Timeline", href: "/timeline", icon: Clock },
+    { name: "Agents", href: "/agents", icon: Bot },
   ];
+
+  // Load chat history
+  useEffect(() => {
+    if (user) {
+      loadChatHistory();
+    }
+  }, [user]);
+
+  const loadChatHistory = async () => {
+    try {
+      setLoadingChats(true);
+      const result = await getChatHistory();
+      setChatHistory(result.chats);
+    } catch (error) {
+      console.error("Failed to load chat history:", error);
+    } finally {
+      setLoadingChats(false);
+    }
+  };
+
+  const handleNewChat = async () => {
+    try {
+      const result = await createNewChat();
+      router.push(`/?chat_id=${result.chat_id}`);
+      toast({ title: "New chat created" });
+      loadChatHistory(); // Refresh history
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to create chat",
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
+  const formatTimestamp = (timestamp: string) => {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const days = Math.floor(hours / 24);
+
+    if (hours < 1) return "Just now";
+    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
+    if (days === 1) return "Yesterday";
+    if (days < 7) return `${days} days ago`;
+    return date.toLocaleDateString();
+  };
 
   return (
     <div className="w-64 h-screen bg-gray-900/95 backdrop-blur-xl border-r border-white/10 flex flex-col">
-      {/* Logo */}
+      {/* Logo - Clickable to go home */}
       <div className="p-6">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500" />
-          <span className="text-xl font-semibold text-white">Cortex</span>
-        </div>
+        <Link href="/">
+          <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500" />
+            <span className="text-xl font-semibold text-white">Cortex</span>
+          </div>
+        </Link>
       </div>
 
       {/* New Chat Button */}
       <div className="px-4 mb-4">
-        <Link href="/">
-          <Button className="w-full justify-start gap-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl py-6">
-            <MessageSquarePlus className="h-5 w-5" />
-            New chat
-          </Button>
-        </Link>
+        <Button 
+          onClick={handleNewChat}
+          className="w-full justify-start gap-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl py-6"
+        >
+          <MessageSquarePlus className="h-5 w-5" />
+          New chat
+        </Button>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-        {navigation.map((item) => {
-          const Icon = item.icon;
-          const isActive = pathname === item.href;
-          return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                isActive
-                  ? "bg-white/10 text-white"
-                  : "text-white/70 hover:bg-white/5 hover:text-white"
-              }`}
-            >
-              <Icon className="h-5 w-5" />
-              <span className="text-sm">{item.name}</span>
-            </Link>
-          );
-        })}
-      </nav>
+      {/* Chat History */}
+      <div className="flex-1 px-4 overflow-y-auto">
+        <div className="text-xs font-semibold text-white/50 mb-2 px-4">Recent Chats</div>
+        <div className="space-y-1 mb-6">
+          {loadingChats ? (
+            <div className="text-center text-white/50 text-sm py-4">Loading...</div>
+          ) : chatHistory.length === 0 ? (
+            <div className="text-center text-white/50 text-sm py-4">No chats yet</div>
+          ) : (
+            chatHistory.map((chat) => (
+              <Link
+                key={chat.id}
+                href={`/?chat_id=${chat.id}`}
+                className="block w-full text-left px-4 py-3 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+              >
+                <div className="text-sm truncate">{chat.title || "New Chat"}</div>
+                <div className="text-xs text-white/50 mt-1">
+                  {formatTimestamp(chat.updated_at)} • {chat.message_count} messages
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+
+        {/* Navigation */}
+        <div className="text-xs font-semibold text-white/50 mb-2 px-4">Pages</div>
+        <nav className="space-y-1">
+          {navigation.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                  isActive
+                    ? "bg-white/10 text-white"
+                    : "text-white/70 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <Icon className="h-5 w-5" />
+                <span className="text-sm">{item.name}</span>
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
 
       {/* User Section */}
       <div className="p-4 border-t border-white/10">

@@ -6,6 +6,24 @@ if (!BACKEND_URL) {
   throw new Error("NEXT_PUBLIC_BACKEND_URL environment variable is not set");
 }
 
+// Types
+export interface ChatHistoryItem {
+  id: string;
+  title: string;
+  created_at: string;
+  updated_at: string;
+  message_count: number;
+}
+
+export interface ChatMessage {
+  id: string;
+  chat_id: string;
+  role: "user" | "assistant";
+  content: string;
+  sources?: any;
+  created_at: string;
+}
+
 async function getAuthHeaders(): Promise<HeadersInit> {
   const {
     data: { session },
@@ -158,6 +176,83 @@ export async function searchOptimized(data: {
     throw new Error(
       `Search failed: ${response.status} ${response.statusText} - ${errorText}`
     );
+  }
+
+  return response.json();
+}
+
+// Chat History APIs
+export async function getChatHistory(): Promise<{ chats: ChatHistoryItem[] }> {
+  return apiGet("/api/v1/chats");
+}
+
+export async function getChatMessages(chatId: string): Promise<{ messages: ChatMessage[] }> {
+  return apiGet(`/api/v1/chats/${chatId}/messages`);
+}
+
+export async function createNewChat(title?: string): Promise<{ chat_id: string }> {
+  const url = new URL("/api/v1/chats", BACKEND_URL);
+  const headers = await getAuthHeaders();
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ title }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to create chat: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+export async function deleteChat(chatId: string): Promise<{ success: boolean }> {
+  const url = new URL(`/api/v1/chats/${chatId}`, BACKEND_URL);
+  const headers = await getAuthHeaders();
+
+  const response = await fetch(url.toString(), {
+    method: "DELETE",
+    headers,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to delete chat: ${response.statusText}`);
+  }
+
+  return response.json();
+}
+
+// File Upload API
+export async function uploadFile(file: File, chatId?: string): Promise<{
+  success: boolean;
+  filename: string;
+  file_type?: string;
+  characters?: number;
+  message: string;
+}> {
+  const url = new URL("/api/v1/upload/file", BACKEND_URL);
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  const headers: HeadersInit = {};
+  if (session?.access_token) {
+    headers["Authorization"] = `Bearer ${session.access_token}`;
+  }
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers,
+    body: formData,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error");
+    throw new Error(`Upload failed: ${response.status} ${errorText}`);
   }
 
   return response.json();

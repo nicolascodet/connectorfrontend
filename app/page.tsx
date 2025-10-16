@@ -2,12 +2,12 @@
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { handleOAuthCallback, searchOptimized } from "@/lib/api";
+import { handleOAuthCallback, searchOptimized, uploadFile } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus } from "lucide-react";
+import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 
 interface Status {
@@ -43,7 +43,9 @@ function HomeContent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loadingChat, setLoadingChat] = useState(false);
+  const [uploadingFile, setUploadingFile] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -108,6 +110,47 @@ function HomeContent() {
     processOAuthCallback();
   }, [searchParams, router, user, loading]);
 
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingFile(true);
+    const userMessage: Message = { role: "user", content: `📎 Uploaded: ${file.name}` };
+    setMessages((prev) => [...prev, userMessage]);
+
+    try {
+      // Call real upload API
+      const result = await uploadFile(file);
+
+      toast({
+        title: "File Uploaded",
+        description: result.message,
+      });
+
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: `✅ ${result.message} You can now ask me questions about it!`,
+      };
+      setMessages((prev) => [...prev, assistantMessage]);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Upload Failed",
+        description: error instanceof Error ? error.message : "Failed to upload file",
+      });
+      const errorMessage: Message = {
+        role: "assistant",
+        content: "Sorry, I couldn't process that file. Please try again.",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+      setUploadingFile(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
 
   const handleChatSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -215,15 +258,27 @@ function HomeContent() {
                   </Button>
                 </div>
 
-                {/* Add + and mic icons */}
+                {/* Add file upload */}
                 <div className="flex items-center gap-3 mt-4 justify-center">
-                  <button type="button" className="p-3 rounded-full hover:bg-white/60 transition-colors">
-                    <Plus className="h-5 w-5 text-gray-600" />
-                  </button>
-                  <button type="button" className="p-3 rounded-full hover:bg-white/60 transition-colors">
-                    <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-                    </svg>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                    accept=".pdf,.doc,.docx,.txt,.csv,.xlsx,.xls,.ppt,.pptx"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploadingFile}
+                    className="p-3 rounded-full hover:bg-white/60 transition-colors disabled:opacity-50"
+                    title="Upload file"
+                  >
+                    {uploadingFile ? (
+                      <Loader2 className="h-5 w-5 text-gray-600 animate-spin" />
+                    ) : (
+                      <Upload className="h-5 w-5 text-gray-600" />
+                    )}
                   </button>
                   <select className="px-4 py-2 rounded-xl bg-white/60 text-sm text-gray-700 border-0 hover:bg-white/80 transition-colors">
                     <option>Data Source</option>
