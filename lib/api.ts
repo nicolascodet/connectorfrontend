@@ -54,9 +54,8 @@ export async function apiGet(
 export async function startConnect(
   provider: "microsoft" | "gmail" | "google-drive"
 ): Promise<{ auth_url: string; provider: string; tenant_id: string }> {
-  // Map frontend "google-drive" button to backend provider "gmail" (same Google connection)
-  const mapped = provider === "google-drive" ? "gmail" : provider;
-  return apiGet("/connect/start", { provider: mapped });
+  // Now support dedicated google-drive provider in backend
+  return apiGet("/connect/start", { provider });
 }
 
 export async function fetchStatus(): Promise<{
