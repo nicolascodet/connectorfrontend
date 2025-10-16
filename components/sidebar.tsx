@@ -5,13 +5,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   MessageSquarePlus,
-  Search,
-  Database,
-  Upload,
-  Folder,
-  Plus,
-  Settings,
-  Globe,
   ChevronDown,
   LogOut,
   Plug,
@@ -27,18 +20,9 @@ export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const { signOut } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [foldersExpanded, setFoldersExpanded] = useState(true);
 
   const navigation = [
     { name: "New chat", href: "/", icon: MessageSquarePlus },
-    { name: "Search", href: "/", icon: Search },
-    { name: "Knowledge Base", href: "/", icon: Database },
-    { name: "Upload Files", href: "/", icon: Upload },
-  ];
-
-  const folders = [
-    { name: "Work Documents", href: "/" },
-    { name: "Personal", href: "/" },
   ];
 
   return (
@@ -81,75 +65,17 @@ export default function Sidebar({ user }: SidebarProps) {
             </Link>
           );
         })}
-
-        {/* Connections */}
-        <Link
-          href="/connections"
-          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-            pathname === "/connections"
-              ? "bg-white/10 text-white"
-              : "text-white/70 hover:bg-white/5 hover:text-white"
-          }`}
-        >
-          <Plug className="h-5 w-5" />
-          <span className="text-sm">Connections</span>
-        </Link>
-
-        {/* Folders Section */}
-        <div className="pt-6">
-          <button
-            onClick={() => setFoldersExpanded(!foldersExpanded)}
-            className="flex items-center justify-between w-full px-4 py-2 text-sm text-white/70 hover:text-white"
-          >
-            <span className="font-medium">Folders</span>
-            <div className="flex items-center gap-2">
-              <Plus className="h-4 w-4" />
-              <ChevronDown
-                className={`h-4 w-4 transition-transform ${
-                  foldersExpanded ? "rotate-180" : ""
-                }`}
-              />
-            </div>
-          </button>
-
-          {foldersExpanded && (
-            <div className="mt-2 space-y-1">
-              {folders.map((folder) => (
-                <Link
-                  key={folder.name}
-                  href={folder.href}
-                  className="flex items-center gap-3 px-4 py-2 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-colors"
-                >
-                  <Folder className="h-4 w-4 text-pink-400" />
-                  <span className="text-sm">{folder.name}</span>
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
       </nav>
 
       {/* User Section */}
       <div className="p-4 border-t border-white/10">
         {settingsOpen ? (
           <div className="bg-white/10 rounded-2xl p-4 space-y-2 mb-3">
-            <button className="flex items-center gap-3 px-3 py-2 w-full text-left text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
-              <Settings className="h-4 w-4" />
-              <span className="text-sm">Settings</span>
-            </button>
-            <button className="flex items-center gap-3 px-3 py-2 w-full text-left text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
-              <Globe className="h-4 w-4" />
-              <span className="text-sm">Language</span>
-              <ChevronDown className="h-4 w-4 ml-auto" />
-            </button>
-            <button className="flex items-center gap-3 px-3 py-2 w-full text-left text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
-              <Settings className="h-4 w-4" />
-              <span className="text-sm">Personalization</span>
-            </button>
+            <Link href="/connections" className="flex items-center gap-3 px-3 py-2 w-full text-left text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
+              <Plug className="h-4 w-4" />
+              <span className="text-sm">Connections</span>
+            </Link>
             <div className="h-px bg-white/10 my-2" />
-            <button className="flex items-center gap-3 px-3 py-2 w-full text-left text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
-              <span className="text-sm">Get help</span>
-            </button>
             <button
               onClick={() => signOut()}
               className="flex items-center gap-3 px-3 py-2 w-full text-left text-red-400 hover:text-red-300 rounded-lg hover:bg-white/10 transition-colors"
