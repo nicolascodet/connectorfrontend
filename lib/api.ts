@@ -54,7 +54,9 @@ export async function apiGet(
 export async function startConnect(
   provider: "microsoft" | "gmail" | "google-drive"
 ): Promise<{ auth_url: string; provider: string; tenant_id: string }> {
-  return apiGet("/connect/start", { provider });
+  // Map frontend "google-drive" button to backend provider "gmail" (same Google connection)
+  const mapped = provider === "google-drive" ? "gmail" : provider;
+  return apiGet("/connect/start", { provider: mapped });
 }
 
 export async function fetchStatus(): Promise<{
@@ -89,7 +91,8 @@ export async function syncGmailOnce(): Promise<any> {
 }
 
 export async function syncGoogleDriveOnce(): Promise<any> {
-  return apiGet("/sync/once/google-drive");
+  // Backend endpoint is /sync/once/drive
+  return apiGet("/sync/once/drive");
 }
 
 export async function handleOAuthCallback(data: {

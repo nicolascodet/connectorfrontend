@@ -381,11 +381,11 @@ function HomeContent() {
             )}
 
             {/* Sync Actions */}
-            {status && (status.providers.gmail.connected || status.providers.google_drive.connected) && (
+            {status && ((status.providers?.gmail?.connected) || (status.providers?.google_drive?.connected)) && (
               <div className="glass-card rounded-3xl p-6 backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
                 <h3 className="text-lg font-semibold text-white mb-4">Manual Sync</h3>
                 <div className="space-y-3">
-                  {status.providers.gmail.connected && (
+                  {status.providers?.gmail?.connected && (
                     <Button
                       onClick={handleSyncGmail}
                       disabled={loadingSync.gmail}
@@ -394,7 +394,7 @@ function HomeContent() {
                       {loadingSync.gmail ? "Syncing..." : "Sync Gmail Once"}
                     </Button>
                   )}
-                  {status.providers.google_drive.connected && (
+                  {status.providers?.google_drive?.connected && (
                     <Button
                       onClick={handleSyncGoogleDrive}
                       disabled={loadingSync.google_drive}

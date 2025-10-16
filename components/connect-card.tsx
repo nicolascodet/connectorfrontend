@@ -253,14 +253,28 @@ export function ConnectCard() {
                   <span className="text-muted-foreground">Gmail:</span>
                   <span
                     className={
-                      status.providers.gmail.connected
+                      status.providers?.gmail?.connected
                         ? "text-green-600 font-medium"
                         : "text-muted-foreground"
                     }
                   >
-                    {status.providers.gmail.connected ? "Connected" : "Not Connected"}
+                    {status.providers?.gmail?.connected ? "Connected" : "Not Connected"}
                   </span>
                 </div>
+                {status.providers?.google_drive && (
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Google Drive:</span>
+                    <span
+                      className={
+                        status.providers?.google_drive?.connected
+                          ? "text-green-600 font-medium"
+                          : "text-muted-foreground"
+                      }
+                    >
+                      {status.providers?.google_drive?.connected ? "Connected" : "Not Connected"}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -281,7 +295,7 @@ export function ConnectCard() {
             </Button>
             <Button
               onClick={handleSyncGmail}
-              disabled={loadingSync.gmail || !status?.providers.gmail.connected}
+              disabled={loadingSync.gmail || !status?.providers?.gmail?.connected}
               variant="outline"
               className="flex-1"
             >
