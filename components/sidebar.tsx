@@ -33,12 +33,12 @@ export default function Sidebar({ user }: SidebarProps) {
     { name: "New chat", href: "/", icon: MessageSquarePlus },
     { name: "Search", href: "/", icon: Search },
     { name: "Knowledge Base", href: "/", icon: Database },
-    { name: "Upload Files", href: "/upload", icon: Upload },
+    { name: "Upload Files", href: "/", icon: Upload },
   ];
 
   const folders = [
-    { name: "Work Documents", href: "/folders/work" },
-    { name: "Personal", href: "/folders/personal" },
+    { name: "Work Documents", href: "/" },
+    { name: "Personal", href: "/" },
   ];
 
   return (
