@@ -368,12 +368,12 @@ function HomeContent() {
                     <span className="text-white/80 text-sm">Google Drive</span>
                     <span
                       className={`text-sm font-medium ${
-                        status.providers.google_drive.connected
+                        status.providers?.google_drive?.connected
                           ? "text-green-400"
                           : "text-white/50"
                       }`}
                     >
-                      {status.providers.google_drive.connected ? "● Connected" : "○ Not Connected"}
+                      {status.providers?.google_drive?.connected ? "● Connected" : "○ Not Connected"}
                     </span>
                   </div>
                 </div>
