@@ -52,7 +52,7 @@ export async function apiGet(
 }
 
 export async function startConnect(
-  provider: "microsoft" | "gmail"
+  provider: "microsoft" | "gmail" | "google-drive"
 ): Promise<{ auth_url: string; provider: string; tenant_id: string }> {
   return apiGet("/connect/start", { provider });
 }
@@ -70,6 +70,11 @@ export async function fetchStatus(): Promise<{
       connected: boolean;
       connection_id: string | null;
     };
+    google_drive: {
+      configured: boolean;
+      connected: boolean;
+      connection_id: string | null;
+    };
   };
 }> {
   return apiGet("/status");
@@ -81,6 +86,10 @@ export async function syncOutlookOnce(): Promise<any> {
 
 export async function syncGmailOnce(): Promise<any> {
   return apiGet("/sync/once/gmail");
+}
+
+export async function syncGoogleDriveOnce(): Promise<any> {
+  return apiGet("/sync/once/google-drive");
 }
 
 export async function handleOAuthCallback(data: {

@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { handleOAuthCallback, fetchStatus, startConnect, searchOptimized, syncGmailOnce } from "@/lib/api";
+import { handleOAuthCallback, fetchStatus, startConnect, searchOptimized, syncGmailOnce, syncGoogleDriveOnce } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
@@ -18,6 +18,11 @@ interface Status {
       connection_id: string | null;
     };
     gmail: {
+      configured: boolean;
+      connected: boolean;
+      connection_id: string | null;
+    };
+    google_drive: {
       configured: boolean;
       connected: boolean;
       connection_id: string | null;
@@ -38,8 +43,9 @@ function HomeContent() {
   const [loadingConnect, setLoadingConnect] = useState<{
     microsoft: boolean;
     gmail: boolean;
-  }>({ microsoft: false, gmail: false });
-  const [loadingSync, setLoadingSync] = useState<{ gmail: boolean }>({ gmail: false });
+    "google-drive": boolean;
+  }>({ microsoft: false, gmail: false, "google-drive": false });
+  const [loadingSync, setLoadingSync] = useState<{ gmail: boolean; google_drive: boolean }>({ gmail: false, google_drive: false });
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loadingChat, setLoadingChat] = useState(false);
@@ -127,7 +133,7 @@ function HomeContent() {
     }
   };
 
-  const handleConnect = async (provider: "microsoft" | "gmail") => {
+  const handleConnect = async (provider: "microsoft" | "gmail" | "google-drive") => {
     setLoadingConnect((prev) => ({ ...prev, [provider]: true }));
     try {
       const result = await startConnect(provider);
@@ -199,6 +205,26 @@ function HomeContent() {
       });
     } finally {
       setLoadingSync((prev) => ({ ...prev, gmail: false }));
+    }
+  };
+
+  const handleSyncGoogleDrive = async () => {
+    setLoadingSync((prev) => ({ ...prev, google_drive: true }));
+    try {
+      const result = await syncGoogleDriveOnce();
+      await loadStatus();
+      toast({
+        title: "Sync Complete",
+        description: result.message || "Google Drive synced successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Sync Failed",
+        description: error instanceof Error ? error.message : "Failed to sync Google Drive",
+      });
+    } finally {
+      setLoadingSync((prev) => ({ ...prev, google_drive: false }));
     }
   };
 
@@ -310,6 +336,14 @@ function HomeContent() {
                   <Mail className="h-5 w-5 mr-2" />
                   {loadingConnect.gmail ? "Connecting..." : "Connect Gmail"}
                 </Button>
+                <Button
+                  onClick={() => handleConnect("google-drive")}
+                  disabled={loadingConnect["google-drive"]}
+                  className="w-full rounded-xl py-6 glass-button text-white hover:scale-105 transition-transform"
+                >
+                  <Mail className="h-5 w-5 mr-2" />
+                  {loadingConnect["google-drive"] ? "Connecting..." : "Connect Google Drive"}
+                </Button>
               </div>
             </div>
 
@@ -330,21 +364,46 @@ function HomeContent() {
                       {status.providers.gmail.connected ? "● Connected" : "○ Not Connected"}
                     </span>
                   </div>
+                  <div className="flex justify-between items-center py-2 px-4 rounded-xl bg-white/5 border border-white/10">
+                    <span className="text-white/80 text-sm">Google Drive</span>
+                    <span
+                      className={`text-sm font-medium ${
+                        status.providers.google_drive.connected
+                          ? "text-green-400"
+                          : "text-white/50"
+                      }`}
+                    >
+                      {status.providers.google_drive.connected ? "● Connected" : "○ Not Connected"}
+                    </span>
+                  </div>
                 </div>
               </div>
             )}
 
             {/* Sync Actions */}
-            {status && status.providers.gmail.connected && (
+            {status && (status.providers.gmail.connected || status.providers.google_drive.connected) && (
               <div className="glass-card rounded-3xl p-6 backdrop-blur-xl bg-white/10 border border-white/20 shadow-2xl">
                 <h3 className="text-lg font-semibold text-white mb-4">Manual Sync</h3>
-                <Button
-                  onClick={handleSyncGmail}
-                  disabled={loadingSync.gmail}
-                  className="w-full rounded-xl py-4 bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
-                >
-                  {loadingSync.gmail ? "Syncing..." : "Sync Gmail Once"}
-                </Button>
+                <div className="space-y-3">
+                  {status.providers.gmail.connected && (
+                    <Button
+                      onClick={handleSyncGmail}
+                      disabled={loadingSync.gmail}
+                      className="w-full rounded-xl py-4 bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
+                    >
+                      {loadingSync.gmail ? "Syncing..." : "Sync Gmail Once"}
+                    </Button>
+                  )}
+                  {status.providers.google_drive.connected && (
+                    <Button
+                      onClick={handleSyncGoogleDrive}
+                      disabled={loadingSync.google_drive}
+                      className="w-full rounded-xl py-4 bg-blue-500/20 hover:bg-blue-500/30 text-white border border-blue-400/30"
+                    >
+                      {loadingSync.google_drive ? "Syncing..." : "Sync Google Drive Once"}
+                    </Button>
+                  )}
+                </div>
               </div>
             )}
           </div>
