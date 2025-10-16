@@ -31,6 +31,11 @@ interface Status {
       connected: boolean;
       connection_id: string | null;
     };
+    google_drive?: {
+      configured: boolean;
+      connected: boolean;
+      connection_id: string | null;
+    };
   };
 }
 
