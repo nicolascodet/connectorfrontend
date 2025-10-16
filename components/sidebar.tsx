@@ -6,10 +6,8 @@ import { usePathname } from "next/navigation";
 import {
   MessageSquarePlus,
   Search,
-  Library,
-  Image,
-  Video,
-  Code,
+  Database,
+  Upload,
   Folder,
   Plus,
   Settings,
@@ -33,16 +31,14 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const navigation = [
     { name: "New chat", href: "/", icon: MessageSquarePlus },
-    { name: "Search chat", href: "/search", icon: Search },
-    { name: "Library", href: "/library", icon: Library },
-    { name: "AI images", href: "/images", icon: Image },
-    { name: "AI videos", href: "/videos", icon: Video },
-    { name: "AI code", href: "/code", icon: Code },
+    { name: "Search", href: "/", icon: Search },
+    { name: "Knowledge Base", href: "/", icon: Database },
+    { name: "Upload Files", href: "/upload", icon: Upload },
   ];
 
   const folders = [
-    { name: "Branding", href: "/folders/branding" },
-    { name: "Web Development", href: "/folders/web-dev" },
+    { name: "Work Documents", href: "/folders/work" },
+    { name: "Personal", href: "/folders/personal" },
   ];
 
   return (
