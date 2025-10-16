@@ -11,6 +11,7 @@ import {
   BarChart3,
   Clock,
   Bot,
+  FileText,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
@@ -31,6 +32,7 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const navigation = [
     { name: "Views", href: "/views", icon: BarChart3 },
+    { name: "Reports", href: "/reports", icon: FileText },
     { name: "Timeline", href: "/timeline", icon: Clock },
     { name: "Agents", href: "/agents", icon: Bot },
   ];
