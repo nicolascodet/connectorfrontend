@@ -430,7 +430,7 @@ export default function ConnectionsPage() {
                 <div className="p-4 bg-gray-50 rounded-xl">
                   <p className="text-sm text-gray-600">Outlook</p>
                   <p className="text-xs font-medium text-gray-900 mt-1">
-                    {status.providers.outlook.connected ? "✓ Active" : "Not connected"}
+                    {status.providers?.outlook?.connected ? "✓ Active" : "Not connected"}
                   </p>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-xl">
