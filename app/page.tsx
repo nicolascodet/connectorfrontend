@@ -327,7 +327,7 @@ function HomeContent() {
                     <div className="bg-white/70 backdrop-blur-sm rounded-3xl px-6 py-4 border border-gray-200">
                       <div className="flex items-center gap-2">
                         <Loader2 className="h-4 w-4 animate-spin text-gray-600" />
-                        <span className="text-sm text-gray-600">Creating CSV file, please wait...</span>
+                        <span className="text-sm text-gray-600">Loading...</span>
                       </div>
                     </div>
                   </div>
