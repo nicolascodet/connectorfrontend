@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
-import { fetchStatus, startConnect, syncGmailOnce, syncGoogleDriveOnce } from "@/lib/api";
+import { fetchStatus, startConnect, syncOutlookOnce, syncGmailOnce, syncGoogleDriveOnce } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Loader2, Mail, HardDrive, RefreshCw, Plug2 } from "lucide-react";
+import { Loader2, Mail, HardDrive, RefreshCw, Plug2, Building2, DollarSign } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 
 interface Status {
@@ -27,6 +27,11 @@ interface Status {
       connected: boolean;
       connection_id: string | null;
     };
+    quickbooks?: {
+      configured: boolean;
+      connected: boolean;
+      connection_id: string | null;
+    };
   };
 }
 
@@ -38,8 +43,14 @@ export default function ConnectionsPage() {
     microsoft: boolean;
     gmail: boolean;
     "google-drive": boolean;
-  }>({ microsoft: false, gmail: false, "google-drive": false });
-  const [loadingSync, setLoadingSync] = useState<{ gmail: boolean; google_drive: boolean }>({
+    quickbooks: boolean;
+  }>({ microsoft: false, gmail: false, "google-drive": false, quickbooks: false });
+  const [loadingSync, setLoadingSync] = useState<{ 
+    outlook: boolean;
+    gmail: boolean;
+    google_drive: boolean;
+  }>({
+    outlook: false,
     gmail: false,
     google_drive: false,
   });
@@ -69,7 +80,7 @@ export default function ConnectionsPage() {
     }
   };
 
-  const handleConnect = async (provider: "microsoft" | "gmail" | "google-drive") => {
+  const handleConnect = async (provider: "microsoft" | "gmail" | "google-drive" | "quickbooks") => {
     setLoadingConnect((prev) => ({ ...prev, [provider]: true }));
     try {
       const result = await startConnect(provider);
@@ -121,6 +132,26 @@ export default function ConnectionsPage() {
         title: "Connection Failed",
         description: error instanceof Error ? error.message : `Failed to connect ${provider}`,
       });
+    }
+  };
+
+  const handleSyncOutlook = async () => {
+    setLoadingSync((prev) => ({ ...prev, outlook: true }));
+    try {
+      const result = await syncOutlookOnce();
+      await loadStatus();
+      toast({
+        title: "Sync Complete",
+        description: result.message || "Outlook synced successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Sync Failed",
+        description: error instanceof Error ? error.message : "Failed to sync Outlook",
+      });
+    } finally {
+      setLoadingSync((prev) => ({ ...prev, outlook: false }));
     }
   };
 
@@ -191,6 +222,58 @@ export default function ConnectionsPage() {
 
           {/* Connect Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Outlook */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-xl">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-blue-700/10 flex items-center justify-center">
+                    <Building2 className="h-6 w-6 text-blue-700" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">Outlook</h3>
+                    <p className="text-sm text-gray-600">Email synchronization</p>
+                  </div>
+                </div>
+                {status?.providers?.outlook?.connected && (
+                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                    Connected
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={() => handleConnect("microsoft")}
+                  disabled={loadingConnect.microsoft || status?.providers?.outlook?.connected}
+                  className="w-full rounded-xl py-6 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white border-0"
+                >
+                  {loadingConnect.microsoft ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : status?.providers?.outlook?.connected ? (
+                    "Connected"
+                  ) : (
+                    "Connect Outlook"
+                  )}
+                </Button>
+
+                {status?.providers?.outlook?.connected && (
+                  <Button
+                    onClick={handleSyncOutlook}
+                    disabled={loadingSync.outlook}
+                    variant="outline"
+                    className="w-full rounded-xl py-4 border-2"
+                  >
+                    {loadingSync.outlook ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                    )}
+                    {loadingSync.outlook ? "Syncing..." : "Sync Now"}
+                  </Button>
+                )}
+              </div>
+            </div>
+
             {/* Gmail */}
             <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-xl">
               <div className="flex items-start justify-between mb-4">
@@ -294,6 +377,42 @@ export default function ConnectionsPage() {
                 )}
               </div>
             </div>
+
+            {/* QuickBooks */}
+            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-xl">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-12 h-12 rounded-2xl bg-green-600/10 flex items-center justify-center">
+                    <DollarSign className="h-6 w-6 text-green-600" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-gray-900">QuickBooks</h3>
+                    <p className="text-sm text-gray-600">Accounting data</p>
+                  </div>
+                </div>
+                {status?.providers?.quickbooks?.connected && (
+                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                    Connected
+                  </span>
+                )}
+              </div>
+
+              <div className="space-y-3">
+                <Button
+                  onClick={() => handleConnect("quickbooks")}
+                  disabled={loadingConnect.quickbooks || status?.providers?.quickbooks?.connected}
+                  className="w-full rounded-xl py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0"
+                >
+                  {loadingConnect.quickbooks ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : status?.providers?.quickbooks?.connected ? (
+                    "Connected"
+                  ) : (
+                    "Connect QuickBooks"
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
 
           {/* Status Info */}
@@ -309,6 +428,12 @@ export default function ConnectionsPage() {
                   <p className="text-xs font-mono text-gray-900 mt-1">{status.tenant_id}</p>
                 </div>
                 <div className="p-4 bg-gray-50 rounded-xl">
+                  <p className="text-sm text-gray-600">Outlook</p>
+                  <p className="text-xs font-medium text-gray-900 mt-1">
+                    {status.providers.outlook.connected ? "✓ Active" : "Not connected"}
+                  </p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-xl">
                   <p className="text-sm text-gray-600">Gmail</p>
                   <p className="text-xs font-medium text-gray-900 mt-1">
                     {status.providers.gmail.connected ? "✓ Active" : "Not connected"}
@@ -318,6 +443,12 @@ export default function ConnectionsPage() {
                   <p className="text-sm text-gray-600">Google Drive</p>
                   <p className="text-xs font-medium text-gray-900 mt-1">
                     {status.providers?.google_drive?.connected ? "✓ Active" : "Not connected"}
+                  </p>
+                </div>
+                <div className="p-4 bg-gray-50 rounded-xl">
+                  <p className="text-sm text-gray-600">QuickBooks</p>
+                  <p className="text-xs font-medium text-gray-900 mt-1">
+                    {status.providers?.quickbooks?.connected ? "✓ Active" : "Not connected"}
                   </p>
                 </div>
               </div>
