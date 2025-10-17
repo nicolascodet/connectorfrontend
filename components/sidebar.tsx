@@ -86,7 +86,7 @@ export default function Sidebar({ user }: SidebarProps) {
   };
 
   return (
-    <div className="w-64 h-screen bg-gray-900/95 backdrop-blur-xl border-r border-white/10 flex flex-col">
+    <div className="w-64 h-screen bg-gray-900/95 backdrop-blur-xl border-r border-white/10 flex flex-col overflow-hidden">
       {/* Logo - Clickable to go home */}
       <div className="p-6">
         <Link href="/">
@@ -169,7 +169,7 @@ export default function Sidebar({ user }: SidebarProps) {
       <div className="flex-1"></div>
 
       {/* User Section */}
-      <div className="p-4 border-t border-white/10">
+      <div className="p-4 pb-6 border-t border-white/10">
         {settingsOpen ? (
           <div className="bg-white/10 rounded-2xl p-4 space-y-2 mb-3">
             <Link href="/connections" className="flex items-center gap-3 px-3 py-2 w-full text-left text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
