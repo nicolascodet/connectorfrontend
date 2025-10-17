@@ -217,7 +217,7 @@ export default function ConnectionsPage() {
           {/* Header */}
           <div>
             <h1 className="text-4xl font-bold text-gray-900 mb-2">Data Connections</h1>
-            <p className="text-gray-600">Connect and manage your data sources</p>
+            <p className="text-gray-600">Connect and manage your data sources - Outlook, Gmail, Drive, QuickBooks</p>
           </div>
 
           {/* Connect Cards */}
