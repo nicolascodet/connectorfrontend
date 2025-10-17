@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -90,7 +90,7 @@ const getAppName = (source: string) => {
   return source || 'Unknown';
 };
 
-export default function ChatbotPage() {
+function ChatbotPageContent() {
   const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
@@ -192,6 +192,10 @@ export default function ChatbotPage() {
 
       const result = await response.json();
 
+      console.log('📊 Chat API Response:', result);
+      console.log('📊 Sources received:', result.sources);
+      console.log('📊 Source count:', result.source_count);
+
       // Update chat ID if this is first message
       if (!chatId && result.chat_id) {
         setChatId(result.chat_id);
@@ -202,6 +206,8 @@ export default function ChatbotPage() {
         content: result.answer,
         sources: result.sources || [],
       };
+
+      console.log('📊 Assistant message with sources:', assistantMessage);
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       toast({
@@ -416,5 +422,17 @@ export default function ChatbotPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function ChatbotPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 p-8 flex items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-white/70" />
+      </main>
+    }>
+      <ChatbotPageContent />
+    </Suspense>
   );
 }
