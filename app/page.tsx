@@ -159,7 +159,7 @@ function HomeContent() {
 
   const handleSourceClick = async (source: Source) => {
     try {
-      if (!source.document_id) {
+      if (!source.document_id || source.document_id === 'None' || source.document_id === 'null' || source.document_id === null) {
         toast({
           variant: "destructive",
           title: "Document not available",
@@ -464,19 +464,30 @@ function HomeContent() {
                     {/* Source Bubbles */}
                     {message.role === "assistant" && message.sources && message.sources.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2 max-w-[75%]">
-                        {message.sources.slice(0, 8).map((source, sourceIndex) => (
-                          <button
-                            key={sourceIndex}
-                            onClick={() => handleSourceClick(source)}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer hover:scale-105 ${getAppColor(source.source)}`}
-                            title={`Click to view: ${source.document_name || 'Document'}`}
-                          >
-                            {getAppIcon(source.source)}
-                            <span className="truncate max-w-[120px]">
-                              {source.document_name || getAppName(source.source) || 'Unknown'}
-                            </span>
-                          </button>
-                        ))}
+                        {message.sources.slice(0, 8).map((source, sourceIndex) => {
+                          const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
+                          return (
+                            <button
+                              key={sourceIndex}
+                              onClick={() => handleSourceClick(source)}
+                              disabled={!hasDocument}
+                              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                                hasDocument 
+                                  ? `cursor-pointer hover:scale-105 ${getAppColor(source.source)}` 
+                                  : `cursor-not-allowed opacity-60 ${getAppColor(source.source)}`
+                              }`}
+                              title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
+                            >
+                              {getAppIcon(source.source)}
+                              <span className="truncate max-w-[120px]">
+                                {source.document_name || getAppName(source.source) || 'Unknown'}
+                              </span>
+                              {!hasDocument && (
+                                <span className="text-[10px] opacity-50">📋</span>
+                              )}
+                            </button>
+                          );
+                        })}
                         {message.sources.length > 8 && (
                           <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-gray-100 text-gray-700 border-gray-200">
                             <span>+{message.sources.length - 8} more</span>
