@@ -108,65 +108,67 @@ export default function Sidebar({ user }: SidebarProps) {
         </Button>
       </div>
 
-      {/* Chat History - Limited to first 5 */}
-      <div className="px-4">
-        <div className="text-xs font-semibold text-white/50 mb-2 px-4">Recent Chats</div>
-        <div className="space-y-1 mb-6">
-          {loadingChats ? (
-            <div className="text-center text-white/50 text-sm py-4">Loading...</div>
-          ) : chatHistory.length === 0 ? (
-            <div className="text-center text-white/50 text-sm py-4">No chats yet</div>
-          ) : (
-            <>
-              {chatHistory.slice(0, 5).map((chat) => (
-                <Link
-                  key={chat.id}
-                  href={`/?chat_id=${chat.id}`}
-                  className="block w-full text-left px-4 py-3 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-colors"
-                >
-                  <div className="text-sm truncate">{chat.title || "New Chat"}</div>
-                  <div className="text-xs text-white/50 mt-1">
-                    {formatTimestamp(chat.updated_at)} • {chat.message_count} messages
+      {/* Scrollable middle section - contains chats and navigation */}
+      <div className="flex-1 flex flex-col min-h-0 px-4">
+        {/* Chat History - Constrained height */}
+        <div className="flex-shrink-0">
+          <div className="text-xs font-semibold text-white/50 mb-2 px-4">Recent Chats</div>
+          <div className="space-y-1 mb-6 max-h-64 overflow-y-auto">
+            {loadingChats ? (
+              <div className="text-center text-white/50 text-sm py-4">Loading...</div>
+            ) : chatHistory.length === 0 ? (
+              <div className="text-center text-white/50 text-sm py-4">No chats yet</div>
+            ) : (
+              <>
+                {chatHistory.slice(0, 5).map((chat) => (
+                  <Link
+                    key={chat.id}
+                    href={`/?chat_id=${chat.id}`}
+                    className="block w-full text-left px-4 py-3 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                  >
+                    <div className="text-sm truncate">{chat.title || "New Chat"}</div>
+                    <div className="text-xs text-white/50 mt-1">
+                      {formatTimestamp(chat.updated_at)} • {chat.message_count} messages
+                    </div>
+                  </Link>
+                ))}
+                {chatHistory.length > 5 && (
+                  <div className="text-center py-2">
+                    <span className="text-xs text-white/40">
+                      +{chatHistory.length - 5} more chats
+                    </span>
                   </div>
-                </Link>
-              ))}
-              {chatHistory.length > 5 && (
-                <div className="text-center py-2">
-                  <span className="text-xs text-white/40">
-                    +{chatHistory.length - 5} more chats
-                  </span>
-                </div>
-              )}
-            </>
-          )}
+                )}
+              </>
+            )}
+          </div>
         </div>
 
         {/* Navigation - Always Visible */}
-        <div className="text-xs font-semibold text-white/50 mb-2 px-4">Pages</div>
-        <nav className="space-y-1 mb-6">
-          {navigation.map((item) => {
-            const Icon = item.icon;
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                  isActive
-                    ? "bg-white/10 text-white"
-                    : "text-white/70 hover:bg-white/5 hover:text-white"
-                }`}
-              >
-                <Icon className="h-5 w-5" />
-                <span className="text-sm">{item.name}</span>
-              </Link>
-            );
-          })}
-        </nav>
+        <div className="flex-shrink-0">
+          <div className="text-xs font-semibold text-white/50 mb-2 px-4">Pages</div>
+          <nav className="space-y-1 mb-6">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                    isActive
+                      ? "bg-white/10 text-white"
+                      : "text-white/70 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="text-sm">{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
       </div>
-
-      {/* Spacer to push user section to bottom */}
-      <div className="flex-1"></div>
 
       {/* User Section */}
       <div className="p-4 pb-6 border-t border-white/10">
