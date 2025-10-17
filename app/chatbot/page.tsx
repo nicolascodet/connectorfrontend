@@ -1,10 +1,12 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { Send, Loader2, Mail, FileText, HardDrive, File, ExternalLink, X } from "lucide-react";
+import { getChatMessages } from "@/lib/api";
 
 // Source type definitions
 interface Source {
@@ -89,12 +91,14 @@ const getAppName = (source: string) => {
 };
 
 export default function ChatbotPage() {
+  const searchParams = useSearchParams();
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [chatId, setChatId] = useState<string | null>(null);
   const [selectedSource, setSelectedSource] = useState<SourceDocument | null>(null);
   const [loadingSource, setLoadingSource] = useState(false);
+  const [loadingMessages, setLoadingMessages] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const scrollToBottom = () => {
@@ -104,6 +108,39 @@ export default function ChatbotPage() {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Load chat from URL parameter
+  useEffect(() => {
+    const chatIdFromUrl = searchParams.get('chat_id');
+    if (chatIdFromUrl && chatIdFromUrl !== chatId) {
+      loadChatMessages(chatIdFromUrl);
+    }
+  }, [searchParams]);
+
+  const loadChatMessages = async (chatIdToLoad: string) => {
+    setLoadingMessages(true);
+    try {
+      const result = await getChatMessages(chatIdToLoad);
+
+      // Convert backend messages to frontend format
+      const loadedMessages: Message[] = result.messages.map((msg: any) => ({
+        role: msg.role as "user" | "assistant",
+        content: msg.content,
+        sources: msg.sources || [],
+      }));
+
+      setMessages(loadedMessages);
+      setChatId(chatIdToLoad);
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Failed to load chat",
+        description: error instanceof Error ? error.message : "Could not load chat messages",
+      });
+    } finally {
+      setLoadingMessages(false);
+    }
+  };
 
   const fetchSourceDocument = async (documentId: string) => {
     setLoadingSource(true);
@@ -207,7 +244,14 @@ export default function ChatbotPage() {
           </div>
 
           <div className="flex-1 overflow-y-auto space-y-4 mb-6 scrollbar-hide">
-            {messages.length === 0 ? (
+            {loadingMessages ? (
+              <div className="flex items-center justify-center h-full">
+                <div className="text-center">
+                  <Loader2 className="h-12 w-12 animate-spin text-white/70 mx-auto mb-4" />
+                  <p className="text-white/60 text-lg">Loading chat...</p>
+                </div>
+              </div>
+            ) : messages.length === 0 ? (
               <div className="flex items-center justify-center h-full">
                 <div className="text-center">
                   <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/10 backdrop-blur-sm mb-4">
