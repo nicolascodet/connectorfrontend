@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { handleOAuthCallback, searchOptimized, uploadFile } from "@/lib/api";
+import { handleOAuthCallback, searchOptimized, uploadFile, getChatMessages, getSourceDocument } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
@@ -92,11 +92,20 @@ function HomeContent() {
   const [input, setInput] = useState("");
   const [loadingChat, setLoadingChat] = useState(false);
   const [uploadingFile, setUploadingFile] = useState(false);
+  const [selectedSource, setSelectedSource] = useState<any>(null);
+  const [sourceModalOpen, setSourceModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    // Use setTimeout to ensure DOM has updated
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView({ 
+        behavior: "smooth",
+        block: "end",
+        inline: "nearest"
+      });
+    }, 100);
   };
 
   useEffect(() => {
@@ -104,10 +113,74 @@ function HomeContent() {
   }, [messages]);
 
   useEffect(() => {
+    // Also scroll when loading state changes (for better UX when chat finishes)
+    if (!loadingChat) {
+      scrollToBottom();
+    }
+  }, [loadingChat]);
+
+  useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
     }
   }, [user, loading, router]);
+
+  // Load existing chat messages if chat_id is in URL
+  useEffect(() => {
+    const chatId = searchParams.get("chat_id");
+    if (chatId && user && !loading) {
+      loadChatMessages(chatId);
+    }
+  }, [searchParams, user, loading]);
+
+  const loadChatMessages = async (chatId: string) => {
+    try {
+      console.log(`📖 Loading chat messages for chat_id: ${chatId}`);
+      const result = await getChatMessages(chatId);
+      
+      // Convert backend message format to frontend format
+      const formattedMessages: Message[] = result.messages.map((msg: any) => ({
+        role: msg.role,
+        content: msg.content,
+        sources: msg.role === 'assistant' ? (msg.sources || []) : undefined
+      }));
+      
+      setMessages(formattedMessages);
+      console.log(`✅ Loaded ${formattedMessages.length} messages`);
+    } catch (error) {
+      console.error("Failed to load chat messages:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to load chat",
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
+  const handleSourceClick = async (source: Source) => {
+    try {
+      if (!source.document_id) {
+        toast({
+          variant: "destructive",
+          title: "Document not available",
+          description: "This source doesn't have a document ID",
+        });
+        return;
+      }
+
+      console.log(`📄 Loading source document: ${source.document_id}`);
+      const document = await getSourceDocument(source.document_id);
+      setSelectedSource(document);
+      setSourceModalOpen(true);
+    } catch (error) {
+      console.error("Failed to load source document:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to load document",
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
 
   useEffect(() => {
     async function processOAuthCallback() {
@@ -219,7 +292,7 @@ function HomeContent() {
         },
         body: JSON.stringify({
           question: input,
-          chat_id: null,
+          chat_id: searchParams.get("chat_id"),
         }),
       });
 
@@ -228,6 +301,14 @@ function HomeContent() {
       const result = await response.json();
 
       console.log('📊 Sources received:', result.sources);
+
+      // If this was a new chat, update URL with the chat_id
+      const currentChatId = searchParams.get("chat_id");
+      if (!currentChatId && result.chat_id) {
+        const url = new URL(window.location.href);
+        url.searchParams.set("chat_id", result.chat_id);
+        window.history.replaceState({}, '', url.toString());
+      }
 
       const assistantMessage: Message = {
         role: "assistant",
@@ -363,8 +444,8 @@ function HomeContent() {
               </div>
             </div>
           ) : (
-            <div className="flex-1 flex flex-col">
-              <div className="flex-1 overflow-y-auto space-y-6 mb-6 px-4">
+            <div className="flex-1 flex flex-col min-h-0">
+              <div className="flex-1 overflow-y-auto space-y-6 mb-6 px-4 scroll-smooth">
                 {messages.map((message, index) => (
                   <div
                     key={index}
@@ -383,20 +464,24 @@ function HomeContent() {
                     {/* Source Bubbles */}
                     {message.role === "assistant" && message.sources && message.sources.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2 max-w-[75%]">
-                        {Object.entries(groupSourcesByApp(message.sources)).map(([appSource, sources]) => (
-                          <div
-                            key={appSource}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${getAppColor(appSource)}`}
+                        {message.sources.slice(0, 8).map((source, sourceIndex) => (
+                          <button
+                            key={sourceIndex}
+                            onClick={() => handleSourceClick(source)}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all cursor-pointer hover:scale-105 ${getAppColor(source.source)}`}
+                            title={`Click to view: ${source.document_name || 'Document'}`}
                           >
-                            {getAppIcon(appSource)}
-                            <span>{getAppName(appSource)}</span>
-                            {sources.length > 1 && (
-                              <span className="bg-white/50 px-1.5 py-0.5 rounded-full text-[10px]">
-                                +{sources.length - 1}
-                              </span>
-                            )}
-                          </div>
+                            {getAppIcon(source.source)}
+                            <span className="truncate max-w-[120px]">
+                              {source.document_name || getAppName(source.source) || 'Unknown'}
+                            </span>
+                          </button>
                         ))}
+                        {message.sources.length > 8 && (
+                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-gray-100 text-gray-700 border-gray-200">
+                            <span>+{message.sources.length - 8} more</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -441,6 +526,59 @@ function HomeContent() {
           )}
         </div>
       </div>
+
+      {/* Source Document Modal */}
+      {sourceModalOpen && selectedSource && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
+            {/* Modal Header */}
+            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                {getAppIcon(selectedSource.source)}
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900 truncate">
+                    {selectedSource.title || selectedSource.metadata?.title || 'Document'}
+                  </h2>
+                  <p className="text-sm text-gray-500">
+                    {getAppName(selectedSource.source)} • {new Date(selectedSource.created_at).toLocaleDateString()}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setSourceModalOpen(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="p-6 overflow-y-auto max-h-[60vh]">
+              <div className="prose prose-sm max-w-none">
+                <div className="bg-gray-50 p-4 rounded-xl border">
+                  <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
+                    {selectedSource.content || 'No content available'}
+                  </pre>
+                </div>
+                
+                {/* Metadata */}
+                {selectedSource.metadata && Object.keys(selectedSource.metadata).length > 0 && (
+                  <div className="mt-6">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Metadata</h3>
+                    <div className="bg-gray-50 p-4 rounded-xl border text-xs">
+                      <pre className="text-gray-600">
+                        {JSON.stringify(selectedSource.metadata, null, 2)}
+                      </pre>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -223,6 +223,17 @@ export async function deleteChat(chatId: string): Promise<{ success: boolean }> 
   return response.json();
 }
 
+export async function getSourceDocument(documentId: string): Promise<{
+  id: string;
+  title: string;
+  content: string;
+  metadata: any;
+  source: string;
+  created_at: string;
+}> {
+  return apiGet(`/api/v1/sources/${documentId}`);
+}
+
 // File Upload API
 export async function uploadFile(file: File, chatId?: string): Promise<{
   success: boolean;
