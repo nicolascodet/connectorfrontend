@@ -7,7 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload } from "lucide-react";
+import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 
 interface Status {
@@ -31,10 +31,58 @@ interface Status {
   };
 }
 
+interface Source {
+  index: number;
+  document_id: string | null;
+  document_name: string;
+  source: string;
+  document_type: string;
+  timestamp: string;
+  text_preview: string;
+  score?: number;
+}
+
 interface Message {
   role: "user" | "assistant";
   content: string;
+  sources?: Source[];
 }
+
+// Helper functions for source display
+const getAppIcon = (source: string) => {
+  const sourceKey = source?.toLowerCase() || '';
+  if (sourceKey === 'gmail') return <Mail className="h-3 w-3" />;
+  if (sourceKey === 'outlook' || sourceKey === 'microsoft') return <Mail className="h-3 w-3" />;
+  if (sourceKey === 'gdrive' || sourceKey === 'google_drive' || sourceKey === 'drive') return <HardDrive className="h-3 w-3" />;
+  return <File className="h-3 w-3" />;
+};
+
+const getAppColor = (source: string) => {
+  const sourceKey = source?.toLowerCase() || '';
+  if (sourceKey === 'gmail') return 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200';
+  if (sourceKey === 'outlook' || sourceKey === 'microsoft') return 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200';
+  if (sourceKey === 'gdrive' || sourceKey === 'google_drive' || sourceKey === 'drive') return 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200';
+  return 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200';
+};
+
+const getAppName = (source: string) => {
+  const sourceKey = source?.toLowerCase() || '';
+  if (sourceKey === 'gmail') return 'Gmail';
+  if (sourceKey === 'outlook' || sourceKey === 'microsoft') return 'Outlook';
+  if (sourceKey === 'gdrive' || sourceKey === 'google_drive' || sourceKey === 'drive') return 'Google Drive';
+  if (sourceKey === 'upload') return 'Upload';
+  return source || 'Unknown';
+};
+
+const groupSourcesByApp = (sources: Source[]) => {
+  const grouped: Record<string, Source[]> = {};
+  sources.forEach(source => {
+    const key = source.source || 'unknown';
+    if (!grouped[key]) grouped[key] = [];
+    grouped[key].push(source);
+  });
+  return grouped;
+};
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -162,19 +210,30 @@ function HomeContent() {
     setLoadingChat(true);
 
     try {
-      const conversationHistory = messages.map((msg) => ({
-        role: msg.role,
-        content: msg.content,
-      }));
-
-      const result = await searchOptimized({
-        query: input,
-        vector_limit: 5,
-        graph_limit: 5,
-        conversation_history: conversationHistory,
+      // Use chat API to get sources
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/chat`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${(await (await import('@/lib/supabase')).supabase.auth.getSession()).data.session?.access_token}`,
+        },
+        body: JSON.stringify({
+          question: input,
+          chat_id: null,
+        }),
       });
 
-      const assistantMessage: Message = { role: "assistant", content: result.answer };
+      if (!response.ok) throw new Error('Chat request failed');
+
+      const result = await response.json();
+
+      console.log('📊 Sources received:', result.sources);
+
+      const assistantMessage: Message = {
+        role: "assistant",
+        content: result.answer,
+        sources: result.sources || [],
+      };
       setMessages((prev) => [...prev, assistantMessage]);
     } catch (error) {
       toast({
@@ -309,7 +368,7 @@ function HomeContent() {
                 {messages.map((message, index) => (
                   <div
                     key={index}
-                    className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                    className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
                   >
                     <div
                       className={`max-w-[75%] rounded-3xl px-6 py-4 ${
@@ -320,6 +379,26 @@ function HomeContent() {
                     >
                       <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                     </div>
+
+                    {/* Source Bubbles */}
+                    {message.role === "assistant" && message.sources && message.sources.length > 0 && (
+                      <div className="mt-2 flex flex-wrap gap-2 max-w-[75%]">
+                        {Object.entries(groupSourcesByApp(message.sources)).map(([appSource, sources]) => (
+                          <div
+                            key={appSource}
+                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${getAppColor(appSource)}`}
+                          >
+                            {getAppIcon(appSource)}
+                            <span>{getAppName(appSource)}</span>
+                            {sources.length > 1 && (
+                              <span className="bg-white/50 px-1.5 py-0.5 rounded-full text-[10px]">
+                                +{sources.length - 1}
+                              </span>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
                 {loadingChat && (
