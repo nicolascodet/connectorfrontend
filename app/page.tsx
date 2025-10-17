@@ -7,7 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File } from "lucide-react";
+import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 
 interface Status {
@@ -48,41 +48,126 @@ interface Message {
   sources?: Source[];
 }
 
-// Helper functions for source display
-const getAppIcon = (source: string) => {
-  const sourceKey = source?.toLowerCase() || '';
-  if (sourceKey === 'gmail') return <Mail className="h-3 w-3" />;
-  if (sourceKey === 'outlook' || sourceKey === 'microsoft') return <Mail className="h-3 w-3" />;
-  if (sourceKey === 'gdrive' || sourceKey === 'google_drive' || sourceKey === 'drive') return <HardDrive className="h-3 w-3" />;
-  return <File className="h-3 w-3" />;
+// Helper functions for source display - Enhanced for all document types
+const getDocumentIcon = (source: Source) => {
+  const sourceKey = source?.source?.toLowerCase() || '';
+  const docType = source?.document_type?.toLowerCase() || '';
+  const docName = source?.document_name?.toLowerCase() || '';
+
+  // Email sources
+  if (sourceKey === 'gmail') return <Mail className="h-3 w-3 text-red-600" />;
+  if (sourceKey === 'outlook' || sourceKey === 'microsoft') return <Mail className="h-3 w-3 text-blue-600" />;
+  
+  // Google Workspace - detect by document name patterns or MIME types
+  if (docName.includes('google docs') || docName.includes('.docx') || docType === 'document') {
+    return <FileText className="h-3 w-3 text-blue-600" />;
+  }
+  if (docName.includes('google sheets') || docName.includes('.xlsx') || docType === 'spreadsheet') {
+    return <Sheet className="h-3 w-3 text-green-600" />;
+  }
+  if (docName.includes('google slides') || docName.includes('.pptx') || docType === 'presentation') {
+    return <Presentation className="h-3 w-3 text-orange-600" />;
+  }
+  
+  // Document types by extension/content
+  if (docName.includes('.pdf') || docType === 'pdf') return <FileText className="h-3 w-3 text-red-600" />;
+  if (docName.includes('.jpg') || docName.includes('.png') || docType === 'image') return <FileImage className="h-3 w-3 text-purple-600" />;
+  
+  // Business platforms
+  if (sourceKey === 'hubspot') return <Building2 className="h-3 w-3 text-orange-600" />;
+  if (sourceKey === 'salesforce') return <Database className="h-3 w-3 text-blue-600" />;
+  if (sourceKey === 'quickbooks') return <DollarSign className="h-3 w-3 text-green-600" />;
+  if (sourceKey === 'slack') return <MessageSquare className="h-3 w-3 text-purple-600" />;
+  
+  // Google Drive (generic)
+  if (sourceKey === 'gdrive' || sourceKey === 'google_drive' || sourceKey === 'drive') {
+    return <HardDrive className="h-3 w-3 text-green-600" />;
+  }
+  
+  // Upload
+  if (sourceKey === 'upload') return <Upload className="h-3 w-3 text-gray-600" />;
+  
+  // Default
+  return <File className="h-3 w-3 text-gray-600" />;
 };
 
-const getAppColor = (source: string) => {
-  const sourceKey = source?.toLowerCase() || '';
-  if (sourceKey === 'gmail') return 'bg-red-100 text-red-700 border-red-200 hover:bg-red-200';
-  if (sourceKey === 'outlook' || sourceKey === 'microsoft') return 'bg-blue-100 text-blue-700 border-blue-200 hover:bg-blue-200';
-  if (sourceKey === 'gdrive' || sourceKey === 'google_drive' || sourceKey === 'drive') return 'bg-green-100 text-green-700 border-green-200 hover:bg-green-200';
-  return 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200';
+const getDocumentColor = (source: Source) => {
+  const sourceKey = source?.source?.toLowerCase() || '';
+  const docType = source?.document_type?.toLowerCase() || '';
+  const docName = source?.document_name?.toLowerCase() || '';
+
+  // Email sources
+  if (sourceKey === 'gmail') return 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100';
+  if (sourceKey === 'outlook' || sourceKey === 'microsoft') return 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100';
+  
+  // Google Workspace
+  if (docName.includes('google docs') || docName.includes('.docx') || docType === 'document') {
+    return 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100';
+  }
+  if (docName.includes('google sheets') || docName.includes('.xlsx') || docType === 'spreadsheet') {
+    return 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100';
+  }
+  if (docName.includes('google slides') || docName.includes('.pptx') || docType === 'presentation') {
+    return 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100';
+  }
+  
+  // Document types
+  if (docName.includes('.pdf') || docType === 'pdf') return 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100';
+  if (docName.includes('.jpg') || docName.includes('.png') || docType === 'image') return 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100';
+  
+  // Business platforms  
+  if (sourceKey === 'hubspot') return 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100';
+  if (sourceKey === 'salesforce') return 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100';
+  if (sourceKey === 'quickbooks') return 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100';
+  if (sourceKey === 'slack') return 'bg-purple-50 text-purple-700 border-purple-200 hover:bg-purple-100';
+  
+  // Google Drive (generic)
+  if (sourceKey === 'gdrive' || sourceKey === 'google_drive' || sourceKey === 'drive') {
+    return 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100';
+  }
+  
+  // Upload
+  if (sourceKey === 'upload') return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100';
+  
+  // Default
+  return 'bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100';
 };
 
-const getAppName = (source: string) => {
-  const sourceKey = source?.toLowerCase() || '';
+const getDocumentTypeName = (source: Source) => {
+  const sourceKey = source?.source?.toLowerCase() || '';
+  const docType = source?.document_type?.toLowerCase() || '';
+  const docName = source?.document_name?.toLowerCase() || '';
+
+  // Email sources
   if (sourceKey === 'gmail') return 'Gmail';
   if (sourceKey === 'outlook' || sourceKey === 'microsoft') return 'Outlook';
+  
+  // Google Workspace - be specific!
+  if (docName.includes('google docs') || docType === 'document') return 'Google Docs';
+  if (docName.includes('google sheets') || docType === 'spreadsheet') return 'Google Sheets';  
+  if (docName.includes('google slides') || docType === 'presentation') return 'Google Slides';
+  
+  // Document types
+  if (docName.includes('.pdf') || docType === 'pdf') return 'PDF';
+  if (docName.includes('.docx')) return 'Word Doc';
+  if (docName.includes('.xlsx')) return 'Excel';
+  if (docName.includes('.pptx')) return 'PowerPoint';
+  if (docName.includes('.jpg') || docName.includes('.png') || docType === 'image') return 'Image';
+  
+  // Business platforms
+  if (sourceKey === 'hubspot') return 'HubSpot';
+  if (sourceKey === 'salesforce') return 'Salesforce';
+  if (sourceKey === 'quickbooks') return 'QuickBooks';
+  if (sourceKey === 'slack') return 'Slack';
+  
+  // Generic Google Drive
   if (sourceKey === 'gdrive' || sourceKey === 'google_drive' || sourceKey === 'drive') return 'Google Drive';
   if (sourceKey === 'upload') return 'Upload';
-  return source || 'Unknown';
+  
+  // Fallback to source name
+  return source?.source || 'Unknown';
 };
 
-const groupSourcesByApp = (sources: Source[]) => {
-  const grouped: Record<string, Source[]> = {};
-  sources.forEach(source => {
-    const key = source.source || 'unknown';
-    if (!grouped[key]) grouped[key] = [];
-    grouped[key].push(source);
-  });
-  return grouped;
-};
 
 function HomeContent() {
   const searchParams = useSearchParams();
@@ -94,6 +179,7 @@ function HomeContent() {
   const [uploadingFile, setUploadingFile] = useState(false);
   const [selectedSource, setSelectedSource] = useState<any>(null);
   const [sourceModalOpen, setSourceModalOpen] = useState(false);
+  const [expandedSources, setExpandedSources] = useState<Set<number>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -461,38 +547,76 @@ function HomeContent() {
                       <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                     </div>
 
-                    {/* Source Bubbles */}
+                    {/* Source Bubbles - Enhanced with All Document Types */}
                     {message.role === "assistant" && message.sources && message.sources.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2 max-w-[75%]">
-                        {message.sources.slice(0, 8).map((source, sourceIndex) => {
-                          const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
+                        {(() => {
+                          const isExpanded = expandedSources.has(index);
+                          const sourcesToShow = isExpanded ? message.sources : message.sources.slice(0, 8);
+                          const remainingCount = message.sources.length - 8;
+                          
                           return (
-                            <button
-                              key={sourceIndex}
-                              onClick={() => handleSourceClick(source)}
-                              disabled={!hasDocument}
-                              className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                                hasDocument 
-                                  ? `cursor-pointer hover:scale-105 ${getAppColor(source.source)}` 
-                                  : `cursor-not-allowed opacity-60 ${getAppColor(source.source)}`
-                              }`}
-                              title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
-                            >
-                              {getAppIcon(source.source)}
-                              <span className="truncate max-w-[120px]">
-                                {source.document_name || getAppName(source.source) || 'Unknown'}
-                              </span>
-                              {!hasDocument && (
-                                <span className="text-[10px] opacity-50">📋</span>
+                            <>
+                              {sourcesToShow.map((source, sourceIndex) => {
+                                const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
+                                return (
+                                  <button
+                                    key={sourceIndex}
+                                    onClick={() => handleSourceClick(source)}
+                                    disabled={!hasDocument}
+                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
+                                      hasDocument 
+                                        ? `cursor-pointer hover:scale-105 ${getDocumentColor(source)}` 
+                                        : `cursor-not-allowed opacity-60 ${getDocumentColor(source)}`
+                                    }`}
+                                    title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
+                                  >
+                                    {getDocumentIcon(source)}
+                                    <span className="truncate max-w-[120px]">
+                                      {source.document_name || getDocumentTypeName(source)}
+                                    </span>
+                                    {!hasDocument && (
+                                      <span className="text-[10px] opacity-50">📋</span>
+                                    )}
+                                  </button>
+                                );
+                              })}
+                              
+                              {/* Expandable "+X more" button */}
+                              {message.sources.length > 8 && (
+                                <button
+                                  onClick={() => {
+                                    const newExpanded = new Set(expandedSources);
+                                    if (isExpanded) {
+                                      newExpanded.delete(index);
+                                    } else {
+                                      newExpanded.add(index);
+                                    }
+                                    setExpandedSources(newExpanded);
+                                  }}
+                                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 cursor-pointer transition-all hover:scale-105"
+                                  title={isExpanded ? 'Show fewer sources' : `Show all ${message.sources.length} sources`}
+                                >
+                                  {isExpanded ? (
+                                    <>
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                      </svg>
+                                      <span>Show less</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <span>+{remainingCount} more</span>
+                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                      </svg>
+                                    </>
+                                  )}
+                                </button>
                               )}
-                            </button>
+                            </>
                           );
-                        })}
-                        {message.sources.length > 8 && (
-                          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-gray-100 text-gray-700 border-gray-200">
-                            <span>+{message.sources.length - 8} more</span>
-                          </div>
-                        )}
+                        })()}
                       </div>
                     )}
                   </div>
@@ -545,13 +669,13 @@ function HomeContent() {
             {/* Modal Header */}
             <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                {getAppIcon(selectedSource.source)}
+                {getDocumentIcon(selectedSource)}
                 <div>
                   <h2 className="text-lg font-semibold text-gray-900 truncate">
                     {selectedSource.title || selectedSource.metadata?.title || 'Document'}
                   </h2>
                   <p className="text-sm text-gray-500">
-                    {getAppName(selectedSource.source)} • {new Date(selectedSource.created_at).toLocaleDateString()}
+                    {getDocumentTypeName(selectedSource)} • {new Date(selectedSource.created_at).toLocaleDateString()}
                   </p>
                 </div>
               </div>
