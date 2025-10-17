@@ -108,8 +108,8 @@ export default function Sidebar({ user }: SidebarProps) {
         </Button>
       </div>
 
-      {/* Chat History */}
-      <div className="flex-1 px-4 overflow-y-auto">
+      {/* Chat History - Limited to first 5 */}
+      <div className="px-4">
         <div className="text-xs font-semibold text-white/50 mb-2 px-4">Recent Chats</div>
         <div className="space-y-1 mb-6">
           {loadingChats ? (
@@ -117,24 +117,33 @@ export default function Sidebar({ user }: SidebarProps) {
           ) : chatHistory.length === 0 ? (
             <div className="text-center text-white/50 text-sm py-4">No chats yet</div>
           ) : (
-            chatHistory.map((chat) => (
-              <Link
-                key={chat.id}
-                href={`/?chat_id=${chat.id}`}
-                className="block w-full text-left px-4 py-3 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-colors"
-              >
-                <div className="text-sm truncate">{chat.title || "New Chat"}</div>
-                <div className="text-xs text-white/50 mt-1">
-                  {formatTimestamp(chat.updated_at)} • {chat.message_count} messages
+            <>
+              {chatHistory.slice(0, 5).map((chat) => (
+                <Link
+                  key={chat.id}
+                  href={`/?chat_id=${chat.id}`}
+                  className="block w-full text-left px-4 py-3 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                >
+                  <div className="text-sm truncate">{chat.title || "New Chat"}</div>
+                  <div className="text-xs text-white/50 mt-1">
+                    {formatTimestamp(chat.updated_at)} • {chat.message_count} messages
+                  </div>
+                </Link>
+              ))}
+              {chatHistory.length > 5 && (
+                <div className="text-center py-2">
+                  <span className="text-xs text-white/40">
+                    +{chatHistory.length - 5} more chats
+                  </span>
                 </div>
-              </Link>
-            ))
+              )}
+            </>
           )}
         </div>
 
-        {/* Navigation */}
+        {/* Navigation - Always Visible */}
         <div className="text-xs font-semibold text-white/50 mb-2 px-4">Pages</div>
-        <nav className="space-y-1">
+        <nav className="space-y-1 mb-6">
           {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
@@ -155,6 +164,9 @@ export default function Sidebar({ user }: SidebarProps) {
           })}
         </nav>
       </div>
+
+      {/* Spacer to push user section to bottom */}
+      <div className="flex-1"></div>
 
       {/* User Section */}
       <div className="p-4 border-t border-white/10">
