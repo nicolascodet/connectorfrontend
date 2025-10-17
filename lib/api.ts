@@ -70,7 +70,7 @@ export async function apiGet(
 }
 
 export async function startConnect(
-  provider: "microsoft" | "gmail" | "google-drive"
+  provider: "microsoft" | "gmail" | "google-drive" | "quickbooks"
 ): Promise<{ auth_url: string; provider: string; tenant_id: string }> {
   // Now support dedicated google-drive provider in backend
   return apiGet("/connect/start", { provider });
