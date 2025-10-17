@@ -59,7 +59,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const handleNewChat = async () => {
     try {
       const result = await createNewChat();
-      router.push(`/chatbot?chat_id=${result.chat_id}`);
+      router.push(`/?chat_id=${result.chat_id}`);
       toast({ title: "New chat created" });
       loadChatHistory(); // Refresh history
     } catch (error) {
@@ -120,7 +120,7 @@ export default function Sidebar({ user }: SidebarProps) {
             chatHistory.map((chat) => (
               <Link
                 key={chat.id}
-                href={`/chatbot?chat_id=${chat.id}`}
+                href={`/?chat_id=${chat.id}`}
                 className="block w-full text-left px-4 py-3 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-colors"
               >
                 <div className="text-sm truncate">{chat.title || "New Chat"}</div>
