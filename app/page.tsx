@@ -317,13 +317,13 @@ export default function Dashboard() {
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm text-gray-700">Overdue >24h</span>
+                        <span className="text-sm text-gray-700">{"Overdue > 24h"}</span>
                         <span className="text-lg font-bold text-red-600">{dashboardData.operations.sla.overdue24h}</span>
                       </div>
                     </div>
                     <div>
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-sm text-gray-700">Critical >7d</span>
+                        <span className="text-sm text-gray-700">{"Critical > 7d"}</span>
                         <span className="text-lg font-bold text-red-700">{dashboardData.operations.sla.overdue7d}</span>
                       </div>
                     </div>
@@ -399,8 +399,8 @@ export default function Dashboard() {
                       <div className="text-sm font-medium text-gray-900">{absence.person}</div>
                       <div className="text-xs text-gray-600 mt-0.5">{absence.dates}</div>
                       <div className="text-xs text-orange-600 mt-1">{absence.impact}</div>
-                    </div>
-                  ))}
+                          </div>
+                        ))}
                 </div>
 
                 {/* Hiring */}
