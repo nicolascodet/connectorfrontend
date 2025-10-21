@@ -188,7 +188,7 @@ export default function Dashboard() {
 
                 {/* A/R Aging */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
-                  <div className="text-sm text-gray-500 mb-1">A/R >60 Days</div>
+                  <div className="text-sm text-gray-500 mb-1">{"A/R > 60 Days"}</div>
                   <div className="text-2xl font-bold text-gray-900">${(dashboardData.finance.arAging["60"].amount / 1000).toFixed(0)}K</div>
                   <div className="text-xs text-orange-600 mt-1">{dashboardData.finance.arAging["90"].customer}</div>
                 </div>

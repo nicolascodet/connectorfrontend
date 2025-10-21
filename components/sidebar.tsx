@@ -12,7 +12,6 @@ import {
   Clock,
   Bot,
   FileText,
-  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
@@ -32,7 +31,6 @@ export default function Sidebar({ user }: SidebarProps) {
   const [loadingChats, setLoadingChats] = useState(false);
 
   const navigation = [
-    { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Views", href: "/views", icon: BarChart3 },
     { name: "Reports", href: "/reports", icon: FileText },
     { name: "Timeline", href: "/timeline", icon: Clock },
@@ -61,7 +59,7 @@ export default function Sidebar({ user }: SidebarProps) {
   const handleNewChat = async () => {
     try {
       const result = await createNewChat();
-      router.push(`/chat?chat_id=${result.chat_id}`);
+      router.push(`/?chat_id=${result.chat_id}`);
       toast({ title: "New chat created" });
       loadChatHistory(); // Refresh history
     } catch (error) {
@@ -93,10 +91,8 @@ export default function Sidebar({ user }: SidebarProps) {
       <div className="p-6">
         <Link href="/">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center">
-              <span className="text-white font-bold text-sm">U</span>
-            </div>
-            <span className="text-xl font-semibold text-white">Unit Industries</span>
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500" />
+            <span className="text-xl font-semibold text-white">Cortex</span>
           </div>
         </Link>
       </div>
@@ -124,18 +120,18 @@ export default function Sidebar({ user }: SidebarProps) {
               <div className="text-center text-white/50 text-sm py-4">No chats yet</div>
             ) : (
               <>
-              {chatHistory.slice(0, 5).map((chat) => (
-                <Link
-                  key={chat.id}
-                  href={`/chat?chat_id=${chat.id}`}
-                  className="block w-full text-left px-4 py-3 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-colors"
-                >
-                  <div className="text-sm truncate">{chat.title || "New Chat"}</div>
-                  <div className="text-xs text-white/50 mt-1">
-                    {formatTimestamp(chat.updated_at)} • {chat.message_count} messages
-                  </div>
-                </Link>
-              ))}
+                {chatHistory.slice(0, 5).map((chat) => (
+                  <Link
+                    key={chat.id}
+                    href={`/?chat_id=${chat.id}`}
+                    className="block w-full text-left px-4 py-3 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-colors"
+                  >
+                    <div className="text-sm truncate">{chat.title || "New Chat"}</div>
+                    <div className="text-xs text-white/50 mt-1">
+                      {formatTimestamp(chat.updated_at)} • {chat.message_count} messages
+                    </div>
+                  </Link>
+                ))}
                 {chatHistory.length > 5 && (
                   <div className="text-center py-2">
                     <span className="text-xs text-white/40">
