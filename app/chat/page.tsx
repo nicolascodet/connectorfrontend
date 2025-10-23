@@ -9,8 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign } from "lucide-react";
 import Sidebar from "@/components/sidebar";
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
+import SmartMarkdown from '@/components/SmartMarkdown';
 
 interface Status {
   tenant_id: string;
@@ -549,11 +548,7 @@ function HomeContent() {
                       {message.role === "user" ? (
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                       ) : (
-                        <div className="prose prose-sm max-w-none prose-headings:text-gray-900 prose-headings:font-semibold prose-h3:text-base prose-h3:mt-3 prose-h3:mb-2 prose-p:text-gray-800 prose-p:leading-relaxed prose-strong:text-gray-900 prose-strong:font-semibold prose-ul:my-2 prose-li:text-gray-800 prose-li:my-1">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {message.content}
-                          </ReactMarkdown>
-                        </div>
+                        <SmartMarkdown content={message.content} />
                       )}
                     </div>
 
