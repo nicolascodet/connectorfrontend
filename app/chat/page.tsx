@@ -7,8 +7,9 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign } from "lucide-react";
+import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, Settings, Link as LinkIcon } from "lucide-react";
 import SmartMarkdown from '@/components/SmartMarkdown';
+import Link from 'next/link';
 
 interface Status {
   tenant_id: string;
@@ -441,7 +442,28 @@ function HomeContent() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
+      {/* Top Navigation */}
+      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-4 bg-white/70 backdrop-blur-md border-b border-gray-200/50">
+        <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          CORTEX
+        </h1>
+        <div className="flex items-center gap-3">
+          <Link href="/connections">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <LinkIcon className="h-4 w-4" />
+              Connections
+            </Button>
+          </Link>
+          <Link href="/settings">
+            <Button variant="ghost" size="sm" className="gap-2">
+              <Settings className="h-4 w-4" />
+              Settings
+            </Button>
+          </Link>
+        </div>
+      </div>
+
+      <div className="flex-1 flex flex-col items-center justify-center p-8 pt-20">
         <div className="w-full max-w-4xl flex flex-col h-full">
           {messages.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center space-y-12">
