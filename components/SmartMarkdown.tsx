@@ -9,51 +9,51 @@ const SmartMarkdown = ({ content }: SmartMarkdownProps) => {
   const components = {
     code({ node, inline, className, children, ...props }: any) {
       return !inline ? (
-        <pre className="bg-gray-900 text-gray-100 p-4 rounded-lg overflow-x-auto my-3">
-          <code className="text-sm font-mono" {...props}>
+        <pre className="bg-gradient-to-br from-gray-900 to-gray-800 text-gray-100 p-5 rounded-xl overflow-x-auto my-4 shadow-lg border border-gray-700">
+          <code className="text-sm font-mono leading-relaxed" {...props}>
             {String(children).replace(/\n$/, '')}
           </code>
         </pre>
       ) : (
-        <code className="bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded text-sm font-mono" {...props}>
+        <code className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm font-mono font-semibold" {...props}>
           {children}
         </code>
       )
     },
     table: ({ children }: any) => (
-      <div className="overflow-x-auto my-4">
-        <table className="min-w-full border-collapse border border-gray-700 bg-gray-800 text-white rounded-lg">
+      <div className="overflow-x-auto my-6 rounded-xl shadow-md">
+        <table className="min-w-full border-collapse bg-white rounded-xl overflow-hidden">
           {children}
         </table>
       </div>
     ),
     th: ({ children }: any) => (
-      <th className="border border-gray-600 px-4 py-2 bg-gray-700 text-left font-semibold">
+      <th className="border-b-2 border-gray-200 px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 text-left font-bold text-gray-800 text-sm uppercase tracking-wider">
         {children}
       </th>
     ),
     td: ({ children }: any) => (
-      <td className="border border-gray-600 px-4 py-2">
+      <td className="border-b border-gray-100 px-6 py-4 text-gray-700">
         {children}
       </td>
     ),
     h1: ({ children }: any) => (
-      <h1 className="text-2xl font-bold text-gray-900 mt-4 mb-3 tracking-tight">
+      <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mt-6 mb-4 tracking-tight">
         {children}
       </h1>
     ),
     h2: ({ children }: any) => (
-      <h2 className="text-xl font-bold text-gray-900 mt-4 mb-2 tracking-tight">
+      <h2 className="text-2xl font-bold text-gray-900 mt-6 mb-3 tracking-tight flex items-center gap-2">
         {children}
       </h2>
     ),
     h3: ({ children }: any) => (
-      <h3 className="text-lg font-bold text-gray-900 mt-3 mb-2 border-b border-gray-200 pb-1">
+      <h3 className="text-xl font-bold text-gray-800 mt-5 mb-3 pb-2 border-b-2 border-gradient-to-r from-blue-200 to-purple-200">
         {children}
       </h3>
     ),
     p: ({ children }: any) => (
-      <p className="text-gray-800 leading-relaxed my-2">
+      <p className="text-gray-700 leading-relaxed my-3 text-[15px]">
         {children}
       </p>
     ),
@@ -63,41 +63,41 @@ const SmartMarkdown = ({ content }: SmartMarkdownProps) => {
       </strong>
     ),
     em: ({ children }: any) => (
-      <em className="text-gray-700 italic">
+      <em className="text-blue-600 italic font-medium">
         {children}
       </em>
     ),
     ul: ({ children }: any) => (
-      <ul className="my-3 list-disc pl-5">
+      <ul className="my-4 space-y-2 pl-6">
         {children}
       </ul>
     ),
     ol: ({ children }: any) => (
-      <ol className="my-3 list-decimal pl-5">
+      <ol className="my-4 space-y-2 pl-6 list-decimal">
         {children}
       </ol>
     ),
     li: ({ children }: any) => (
-      <li className="text-gray-800 my-1.5 leading-relaxed">
+      <li className="text-gray-700 leading-relaxed marker:text-blue-500 marker:font-bold">
         {children}
       </li>
     ),
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-blue-500 pl-4 italic text-gray-700 my-3">
+      <blockquote className="border-l-4 border-blue-500 bg-blue-50/50 pl-6 py-3 rounded-r-lg italic text-gray-700 my-4 shadow-sm">
         {children}
       </blockquote>
     ),
     a: ({ children, href, ...props }: any) => (
-      <a 
-        href={href} 
-        className="text-blue-600 underline font-medium hover:text-blue-700"
+      <a
+        href={href}
+        className="text-blue-600 underline decoration-blue-300 decoration-2 underline-offset-2 font-semibold hover:text-blue-700 hover:decoration-blue-500 transition-all"
         {...props}
       >
         {children}
       </a>
     ),
     hr: () => (
-      <hr className="border-gray-300 my-4" />
+      <hr className="border-0 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-6" />
     )
   }
 
