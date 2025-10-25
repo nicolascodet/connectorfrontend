@@ -556,22 +556,31 @@ function HomeContent() {
                     {message.role === "assistant" && message.sources && message.sources.length > 0 && (
                       <div className="mt-2 flex flex-wrap gap-2 max-w-[75%]">
                         {(() => {
+                          // Deduplicate sources by document_id
+                          const uniqueSources = Array.from(
+                            new Map(
+                              message.sources
+                                .filter(s => s.document_id && s.document_id !== 'None' && s.document_id !== 'null' && s.document_id !== null)
+                                .map(s => [s.document_id, s])
+                            ).values()
+                          );
+
                           const isExpanded = expandedSources.has(index);
-                          const sourcesToShow = isExpanded ? message.sources : message.sources.slice(0, 8);
-                          const remainingCount = message.sources.length - 8;
-                          
+                          const sourcesToShow = isExpanded ? uniqueSources : uniqueSources.slice(0, 8);
+                          const remainingCount = uniqueSources.length - 8;
+
                           return (
                             <>
                               {sourcesToShow.map((source, sourceIndex) => {
                                 const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
                                 return (
                                   <button
-                                    key={sourceIndex}
+                                    key={source.document_id || sourceIndex}
                                     onClick={() => handleSourceClick(source)}
                                     disabled={!hasDocument}
                                     className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                                      hasDocument 
-                                        ? `cursor-pointer hover:scale-105 ${getDocumentColor(source)}` 
+                                      hasDocument
+                                        ? `cursor-pointer hover:scale-105 ${getDocumentColor(source)}`
                                         : `cursor-not-allowed opacity-60 ${getDocumentColor(source)}`
                                     }`}
                                     title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
@@ -588,7 +597,7 @@ function HomeContent() {
                               })}
                               
                               {/* Expandable "+X more" button */}
-                              {message.sources.length > 8 && (
+                              {uniqueSources.length > 8 && (
                                 <button
                                   onClick={() => {
                                     const newExpanded = new Set(expandedSources);
@@ -600,7 +609,7 @@ function HomeContent() {
                                     setExpandedSources(newExpanded);
                                   }}
                                   className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 cursor-pointer transition-all hover:scale-105"
-                                  title={isExpanded ? 'Show fewer sources' : `Show all ${message.sources.length} sources`}
+                                  title={isExpanded ? 'Show fewer sources' : `Show all ${uniqueSources.length} sources`}
                                 >
                                   {isExpanded ? (
                                     <>
