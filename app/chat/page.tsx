@@ -41,6 +41,9 @@ interface Source {
   timestamp: string;
   text_preview: string;
   score?: number;
+  file_url?: string | null;
+  mime_type?: string | null;
+  file_size_bytes?: number | null;
 }
 
 interface Message {
