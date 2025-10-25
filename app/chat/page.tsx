@@ -696,13 +696,71 @@ function HomeContent() {
 
             {/* Modal Content */}
             <div className="p-6 overflow-y-auto max-h-[60vh]">
+              {/* File Preview Section */}
+              {selectedSource.file_url && (
+                <div className="mb-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-gray-900">Original File</h3>
+                    <a
+                      href={selectedSource.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                    >
+                      Open in new tab ↗
+                    </a>
+                  </div>
+
+                  {/* Image Preview */}
+                  {selectedSource.mime_type?.startsWith('image/') && (
+                    <div className="bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200">
+                      <img
+                        src={selectedSource.file_url}
+                        alt={selectedSource.title || 'Document preview'}
+                        className="w-full h-auto max-h-[400px] object-contain"
+                      />
+                    </div>
+                  )}
+
+                  {/* PDF Preview */}
+                  {selectedSource.mime_type === 'application/pdf' && (
+                    <div className="bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200">
+                      <iframe
+                        src={selectedSource.file_url}
+                        className="w-full h-[400px]"
+                        title="PDF Preview"
+                      />
+                    </div>
+                  )}
+
+                  {/* Generic File Link */}
+                  {!selectedSource.mime_type?.startsWith('image/') && selectedSource.mime_type !== 'application/pdf' && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3">
+                      <FileText className="h-8 w-8 text-blue-600" />
+                      <div className="flex-1">
+                        <p className="text-sm font-medium text-gray-900">{selectedSource.title}</p>
+                        <p className="text-xs text-gray-600">{selectedSource.mime_type}</p>
+                      </div>
+                      <a
+                        href={selectedSource.file_url}
+                        download
+                        className="px-4 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Download
+                      </a>
+                    </div>
+                  )}
+                </div>
+              )}
+
               <div className="prose prose-sm max-w-none">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Extracted Text {selectedSource.metadata?.ocr_enabled && '(via OCR)'}</h3>
                 <div className="bg-gray-50 p-4 rounded-xl border">
                   <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
                     {selectedSource.content || 'No content available'}
                   </pre>
                 </div>
-                
+
                 {/* Metadata */}
                 {selectedSource.metadata && Object.keys(selectedSource.metadata).length > 0 && (
                   <div className="mt-6">
