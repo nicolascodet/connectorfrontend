@@ -258,6 +258,14 @@ function HomeContent() {
         return;
       }
 
+      // If source has a file_url, open it directly in a new tab (for PDFs, attachments, etc.)
+      if (source.file_url) {
+        console.log(`🔗 Opening file URL: ${source.file_url}`);
+        window.open(source.file_url, '_blank');
+        return;
+      }
+
+      // Otherwise, fetch and show the document in a modal (for emails, text documents, etc.)
       console.log(`📄 Loading source document: ${source.document_id}`);
       const document = await getSourceDocument(source.document_id);
       setSelectedSource(document);
