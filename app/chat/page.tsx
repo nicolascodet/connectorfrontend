@@ -8,7 +8,6 @@ import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign } from "lucide-react";
-import Sidebar from "@/components/sidebar";
 import SmartMarkdown from '@/components/SmartMarkdown';
 
 interface Status {
@@ -424,11 +423,8 @@ function HomeContent() {
 
   if (loading) {
     return (
-      <div className="flex h-screen">
-        <Sidebar user={user} />
-        <div className="flex-1 flex justify-center items-center">
-          <Loader2 className="h-12 w-12 animate-spin text-gray-600" />
-        </div>
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+        <Loader2 className="h-12 w-12 animate-spin text-purple-600" />
       </div>
     );
   }
