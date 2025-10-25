@@ -7,7 +7,7 @@ import { fetchStatus, startConnect, syncOutlookOnce, syncGmailOnce, syncGoogleDr
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Loader2, Mail, HardDrive, RefreshCw, Plug2, Building2, DollarSign } from "lucide-react";
-import Sidebar from "@/components/sidebar";
+import TopNav from "@/components/TopNav";
 
 interface Status {
   tenant_id: string;
@@ -197,11 +197,8 @@ export default function ConnectionsPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen">
-        <Sidebar user={user} />
-        <div className="flex-1 flex justify-center items-center">
-          <Loader2 className="h-12 w-12 animate-spin text-white" />
-        </div>
+      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+        <Loader2 className="h-12 w-12 animate-spin text-purple-600" />
       </div>
     );
   }
@@ -210,9 +207,9 @@ export default function ConnectionsPage() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      <Sidebar user={user} />
+      <TopNav />
 
-      <div className="flex-1 overflow-y-auto p-8">
+      <div className="flex-1 overflow-y-auto p-8 pt-20">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Header */}
           <div>
