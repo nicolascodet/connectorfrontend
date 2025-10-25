@@ -676,84 +676,102 @@ function HomeContent() {
         </div>
       </div>
 
-      {/* Source Document Modal */}
+      {/* Source Document Modal - FIRE EDITION */}
       {sourceModalOpen && selectedSource && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-4xl w-full max-h-[80vh] overflow-hidden shadow-2xl">
-            {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                {getDocumentIcon(selectedSource)}
+        <div className="fixed inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl max-w-5xl w-full max-h-[85vh] overflow-hidden shadow-2xl ring-1 ring-black/5 animate-in slide-in-from-bottom-4 duration-300">
+            {/* Modal Header - Gradient */}
+            <div className="px-6 py-5 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-b border-gray-200/50 flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <div className="p-2 bg-white rounded-xl shadow-sm">
+                  {getDocumentIcon(selectedSource)}
+                </div>
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900 truncate">
+                  <h2 className="text-xl font-bold text-gray-900 truncate max-w-xl">
                     {selectedSource.title || selectedSource.metadata?.title || 'Document'}
                   </h2>
-                  <p className="text-sm text-gray-500">
-                    {getDocumentTypeName(selectedSource)} • {new Date(selectedSource.created_at).toLocaleDateString()}
-                  </p>
+                  <div className="flex items-center gap-2 mt-1">
+                    <span className="px-2 py-0.5 bg-white/80 text-xs font-medium text-gray-700 rounded-full border border-gray-200">
+                      {getDocumentTypeName(selectedSource)}
+                    </span>
+                    <span className="text-xs text-gray-500">
+                      • {new Date(selectedSource.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
                 </div>
               </div>
               <button
                 onClick={() => setSourceModalOpen(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                className="p-2 hover:bg-white/80 rounded-xl transition-all hover:scale-110 active:scale-95"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
             {/* Modal Content */}
-            <div className="p-6 overflow-y-auto max-h-[60vh]">
-              {/* File Preview Section */}
+            <div className="p-8 overflow-y-auto max-h-[65vh] space-y-6">
+              {/* File Preview Section - UPGRADED */}
               {selectedSource.file_url && (
-                <div className="mb-6">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-sm font-semibold text-gray-900">Original File</h3>
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+                      <h3 className="text-base font-bold text-gray-900">Original File</h3>
+                    </div>
                     <a
                       href={selectedSource.file_url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all hover:scale-105"
                     >
-                      Open in new tab ↗
+                      <span>Open in new tab</span>
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
                     </a>
                   </div>
 
-                  {/* Image Preview */}
+                  {/* Image Preview - ENHANCED */}
                   {selectedSource.mime_type?.startsWith('image/') && (
-                    <div className="bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200">
+                    <div className="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden border border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
                       <img
                         src={selectedSource.file_url}
                         alt={selectedSource.title || 'Document preview'}
-                        className="w-full h-auto max-h-[400px] object-contain"
+                        className="w-full h-auto max-h-[500px] object-contain p-4"
                       />
+                      <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <span className="px-2 py-1 bg-black/70 text-white text-xs rounded-lg">Click to zoom</span>
+                      </div>
                     </div>
                   )}
 
-                  {/* PDF Preview */}
+                  {/* PDF Preview - ENHANCED */}
                   {selectedSource.mime_type === 'application/pdf' && (
-                    <div className="bg-gray-100 rounded-xl overflow-hidden border-2 border-gray-200">
+                    <div className="bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 shadow-lg">
                       <iframe
                         src={selectedSource.file_url}
-                        className="w-full h-[400px]"
+                        className="w-full h-[500px]"
                         title="PDF Preview"
                       />
                     </div>
                   )}
 
-                  {/* Generic File Link */}
+                  {/* Generic File Link - ENHANCED */}
                   {!selectedSource.mime_type?.startsWith('image/') && selectedSource.mime_type !== 'application/pdf' && (
-                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex items-center gap-3">
-                      <FileText className="h-8 w-8 text-blue-600" />
+                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-2xl p-6 flex items-center gap-4 shadow-md hover:shadow-lg transition-shadow">
+                      <div className="p-3 bg-white rounded-xl shadow-sm">
+                        <FileText className="h-10 w-10 text-blue-600" />
+                      </div>
                       <div className="flex-1">
-                        <p className="text-sm font-medium text-gray-900">{selectedSource.title}</p>
-                        <p className="text-xs text-gray-600">{selectedSource.mime_type}</p>
+                        <p className="font-semibold text-gray-900">{selectedSource.title}</p>
+                        <p className="text-sm text-gray-600 mt-1">{selectedSource.mime_type}</p>
                       </div>
                       <a
                         href={selectedSource.file_url}
                         download
-                        className="px-4 py-2 bg-blue-600 text-white text-xs font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                        className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
                       >
                         Download
                       </a>
@@ -762,26 +780,43 @@ function HomeContent() {
                 </div>
               )}
 
-              <div className="prose prose-sm max-w-none">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">Extracted Text {selectedSource.metadata?.ocr_enabled && '(via OCR)'}</h3>
-                <div className="bg-gray-50 p-4 rounded-xl border">
-                  <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono">
+              {/* Extracted Text Section - UPGRADED */}
+              <div className="space-y-4">
+                <div className="flex items-center gap-2">
+                  <div className="w-1 h-6 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full"></div>
+                  <h3 className="text-base font-bold text-gray-900">
+                    Extracted Text
+                    {selectedSource.metadata?.ocr_enabled && (
+                      <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 text-xs font-semibold rounded-full border border-green-200">
+                        ✨ AI OCR
+                      </span>
+                    )}
+                  </h3>
+                </div>
+                <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-2xl border border-gray-200 shadow-inner">
+                  <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono leading-relaxed">
                     {selectedSource.content || 'No content available'}
                   </pre>
                 </div>
-
-                {/* Metadata */}
-                {selectedSource.metadata && Object.keys(selectedSource.metadata).length > 0 && (
-                  <div className="mt-6">
-                    <h3 className="text-sm font-semibold text-gray-900 mb-3">Metadata</h3>
-                    <div className="bg-gray-50 p-4 rounded-xl border text-xs">
-                      <pre className="text-gray-600">
-                        {JSON.stringify(selectedSource.metadata, null, 2)}
-                      </pre>
-                    </div>
-                  </div>
-                )}
               </div>
+
+              {/* Metadata - Collapsible & Styled */}
+              {selectedSource.metadata && Object.keys(selectedSource.metadata).length > 0 && (
+                <details className="group">
+                  <summary className="flex items-center gap-2 cursor-pointer list-none">
+                    <div className="w-1 h-6 bg-gradient-to-b from-gray-400 to-gray-500 rounded-full"></div>
+                    <h3 className="text-base font-bold text-gray-900">Technical Metadata</h3>
+                    <svg className="w-4 h-4 text-gray-500 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </summary>
+                  <div className="mt-3 bg-gray-900 p-6 rounded-2xl border border-gray-700 shadow-lg">
+                    <pre className="text-xs text-green-400 font-mono leading-relaxed overflow-x-auto">
+                      {JSON.stringify(selectedSource.metadata, null, 2)}
+                    </pre>
+                  </div>
+                </details>
+              )}
             </div>
           </div>
         </div>
