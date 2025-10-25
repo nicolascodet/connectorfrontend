@@ -678,8 +678,14 @@ function HomeContent() {
 
       {/* Source Document Modal - FIRE EDITION */}
       {sourceModalOpen && selectedSource && (
-        <div className="fixed inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-white rounded-3xl max-w-5xl w-full max-h-[85vh] overflow-hidden shadow-2xl ring-1 ring-black/5 animate-in slide-in-from-bottom-4 duration-300">
+        <div
+          className="fixed inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          onClick={() => setSourceModalOpen(false)}
+        >
+          <div
+            className="bg-white rounded-3xl max-w-5xl w-full max-h-[85vh] overflow-hidden shadow-2xl ring-1 ring-black/5 animate-in slide-in-from-bottom-4 duration-300"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Modal Header - Gradient */}
             <div className="px-6 py-5 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-b border-gray-200/50 flex items-center justify-between">
               <div className="flex items-center gap-4">
