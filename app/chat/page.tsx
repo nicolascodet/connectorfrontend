@@ -445,23 +445,16 @@ function HomeContent() {
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      <Sidebar user={user} />
-
       <div className="flex-1 flex flex-col items-center justify-center p-8">
         <div className="w-full max-w-4xl flex flex-col h-full">
           {messages.length === 0 ? (
-            <div className="flex-1 flex flex-col items-center justify-center space-y-8">
-              {/* Gradient Orb */}
-              <div className="w-32 h-32 rounded-full bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 shadow-2xl flex items-center justify-center">
-                <div className="w-28 h-28 rounded-full bg-gradient-to-br from-pink-300 via-purple-300 to-blue-300 opacity-90" />
-              </div>
-
+            <div className="flex-1 flex flex-col items-center justify-center space-y-12">
               {/* Greeting */}
-              <div className="text-center space-y-2">
-                <h1 className="text-5xl font-bold text-gray-900">
-                  Good {new Date().getHours() < 12 ? "Morning" : new Date().getHours() < 18 ? "Afternoon" : "Evening"}, {user?.email?.split("@")[0] || "User"}
+              <div className="text-center space-y-3">
+                <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent">
+                  Good {new Date().getHours() < 12 ? "Morning" : new Date().getHours() < 18 ? "Afternoon" : "Evening"}
                 </h1>
-                <p className="text-xl text-gray-600">How can I help you today?</p>
+                <p className="text-2xl text-gray-600">What can I help you with?</p>
               </div>
 
               {/* Input */}
@@ -517,16 +510,16 @@ function HomeContent() {
               </form>
 
               {/* Suggestion Chips */}
-              <div className="flex flex-wrap gap-3 justify-center">
+              <div className="flex flex-wrap gap-3 justify-center max-w-2xl">
                 {suggestionChips.map((chip, i) => {
                   const Icon = chip.icon;
                   return (
                     <button
                       key={i}
                       onClick={chip.action}
-                      className="flex items-center gap-2 px-5 py-3 bg-white/60 hover:bg-white/80 backdrop-blur-sm rounded-2xl transition-all hover:scale-105 border border-gray-200/50"
+                      className="flex items-center gap-2 px-4 py-2.5 bg-white/70 hover:bg-white backdrop-blur-sm rounded-full transition-all hover:scale-105 border border-gray-200/50 shadow-sm hover:shadow-md"
                     >
-                      <Icon className="h-4 w-4 text-gray-700" />
+                      <Icon className="h-4 w-4 text-purple-600" />
                       <span className="text-sm text-gray-700 font-medium">{chip.label}</span>
                     </button>
                   );
@@ -640,10 +633,16 @@ function HomeContent() {
                 ))}
                 {loadingChat && (
                   <div className="flex justify-start">
-                    <div className="bg-white/70 backdrop-blur-sm rounded-3xl px-6 py-4 border border-gray-200">
-                      <div className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-gray-600" />
-                        <span className="text-sm text-gray-600">Loading...</span>
+                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 backdrop-blur-sm rounded-3xl px-6 py-4 border border-purple-200/50 shadow-lg">
+                      <div className="flex items-center gap-3">
+                        <div className="flex gap-1">
+                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
+                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
+                          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
+                        </div>
+                        <span className="text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+                          Thinking...
+                        </span>
                       </div>
                     </div>
                   </div>
