@@ -228,6 +228,16 @@ export async function deleteChat(chatId: string): Promise<{ success: boolean }> 
   return response.json();
 }
 
+export interface Attachment {
+  id: string;
+  title: string;
+  file_url: string | null;
+  mime_type: string | null;
+  file_size_bytes: number | null;
+  document_type: string;
+  content: string;
+}
+
 export async function getSourceDocument(documentId: string): Promise<{
   id: string;
   title: string;
@@ -235,6 +245,12 @@ export async function getSourceDocument(documentId: string): Promise<{
   metadata: any;
   source: string;
   created_at: string;
+  // File storage fields (for PDFs, images, etc.)
+  file_url?: string | null;
+  mime_type?: string | null;
+  file_size_bytes?: number | null;
+  // Attachments array (for emails with attachments)
+  attachments: Attachment[];
 }> {
   return apiGet(`/api/v1/sources/${documentId}`);
 }

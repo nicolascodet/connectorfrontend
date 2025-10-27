@@ -7,7 +7,7 @@ import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, Settings, Link as LinkIcon } from "lucide-react";
+import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, Settings, Link as LinkIcon, Paperclip, ExternalLink } from "lucide-react";
 import SmartMarkdown from '@/components/SmartMarkdown';
 import Link from 'next/link';
 
@@ -811,6 +811,61 @@ function HomeContent() {
                       </a>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* Attachments Section - NEW */}
+              {selectedSource.attachments && selectedSource.attachments.length > 0 && (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2">
+                    <div className="w-1 h-6 bg-gradient-to-b from-orange-500 to-red-500 rounded-full"></div>
+                    <h3 className="text-base font-bold text-gray-900">
+                      Attachments ({selectedSource.attachments.length})
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3">
+                    {selectedSource.attachments.map((attachment: any) => (
+                      <div
+                        key={attachment.id}
+                        className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-4 flex items-center gap-4 shadow-md hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (attachment.file_url) {
+                            window.open(attachment.file_url, '_blank');
+                          }
+                        }}
+                      >
+                        <div className="p-3 bg-white rounded-xl shadow-sm">
+                          {attachment.mime_type?.startsWith('image/') ? (
+                            <FileImage className="h-8 w-8 text-orange-600" />
+                          ) : attachment.mime_type === 'application/pdf' ? (
+                            <FileText className="h-8 w-8 text-red-600" />
+                          ) : (
+                            <Paperclip className="h-8 w-8 text-gray-600" />
+                          )}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="font-semibold text-gray-900 truncate">{attachment.title}</p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <p className="text-xs text-gray-600">{attachment.mime_type || 'Unknown type'}</p>
+                            {attachment.file_size_bytes && (
+                              <>
+                                <span className="text-gray-400">•</span>
+                                <p className="text-xs text-gray-600">
+                                  {(attachment.file_size_bytes / 1024).toFixed(1)} KB
+                                </p>
+                              </>
+                            )}
+                          </div>
+                        </div>
+                        {attachment.file_url && (
+                          <div className="flex-shrink-0">
+                            <ExternalLink className="h-5 w-5 text-orange-600" />
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
 
