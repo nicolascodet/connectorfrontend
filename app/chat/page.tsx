@@ -577,7 +577,7 @@ function HomeContent() {
 
                     {/* Source Bubbles - Enhanced with All Document Types */}
                     {message.role === "assistant" && message.sources && message.sources.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-2 max-w-[75%]">
+                      <div className="mt-3 max-w-[75%]">
                         {(() => {
                           // Deduplicate sources by document_id
                           const uniqueSources = Array.from(
@@ -589,69 +589,84 @@ function HomeContent() {
                           );
 
                           const isExpanded = expandedSources.has(index);
-                          const sourcesToShow = isExpanded ? uniqueSources : uniqueSources.slice(0, 8);
-                          const remainingCount = uniqueSources.length - 8;
+                          // Show first 5, then expand to show all (better for 9 sources case)
+                          const sourcesToShow = isExpanded ? uniqueSources : uniqueSources.slice(0, 5);
+                          const remainingCount = uniqueSources.length - 5;
 
                           return (
-                            <>
-                              {sourcesToShow.map((source, sourceIndex) => {
-                                const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
-                                return (
+                            <div className="space-y-2">
+                              {/* Header */}
+                              <div className="flex items-center gap-2 text-xs text-gray-500">
+                                <span className="font-medium">{uniqueSources.length} source{uniqueSources.length !== 1 ? 's' : ''}</span>
+                                {uniqueSources.length > 5 && (
                                   <button
-                                    key={source.document_id || sourceIndex}
-                                    onClick={() => handleSourceClick(source)}
-                                    disabled={!hasDocument}
-                                    className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border transition-all ${
-                                      hasDocument
-                                        ? `cursor-pointer hover:scale-105 ${getDocumentColor(source)}`
-                                        : `cursor-not-allowed opacity-60 ${getDocumentColor(source)}`
-                                    }`}
-                                    title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
+                                    onClick={() => {
+                                      const newExpanded = new Set(expandedSources);
+                                      if (isExpanded) {
+                                        newExpanded.delete(index);
+                                      } else {
+                                        newExpanded.add(index);
+                                      }
+                                      setExpandedSources(newExpanded);
+                                    }}
+                                    className="text-blue-600 hover:text-blue-700 font-medium underline"
                                   >
-                                    {getDocumentIcon(source)}
-                                    <span className="truncate max-w-[120px]">
-                                      {source.document_name || getDocumentTypeName(source)}
-                                    </span>
-                                    {!hasDocument && (
-                                      <span className="text-[10px] opacity-50">📋</span>
-                                    )}
+                                    {isExpanded ? 'Show less' : `Show all ${uniqueSources.length}`}
                                   </button>
-                                );
-                              })}
-                              
-                              {/* Expandable "+X more" button */}
-                              {uniqueSources.length > 8 && (
-                                <button
-                                  onClick={() => {
-                                    const newExpanded = new Set(expandedSources);
-                                    if (isExpanded) {
-                                      newExpanded.delete(index);
-                                    } else {
-                                      newExpanded.add(index);
-                                    }
-                                    setExpandedSources(newExpanded);
-                                  }}
-                                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium border bg-gray-50 text-gray-700 border-gray-200 hover:bg-gray-100 cursor-pointer transition-all hover:scale-105"
-                                  title={isExpanded ? 'Show fewer sources' : `Show all ${uniqueSources.length} sources`}
-                                >
-                                  {isExpanded ? (
-                                    <>
-                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
-                                      </svg>
-                                      <span>Show less</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <span>+{remainingCount} more</span>
-                                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                      </svg>
-                                    </>
-                                  )}
-                                </button>
-                              )}
-                            </>
+                                )}
+                              </div>
+
+                              {/* Source Cards */}
+                              <div className="space-y-1.5">
+                                {sourcesToShow.map((source, sourceIndex) => {
+                                  const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
+                                  // Format date nicely
+                                  const sourceDate = source.timestamp ? new Date(source.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
+                                  // Get text preview snippet
+                                  const preview = source.text_preview ? source.text_preview.substring(0, 60).replace(/\n/g, ' ').trim() + '...' : null;
+
+                                  return (
+                                    <button
+                                      key={source.document_id || sourceIndex}
+                                      onClick={() => handleSourceClick(source)}
+                                      disabled={!hasDocument}
+                                      className={`w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-xl border transition-all ${
+                                        hasDocument
+                                          ? `cursor-pointer hover:scale-[1.01] ${getDocumentColor(source)}`
+                                          : `cursor-not-allowed opacity-60 ${getDocumentColor(source)}`
+                                      }`}
+                                      title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
+                                    >
+                                      <div className="flex-shrink-0 mt-0.5">
+                                        {getDocumentIcon(source)}
+                                      </div>
+                                      <div className="flex-1 min-w-0">
+                                        <div className="flex items-center gap-2 mb-0.5">
+                                          <span className="font-semibold text-xs truncate">
+                                            {source.document_name || getDocumentTypeName(source)}
+                                          </span>
+                                          {sourceDate && (
+                                            <span className="text-[10px] text-gray-500 flex-shrink-0">
+                                              {sourceDate}
+                                            </span>
+                                          )}
+                                        </div>
+                                        {preview && (
+                                          <p className="text-[11px] text-gray-600 leading-snug line-clamp-1">
+                                            {preview}
+                                          </p>
+                                        )}
+                                      </div>
+                                      {source.score && (
+                                        <div className="flex-shrink-0 px-1.5 py-0.5 bg-white/60 rounded text-[10px] font-semibold text-gray-600">
+                                          {(source.score * 100).toFixed(0)}%
+                                        </div>
+                                      )}
+                                    </button>
+                                  );
+                                })}
+                              </div>
+                            </div>
                           );
                         })()}
                       </div>
@@ -705,322 +720,180 @@ function HomeContent() {
         </div>
       </div>
 
-      {/* Source Document Modal - FIRE EDITION */}
+      {/* Source Document Modal - Clean & Simple */}
       {sourceModalOpen && selectedSource && (
         <div
-          className="fixed inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
+          className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50 flex items-center justify-center p-4"
           onClick={() => {
             setSourceModalOpen(false);
-            setSelectedAttachment(null); // Reset viewer when modal closes
+            setSelectedAttachment(null);
           }}
         >
           <div
-            className="bg-white rounded-3xl max-w-5xl w-full max-h-[85vh] overflow-hidden shadow-2xl ring-1 ring-black/5 animate-in slide-in-from-bottom-4 duration-300"
+            className="bg-white rounded-2xl max-w-3xl w-full max-h-[80vh] overflow-hidden shadow-xl"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Modal Header - Gradient */}
-            <div className="px-6 py-5 bg-gradient-to-r from-blue-50 via-purple-50 to-pink-50 border-b border-gray-200/50 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="p-2 bg-white rounded-xl shadow-sm">
-                  {getDocumentIcon(selectedSource)}
-                </div>
+            {/* Simple Header */}
+            <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+              <div className="flex items-center gap-3">
+                {getDocumentIcon(selectedSource)}
                 <div>
-                  <h2 className="text-xl font-bold text-gray-900 truncate max-w-xl">
-                    {selectedSource.title || selectedSource.metadata?.title || 'Document'}
-                  </h2>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className="px-2 py-0.5 bg-white/80 text-xs font-medium text-gray-700 rounded-full border border-gray-200">
-                      {getDocumentTypeName(selectedSource)}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      • {new Date(selectedSource.created_at).toLocaleDateString()}
-                    </span>
-                  </div>
+                  <h3 className="font-semibold text-gray-900 text-sm">
+                    {selectedSource.title || 'Document'}
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    {getDocumentTypeName(selectedSource)} • {new Date(selectedSource.created_at).toLocaleDateString()}
+                  </p>
                 </div>
               </div>
               <button
                 onClick={() => {
                   setSourceModalOpen(false);
-                  setSelectedAttachment(null); // Reset viewer when modal closes
+                  setSelectedAttachment(null);
                 }}
-                className="p-2 hover:bg-white/80 rounded-xl transition-all hover:scale-110 active:scale-95"
+                className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
               >
-                <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
 
-            {/* Modal Content */}
-            <div className="p-8 overflow-y-auto max-h-[65vh] space-y-6">
-              {/* File Preview Section - UPGRADED */}
-              {selectedSource.file_url && (
-                <div className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
-                      <h3 className="text-base font-bold text-gray-900">Original File</h3>
-                    </div>
-                    <a
-                      href={selectedSource.file_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-all hover:scale-105"
-                    >
-                      <span>Open in new tab</span>
-                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
-                  </div>
+            {/* Modal Content - Adaptive based on type */}
+            <div className="overflow-y-auto max-h-[calc(80vh-60px)]">
+              {(() => {
+                const isEmail = selectedSource.source?.toLowerCase() === 'outlook' || selectedSource.source?.toLowerCase() === 'gmail';
+                const hasAttachments = selectedSource.attachments && selectedSource.attachments.length > 0;
+                const isImage = selectedSource.mime_type?.startsWith('image/');
+                const isPDF = selectedSource.mime_type === 'application/pdf';
 
-                  {/* Image Preview - ENHANCED */}
-                  {selectedSource.mime_type?.startsWith('image/') && (
-                    <div className="group relative bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden border border-gray-200 shadow-lg hover:shadow-xl transition-shadow">
-                      <img
-                        src={selectedSource.file_url}
-                        alt={selectedSource.title || 'Document preview'}
-                        className="w-full h-auto max-h-[500px] object-contain p-4"
-                      />
-                      <div className="absolute bottom-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <span className="px-2 py-1 bg-black/70 text-white text-xs rounded-lg">Click to zoom</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* PDF Preview - ENHANCED */}
-                  {selectedSource.mime_type === 'application/pdf' && (
-                    <div className="bg-gray-100 rounded-2xl overflow-hidden border border-gray-200 shadow-lg">
-                      <iframe
-                        src={selectedSource.file_url}
-                        className="w-full h-[500px]"
-                        title="PDF Preview"
-                      />
-                    </div>
-                  )}
-
-                  {/* Generic File Link - ENHANCED */}
-                  {!selectedSource.mime_type?.startsWith('image/') && selectedSource.mime_type !== 'application/pdf' && (
-                    <div className="bg-gradient-to-br from-blue-50 to-purple-50 border-2 border-blue-200 rounded-2xl p-6 flex items-center gap-4 shadow-md hover:shadow-lg transition-shadow">
-                      <div className="p-3 bg-white rounded-xl shadow-sm">
-                        <FileText className="h-10 w-10 text-blue-600" />
-                      </div>
-                      <div className="flex-1">
-                        <p className="font-semibold text-gray-900">{selectedSource.title}</p>
-                        <p className="text-sm text-gray-600 mt-1">{selectedSource.mime_type}</p>
-                      </div>
-                      <a
-                        href={selectedSource.file_url}
-                        download
-                        className="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg hover:scale-105 active:scale-95"
-                      >
-                        Download
-                      </a>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Attachments Section - NEW */}
-              {selectedSource.attachments && selectedSource.attachments.length > 0 && (
-                <div className="space-y-4">
-                  <div className="flex items-center gap-2">
-                    <div className="w-1 h-6 bg-gradient-to-b from-orange-500 to-red-500 rounded-full"></div>
-                    <h3 className="text-base font-bold text-gray-900">
-                      Attachments ({selectedSource.attachments.length})
-                    </h3>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3">
-                    {selectedSource.attachments.map((attachment: any) => (
-                      <div
-                        key={attachment.id}
-                        className={`bg-gradient-to-br from-orange-50 to-red-50 border-2 rounded-xl p-4 flex items-center gap-4 shadow-md hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
-                          selectedAttachment?.id === attachment.id
-                            ? 'border-orange-500 ring-2 ring-orange-300'
-                            : 'border-orange-200'
-                        }`}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedAttachment(attachment);
-                        }}
-                      >
-                        <div className="p-3 bg-white rounded-xl shadow-sm">
-                          {attachment.mime_type?.startsWith('image/') ? (
-                            <FileImage className="h-8 w-8 text-orange-600" />
-                          ) : attachment.mime_type === 'application/pdf' ? (
-                            <FileText className="h-8 w-8 text-red-600" />
-                          ) : (
-                            <Paperclip className="h-8 w-8 text-gray-600" />
-                          )}
+                // EMAIL - show like a real email with From/To/Subject
+                if (isEmail) {
+                  return (
+                    <div>
+                      {/* Email Headers */}
+                      <div className="p-6 border-b border-gray-200 bg-gray-50 space-y-2">
+                        <div className="flex gap-2">
+                          <span className="text-xs font-semibold text-gray-500 w-16">Subject:</span>
+                          <span className="text-sm font-semibold text-gray-900">{selectedSource.title}</span>
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-gray-900 truncate">{attachment.title}</p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <p className="text-xs text-gray-600">{attachment.mime_type || 'Unknown type'}</p>
-                            {attachment.file_size_bytes && (
-                              <>
-                                <span className="text-gray-400">•</span>
-                                <p className="text-xs text-gray-600">
-                                  {(attachment.file_size_bytes / 1024).toFixed(1)} KB
-                                </p>
-                              </>
+                        <div className="flex gap-2">
+                          <span className="text-xs font-semibold text-gray-500 w-16">From:</span>
+                          <span className="text-sm text-gray-800">
+                            {selectedSource.sender_name || selectedSource.sender_address || 'Unknown'}
+                            {selectedSource.sender_name && selectedSource.sender_address && (
+                              <span className="text-gray-500"> &lt;{selectedSource.sender_address}&gt;</span>
                             )}
-                          </div>
+                          </span>
                         </div>
-                        {attachment.file_url && (
-                          <div className="flex-shrink-0">
-                            <div className="flex flex-col gap-1">
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setSelectedAttachment(attachment);
-                                }}
-                                className="p-1 rounded hover:bg-orange-100 transition-colors"
-                                title="View in modal"
-                              >
-                                <FileText className="h-4 w-4 text-orange-600" />
-                              </button>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  window.open(attachment.file_url, '_blank');
-                                }}
-                                className="p-1 rounded hover:bg-orange-100 transition-colors"
-                                title="Open in new tab"
-                              >
-                                <ExternalLink className="h-4 w-4 text-orange-600" />
-                              </button>
-                            </div>
+                        {selectedSource.to_addresses && (
+                          <div className="flex gap-2">
+                            <span className="text-xs font-semibold text-gray-500 w-16">To:</span>
+                            <span className="text-sm text-gray-800">
+                              {typeof selectedSource.to_addresses === 'string'
+                                ? selectedSource.to_addresses
+                                : Array.isArray(selectedSource.to_addresses)
+                                  ? selectedSource.to_addresses.join(', ')
+                                  : 'Unknown'}
+                            </span>
                           </div>
                         )}
                       </div>
-                    ))}
-                  </div>
 
-                  {/* Attachment Viewer - EMBEDDED */}
-                  {selectedAttachment && selectedAttachment.file_url && (
-                    <div className="mt-4 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
-                          <h4 className="text-sm font-bold text-gray-900">
-                            Viewing: {selectedAttachment.title}
-                          </h4>
-                        </div>
-                        <button
-                          onClick={() => setSelectedAttachment(null)}
-                          className="px-3 py-1 text-xs font-semibold text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
-                        >
-                          Close Viewer
-                        </button>
+                      {/* Email Body */}
+                      <div className="p-6 border-b border-gray-200">
+                        <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-sans">
+                          {selectedSource.content}
+                        </pre>
                       </div>
 
-                      {/* PDF Viewer */}
-                      {selectedAttachment.mime_type === 'application/pdf' && (
-                        <div className="bg-gray-100 rounded-2xl overflow-hidden border-2 border-gray-300 shadow-lg">
-                          <iframe
-                            src={selectedAttachment.file_url}
-                            className="w-full h-[600px]"
-                            title={`PDF Viewer: ${selectedAttachment.title}`}
-                          />
-                        </div>
-                      )}
-
-                      {/* Image Viewer */}
-                      {selectedAttachment.mime_type?.startsWith('image/') && (
-                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden border-2 border-gray-300 shadow-lg">
-                          <img
-                            src={selectedAttachment.file_url}
-                            alt={selectedAttachment.title}
-                            className="w-full h-auto max-h-[600px] object-contain p-4"
-                          />
-                        </div>
-                      )}
-
-                      {/* Office Docs (Word, Excel, PowerPoint) - Google Docs Viewer */}
-                      {(selectedAttachment.mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
-                        selectedAttachment.mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
-                        selectedAttachment.mime_type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
-                        selectedAttachment.mime_type === 'application/msword' ||
-                        selectedAttachment.mime_type === 'application/vnd.ms-excel' ||
-                        selectedAttachment.mime_type === 'application/vnd.ms-powerpoint') && (
-                        <div className="bg-gray-100 rounded-2xl overflow-hidden border-2 border-gray-300 shadow-lg">
-                          <iframe
-                            src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedAttachment.file_url)}`}
-                            className="w-full h-[600px]"
-                            title={`Office Viewer: ${selectedAttachment.title}`}
-                          />
-                        </div>
-                      )}
-
-                      {/* Fallback: Show extracted text if viewer not available */}
-                      {selectedAttachment.mime_type &&
-                        !selectedAttachment.mime_type.startsWith('image/') &&
-                        selectedAttachment.mime_type !== 'application/pdf' &&
-                        !selectedAttachment.mime_type.includes('officedocument') &&
-                        !selectedAttachment.mime_type.includes('msword') &&
-                        !selectedAttachment.mime_type.includes('ms-excel') &&
-                        !selectedAttachment.mime_type.includes('ms-powerpoint') && (
-                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-2xl border-2 border-gray-300 shadow-lg">
-                          <p className="text-sm text-gray-600 mb-3">
-                            Preview not available for this file type. Showing extracted text:
-                          </p>
-                          <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono leading-relaxed max-h-[500px] overflow-y-auto">
-                            {selectedAttachment.content || 'No text content available'}
-                          </pre>
-                          <a
-                            href={selectedAttachment.file_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
-                          >
-                            <ExternalLink className="h-4 w-4" />
-                            Download File
-                          </a>
+                      {/* Attachments (if any) */}
+                      {hasAttachments && (
+                        <div className="p-6 bg-gray-50">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Paperclip className="h-4 w-4 text-gray-500" />
+                            <h4 className="text-xs font-semibold text-gray-500 uppercase">
+                              {selectedSource.attachments.length} Attachment{selectedSource.attachments.length !== 1 ? 's' : ''}
+                            </h4>
+                          </div>
+                          <div className="space-y-2">
+                            {selectedSource.attachments.map((attachment: any) => (
+                              <button
+                                key={attachment.id}
+                                onClick={() => attachment.file_url && window.open(attachment.file_url, '_blank')}
+                                className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors text-left"
+                              >
+                                <Mail className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm font-medium text-gray-900 truncate">{attachment.title}</p>
+                                  <p className="text-xs text-gray-500">
+                                    {attachment.file_size_bytes ? `${(attachment.file_size_bytes / 1024).toFixed(1)} KB` : 'Email'}
+                                  </p>
+                                </div>
+                                <ExternalLink className="h-4 w-4 text-gray-400" />
+                              </button>
+                            ))}
+                          </div>
                         </div>
                       )}
                     </div>
-                  )}
-                </div>
-              )}
+                  );
+                }
 
-              {/* Extracted Text Section - UPGRADED */}
-              <div className="space-y-4">
-                <div className="flex items-center gap-2">
-                  <div className="w-1 h-6 bg-gradient-to-b from-green-500 to-emerald-500 rounded-full"></div>
-                  <h3 className="text-base font-bold text-gray-900">
-                    Extracted Text
-                    {selectedSource.metadata?.ocr_enabled && (
-                      <span className="ml-2 px-2 py-0.5 bg-gradient-to-r from-green-100 to-emerald-100 text-green-700 text-xs font-semibold rounded-full border border-green-200">
-                        ✨ AI OCR
-                      </span>
-                    )}
-                  </h3>
-                </div>
-                <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-2xl border border-gray-200 shadow-inner">
-                  <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono leading-relaxed">
-                    {selectedSource.content || 'No content available'}
-                  </pre>
-                </div>
-              </div>
+                // IMAGE - show image
+                if (isImage && selectedSource.file_url) {
+                  return (
+                    <div className="p-6">
+                      <img
+                        src={selectedSource.file_url}
+                        alt={selectedSource.title || 'Image'}
+                        className="w-full h-auto max-h-[600px] object-contain rounded-lg"
+                      />
+                      {selectedSource.content && (
+                        <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                          <p className="text-xs font-semibold text-gray-500 uppercase mb-2">Extracted Text</p>
+                          <pre className="whitespace-pre-wrap text-sm text-gray-700 leading-relaxed font-sans">
+                            {selectedSource.content}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  );
+                }
 
-              {/* Metadata - Collapsible & Styled */}
-              {selectedSource.metadata && Object.keys(selectedSource.metadata).length > 0 && (
-                <details className="group">
-                  <summary className="flex items-center gap-2 cursor-pointer list-none">
-                    <div className="w-1 h-6 bg-gradient-to-b from-gray-400 to-gray-500 rounded-full"></div>
-                    <h3 className="text-base font-bold text-gray-900">Technical Metadata</h3>
-                    <svg className="w-4 h-4 text-gray-500 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                    </svg>
-                  </summary>
-                  <div className="mt-3 bg-gray-900 p-6 rounded-2xl border border-gray-700 shadow-lg">
-                    <pre className="text-xs text-green-400 font-mono leading-relaxed overflow-x-auto">
-                      {JSON.stringify(selectedSource.metadata, null, 2)}
+                // PDF - show PDF viewer
+                if (isPDF && selectedSource.file_url) {
+                  return (
+                    <div className="bg-gray-100">
+                      <iframe
+                        src={selectedSource.file_url}
+                        className="w-full h-[600px]"
+                        title="PDF Viewer"
+                      />
+                    </div>
+                  );
+                }
+
+                // DEFAULT - just show text content
+                return (
+                  <div className="p-6">
+                    <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-sans">
+                      {selectedSource.content || 'No content available'}
                     </pre>
+                    {selectedSource.file_url && (
+                      <a
+                        href={selectedSource.file_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Open Original
+                      </a>
+                    )}
                   </div>
-                </details>
-              )}
+                );
+              })()}
             </div>
           </div>
         </div>

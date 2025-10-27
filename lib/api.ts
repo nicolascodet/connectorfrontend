@@ -249,6 +249,10 @@ export async function getSourceDocument(documentId: string): Promise<{
   file_url?: string | null;
   mime_type?: string | null;
   file_size_bytes?: number | null;
+  // Email fields (for Outlook/Gmail)
+  sender_name?: string | null;
+  sender_address?: string | null;
+  to_addresses?: string | string[] | null;
   // Attachments array (for emails with attachments)
   attachments: Attachment[];
 }> {
