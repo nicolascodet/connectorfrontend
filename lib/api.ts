@@ -153,10 +153,15 @@ export async function searchOptimized(data: {
   const url = new URL("/api/v1/search", BACKEND_URL);
   const baseHeaders = await getAuthHeaders();
 
-  // Add X-API-Key to the headers
+  // Add X-API-Key to the headers (from environment variable)
+  const apiKey = process.env.NEXT_PUBLIC_CORTEX_API_KEY;
+  if (!apiKey) {
+    throw new Error("NEXT_PUBLIC_CORTEX_API_KEY environment variable is not set");
+  }
+
   const headers = {
     ...baseHeaders,
-    "X-API-Key": "cortex_dev_key_12345",
+    "X-API-Key": apiKey,
   };
 
   const response = await fetch(url.toString(), {
