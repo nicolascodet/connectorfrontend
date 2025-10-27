@@ -184,6 +184,7 @@ function HomeContent() {
   const [selectedSource, setSelectedSource] = useState<any>(null);
   const [sourceModalOpen, setSourceModalOpen] = useState(false);
   const [expandedSources, setExpandedSources] = useState<Set<number>>(new Set());
+  const [selectedAttachment, setSelectedAttachment] = useState<any>(null); // NEW: For viewing attachments in-modal
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -708,7 +709,10 @@ function HomeContent() {
       {sourceModalOpen && selectedSource && (
         <div
           className="fixed inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-200"
-          onClick={() => setSourceModalOpen(false)}
+          onClick={() => {
+            setSourceModalOpen(false);
+            setSelectedAttachment(null); // Reset viewer when modal closes
+          }}
         >
           <div
             className="bg-white rounded-3xl max-w-5xl w-full max-h-[85vh] overflow-hidden shadow-2xl ring-1 ring-black/5 animate-in slide-in-from-bottom-4 duration-300"
@@ -735,7 +739,10 @@ function HomeContent() {
                 </div>
               </div>
               <button
-                onClick={() => setSourceModalOpen(false)}
+                onClick={() => {
+                  setSourceModalOpen(false);
+                  setSelectedAttachment(null); // Reset viewer when modal closes
+                }}
                 className="p-2 hover:bg-white/80 rounded-xl transition-all hover:scale-110 active:scale-95"
               >
                 <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -827,12 +834,14 @@ function HomeContent() {
                     {selectedSource.attachments.map((attachment: any) => (
                       <div
                         key={attachment.id}
-                        className="bg-gradient-to-br from-orange-50 to-red-50 border-2 border-orange-200 rounded-xl p-4 flex items-center gap-4 shadow-md hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer"
+                        className={`bg-gradient-to-br from-orange-50 to-red-50 border-2 rounded-xl p-4 flex items-center gap-4 shadow-md hover:shadow-lg transition-all hover:scale-[1.02] cursor-pointer ${
+                          selectedAttachment?.id === attachment.id
+                            ? 'border-orange-500 ring-2 ring-orange-300'
+                            : 'border-orange-200'
+                        }`}
                         onClick={(e) => {
                           e.stopPropagation();
-                          if (attachment.file_url) {
-                            window.open(attachment.file_url, '_blank');
-                          }
+                          setSelectedAttachment(attachment);
                         }}
                       >
                         <div className="p-3 bg-white rounded-xl shadow-sm">
@@ -860,12 +869,118 @@ function HomeContent() {
                         </div>
                         {attachment.file_url && (
                           <div className="flex-shrink-0">
-                            <ExternalLink className="h-5 w-5 text-orange-600" />
+                            <div className="flex flex-col gap-1">
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setSelectedAttachment(attachment);
+                                }}
+                                className="p-1 rounded hover:bg-orange-100 transition-colors"
+                                title="View in modal"
+                              >
+                                <FileText className="h-4 w-4 text-orange-600" />
+                              </button>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  window.open(attachment.file_url, '_blank');
+                                }}
+                                className="p-1 rounded hover:bg-orange-100 transition-colors"
+                                title="Open in new tab"
+                              >
+                                <ExternalLink className="h-4 w-4 text-orange-600" />
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>
                     ))}
                   </div>
+
+                  {/* Attachment Viewer - EMBEDDED */}
+                  {selectedAttachment && selectedAttachment.file_url && (
+                    <div className="mt-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          <div className="w-1 h-6 bg-gradient-to-b from-blue-500 to-purple-500 rounded-full"></div>
+                          <h4 className="text-sm font-bold text-gray-900">
+                            Viewing: {selectedAttachment.title}
+                          </h4>
+                        </div>
+                        <button
+                          onClick={() => setSelectedAttachment(null)}
+                          className="px-3 py-1 text-xs font-semibold text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                        >
+                          Close Viewer
+                        </button>
+                      </div>
+
+                      {/* PDF Viewer */}
+                      {selectedAttachment.mime_type === 'application/pdf' && (
+                        <div className="bg-gray-100 rounded-2xl overflow-hidden border-2 border-gray-300 shadow-lg">
+                          <iframe
+                            src={selectedAttachment.file_url}
+                            className="w-full h-[600px]"
+                            title={`PDF Viewer: ${selectedAttachment.title}`}
+                          />
+                        </div>
+                      )}
+
+                      {/* Image Viewer */}
+                      {selectedAttachment.mime_type?.startsWith('image/') && (
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl overflow-hidden border-2 border-gray-300 shadow-lg">
+                          <img
+                            src={selectedAttachment.file_url}
+                            alt={selectedAttachment.title}
+                            className="w-full h-auto max-h-[600px] object-contain p-4"
+                          />
+                        </div>
+                      )}
+
+                      {/* Office Docs (Word, Excel, PowerPoint) - Google Docs Viewer */}
+                      {(selectedAttachment.mime_type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+                        selectedAttachment.mime_type === 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' ||
+                        selectedAttachment.mime_type === 'application/vnd.openxmlformats-officedocument.presentationml.presentation' ||
+                        selectedAttachment.mime_type === 'application/msword' ||
+                        selectedAttachment.mime_type === 'application/vnd.ms-excel' ||
+                        selectedAttachment.mime_type === 'application/vnd.ms-powerpoint') && (
+                        <div className="bg-gray-100 rounded-2xl overflow-hidden border-2 border-gray-300 shadow-lg">
+                          <iframe
+                            src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedAttachment.file_url)}`}
+                            className="w-full h-[600px]"
+                            title={`Office Viewer: ${selectedAttachment.title}`}
+                          />
+                        </div>
+                      )}
+
+                      {/* Fallback: Show extracted text if viewer not available */}
+                      {selectedAttachment.mime_type &&
+                        !selectedAttachment.mime_type.startsWith('image/') &&
+                        selectedAttachment.mime_type !== 'application/pdf' &&
+                        !selectedAttachment.mime_type.includes('officedocument') &&
+                        !selectedAttachment.mime_type.includes('msword') &&
+                        !selectedAttachment.mime_type.includes('ms-excel') &&
+                        !selectedAttachment.mime_type.includes('ms-powerpoint') && (
+                        <div className="bg-gradient-to-br from-gray-50 to-gray-100 p-6 rounded-2xl border-2 border-gray-300 shadow-lg">
+                          <p className="text-sm text-gray-600 mb-3">
+                            Preview not available for this file type. Showing extracted text:
+                          </p>
+                          <pre className="whitespace-pre-wrap text-sm text-gray-800 font-mono leading-relaxed max-h-[500px] overflow-y-auto">
+                            {selectedAttachment.content || 'No text content available'}
+                          </pre>
+                          <a
+                            href={selectedAttachment.file_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            <ExternalLink className="h-4 w-4" />
+                            Download File
+                          </a>
+                        </div>
+                      )}
+                    </div>
+                  )}
                 </div>
               )}
 
