@@ -820,7 +820,7 @@ function HomeContent() {
                             {selectedSource.attachments.map((attachment: any) => (
                               <button
                                 key={attachment.id}
-                                onClick={() => attachment.file_url && window.open(attachment.file_url, '_blank')}
+                                onClick={() => setSelectedAttachment(attachment)}
                                 className="w-full flex items-center gap-3 p-3 bg-white border border-gray-200 rounded-lg hover:border-blue-400 hover:bg-blue-50 transition-colors text-left"
                               >
                                 <Mail className="h-4 w-4 text-blue-600 flex-shrink-0" />
@@ -830,7 +830,6 @@ function HomeContent() {
                                     {attachment.file_size_bytes ? `${(attachment.file_size_bytes / 1024).toFixed(1)} KB` : 'Email'}
                                   </p>
                                 </div>
-                                <ExternalLink className="h-4 w-4 text-gray-400" />
                               </button>
                             ))}
                           </div>
@@ -891,6 +890,113 @@ function HomeContent() {
                         Open Original
                       </a>
                     )}
+                  </div>
+                );
+              })()}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Attachment Viewer Popup */}
+      {selectedAttachment && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[60] flex items-center justify-center p-4"
+          onClick={() => setSelectedAttachment(null)}
+        >
+          <div
+            className="bg-white rounded-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="px-5 py-4 border-b border-gray-200 flex items-center justify-between bg-gray-50">
+              <div className="flex items-center gap-3 flex-1 min-w-0">
+                <Mail className="h-5 w-5 text-blue-600 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold text-gray-900 text-sm truncate">
+                    {selectedAttachment.title}
+                  </h3>
+                  <p className="text-xs text-gray-500">
+                    {selectedAttachment.file_size_bytes
+                      ? `${(selectedAttachment.file_size_bytes / 1024).toFixed(1)} KB`
+                      : 'Email Attachment'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <a
+                  href={selectedAttachment.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 text-xs font-medium text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors flex items-center gap-1"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <ExternalLink className="h-3 w-3" />
+                  Open
+                </a>
+                <button
+                  onClick={() => setSelectedAttachment(null)}
+                  className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors"
+                >
+                  <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Content */}
+            <div className="overflow-y-auto max-h-[calc(90vh-80px)] bg-gray-100">
+              {(() => {
+                // Determine attachment type and show appropriate viewer
+                const isImage = selectedAttachment.mime_type?.startsWith('image/');
+                const isPDF = selectedAttachment.mime_type === 'application/pdf';
+                const isOfficeDoc = selectedAttachment.mime_type?.includes('officedocument') ||
+                  selectedAttachment.mime_type?.includes('msword') ||
+                  selectedAttachment.mime_type?.includes('ms-excel') ||
+                  selectedAttachment.mime_type?.includes('ms-powerpoint');
+
+                if (isImage) {
+                  return (
+                    <div className="flex items-center justify-center p-8 min-h-[500px]">
+                      <img
+                        src={selectedAttachment.file_url}
+                        alt={selectedAttachment.title}
+                        className="max-w-full max-h-[700px] object-contain rounded-lg shadow-lg"
+                      />
+                    </div>
+                  );
+                }
+
+                if (isPDF) {
+                  return (
+                    <iframe
+                      src={selectedAttachment.file_url}
+                      className="w-full h-[700px]"
+                      title={selectedAttachment.title}
+                    />
+                  );
+                }
+
+                if (isOfficeDoc) {
+                  return (
+                    <iframe
+                      src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(selectedAttachment.file_url)}`}
+                      className="w-full h-[700px]"
+                      title={selectedAttachment.title}
+                    />
+                  );
+                }
+
+                // Fallback: show extracted text
+                return (
+                  <div className="p-8">
+                    <div className="bg-white rounded-lg p-6 shadow-sm">
+                      <p className="text-xs font-semibold text-gray-500 uppercase mb-3">Email Content</p>
+                      <pre className="whitespace-pre-wrap text-sm text-gray-800 leading-relaxed font-sans">
+                        {selectedAttachment.content || 'No preview available'}
+                      </pre>
+                    </div>
                   </div>
                 );
               })()}
