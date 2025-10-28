@@ -185,6 +185,7 @@ function HomeContent() {
   const [sourceModalOpen, setSourceModalOpen] = useState(false);
   const [expandedSources, setExpandedSources] = useState<Set<number>>(new Set());
   const [selectedAttachment, setSelectedAttachment] = useState<any>(null); // NEW: For viewing attachments in-modal
+  const [sourcesListOpen, setSourcesListOpen] = useState<number | null>(null); // Track which message's sources are open
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -571,57 +572,134 @@ function HomeContent() {
                       {message.role === "user" ? (
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                       ) : (
-                        <div>
+                        <div className="relative">
                           <SmartMarkdown content={message.content} />
 
                           {/* Inline Source Citations - Next to text like ChatGPT */}
                           {message.sources && message.sources.length > 0 && (
-                            <div className="mt-2 flex flex-wrap gap-1.5 items-center">
-                              {(() => {
-                                // Deduplicate sources by document_id
-                                const uniqueSources = Array.from(
-                                  new Map(
-                                    message.sources
-                                      .filter(s => s.document_id && s.document_id !== 'None' && s.document_id !== 'null' && s.document_id !== null)
-                                      .map(s => [s.document_id, s])
-                                  ).values()
-                                );
-
-                                return uniqueSources.map((source, sourceIndex) => {
-                                  const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
-                                  // Get short label (Gmail, PDF name, etc)
-                                  const sourceLabel = source.document_name
-                                    ? source.document_name.length > 20
-                                      ? source.document_name.substring(0, 20) + '...'
-                                      : source.document_name
-                                    : getDocumentTypeName(source);
+                            <>
+                              <div className="mt-2 flex flex-wrap gap-1.5 items-center">
+                                {(() => {
+                                  // Deduplicate sources by document_id
+                                  const uniqueSources = Array.from(
+                                    new Map(
+                                      message.sources
+                                        .filter(s => s.document_id && s.document_id !== 'None' && s.document_id !== 'null' && s.document_id !== null)
+                                        .map(s => [s.document_id, s])
+                                    ).values()
+                                  );
 
                                   return (
-                                    <button
-                                      key={source.document_id || sourceIndex}
-                                      onClick={() => hasDocument && handleSourceClick(source)}
-                                      disabled={!hasDocument}
-                                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium border transition-all ${
-                                        hasDocument
-                                          ? 'bg-white hover:bg-gray-50 border-gray-300 text-gray-700 cursor-pointer shadow-sm'
-                                          : 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
-                                      }`}
-                                      title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
-                                    >
-                                      <span className="flex-shrink-0">
-                                        {getDocumentIcon(source)}
-                                      </span>
-                                      <span className="truncate max-w-[100px]">{sourceLabel}</span>
-                                      {source.score && (
-                                        <span className="text-[10px] text-gray-500">
-                                          {(source.score * 100).toFixed(0)}%
-                                        </span>
-                                      )}
-                                    </button>
+                                    <>
+                                      {uniqueSources.slice(0, 3).map((source, sourceIndex) => {
+                                        const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
+                                        const sourceLabel = source.document_name
+                                          ? source.document_name.length > 15
+                                            ? source.document_name.substring(0, 15) + '...'
+                                            : source.document_name
+                                          : getDocumentTypeName(source);
+
+                                        return (
+                                          <button
+                                            key={source.document_id || sourceIndex}
+                                            onClick={() => hasDocument && handleSourceClick(source)}
+                                            disabled={!hasDocument}
+                                            className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-medium border transition-all ${
+                                              hasDocument
+                                                ? 'bg-white hover:bg-gray-50 border-gray-300 text-gray-700 cursor-pointer'
+                                                : 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                                            }`}
+                                            title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
+                                          >
+                                            <span className="flex-shrink-0">
+                                              {getDocumentIcon(source)}
+                                            </span>
+                                            <span className="truncate max-w-[80px]">{sourceLabel}</span>
+                                          </button>
+                                        );
+                                      })}
+
+                                      {/* "Sources" button */}
+                                      <button
+                                        onClick={() => setSourcesListOpen(sourcesListOpen === index ? null : index)}
+                                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold border border-gray-400 bg-gray-100 hover:bg-gray-200 text-gray-700 transition-all"
+                                      >
+                                        <span>Sources ({uniqueSources.length})</span>
+                                        <svg className={`w-3 h-3 transition-transform ${sourcesListOpen === index ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                      </button>
+                                    </>
                                   );
-                                });
-                              })()}
-                            </div>
+                                })()}
+                              </div>
+
+                              {/* Sources Popup */}
+                              {sourcesListOpen === index && (
+                                <div className="mt-3 p-4 bg-white border-2 border-gray-300 rounded-xl shadow-lg">
+                                  <div className="flex items-center justify-between mb-3">
+                                    <h4 className="text-sm font-bold text-gray-900">Citations</h4>
+                                    <button
+                                      onClick={() => setSourcesListOpen(null)}
+                                      className="text-gray-400 hover:text-gray-600"
+                                    >
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                  <div className="space-y-2 max-h-[300px] overflow-y-auto">
+                                    {(() => {
+                                      const uniqueSources = Array.from(
+                                        new Map(
+                                          message.sources
+                                            .filter(s => s.document_id && s.document_id !== 'None' && s.document_id !== 'null' && s.document_id !== null)
+                                            .map(s => [s.document_id, s])
+                                        ).values()
+                                      );
+
+                                      return uniqueSources.map((source, sourceIndex) => {
+                                        const hasDocument = source.document_id;
+                                        return (
+                                          <button
+                                            key={source.document_id || sourceIndex}
+                                            onClick={() => {
+                                              if (hasDocument) {
+                                                handleSourceClick(source);
+                                                setSourcesListOpen(null);
+                                              }
+                                            }}
+                                            className="w-full text-left p-3 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-all flex items-start gap-3"
+                                          >
+                                            <div className="flex-shrink-0 mt-0.5">
+                                              {getDocumentIcon(source)}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                              <div className="flex items-center gap-2 mb-1">
+                                                <p className="font-semibold text-xs text-gray-900 truncate">
+                                                  {source.document_name}
+                                                </p>
+                                                {source.score && (
+                                                  <span className="text-[10px] text-gray-500">
+                                                    {(source.score * 100).toFixed(0)}%
+                                                  </span>
+                                                )}
+                                              </div>
+                                              <p className="text-[11px] text-gray-600 line-clamp-2">
+                                                {source.text_preview || 'No preview available'}
+                                              </p>
+                                              <p className="text-[10px] text-gray-400 mt-1">
+                                                {getDocumentTypeName(source)} • {source.timestamp ? new Date(source.timestamp).toLocaleDateString() : 'No date'}
+                                              </p>
+                                            </div>
+                                          </button>
+                                        );
+                                      });
+                                    })()}
+                                  </div>
+                                </div>
+                              )}
+                            </>
                           )}
                         </div>
                       )}
