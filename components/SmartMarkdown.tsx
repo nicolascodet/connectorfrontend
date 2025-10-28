@@ -41,41 +41,43 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
   let processedContent = content;
 
   if (sources && sources.length > 0) {
-    // Strategy: Insert citation numbers after document names mentioned in text
-    // For each source in the sources array, find if its document name is mentioned
-    sources.forEach((source) => {
-      const docName = source.document_name;
-      if (!docName || docName.length < 5) return; // Skip very short/empty names
+    // NEW STRATEGY: LLM generates citations in format [Document_Name.pdf]
+    // We convert those to numbered citation bubbles [[CIT:1]], [[CIT:2]], etc.
 
-      // Escape special regex characters
-      const escapedName = docName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    // First, find all [DocumentName] citations in the text
+    // Pattern: [anything inside square brackets that matches a source document name]
+    processedContent = processedContent.replace(/\[([^\]]+)\]/g, (match, docNameInBrackets) => {
+      // Try to find a source that matches this document name
+      const matchingSource = sources.find(source => {
+        const sourceName = source.document_name || '';
+        // Exact match (case-insensitive)
+        if (sourceName.toLowerCase() === docNameInBrackets.toLowerCase()) {
+          return true;
+        }
+        // Partial match - check if the bracketed text is contained in source name
+        if (sourceName.toLowerCase().includes(docNameInBrackets.toLowerCase()) ||
+            docNameInBrackets.toLowerCase().includes(sourceName.toLowerCase())) {
+          return true;
+        }
+        return false;
+      });
 
-      // Look for mentions of this document name in the text
-      // Use word boundaries to avoid partial matches
-      const regex = new RegExp(`\\b${escapedName}\\b`, 'gi');
-
-      // Check if this document is mentioned
-      if (regex.test(processedContent)) {
-        // Assign a citation number to this source
-        if (!citationMap.has(source.index)) {
-          citationMap.set(source.index, citationNumber);
-          citationSources.set(citationNumber, source);
+      if (matchingSource) {
+        // This is a document citation! Convert to numbered citation
+        if (!citationMap.has(matchingSource.index)) {
+          citationMap.set(matchingSource.index, citationNumber);
+          citationSources.set(citationNumber, matchingSource);
           citationNumber++;
         }
-
-        const citNum = citationMap.get(source.index);
-
-        // Replace FIRST occurrence of document name with name + citation
-        let replaced = false;
-        processedContent = processedContent.replace(regex, (match) => {
-          if (replaced) return match; // Only replace first occurrence
-          replaced = true;
-          return `${match}[[CIT:${citNum}]]`;
-        });
+        const citNum = citationMap.get(matchingSource.index);
+        return `[[CIT:${citNum}]]`; // Remove document name, just show number
       }
+
+      // Not a document citation, keep original (might be markdown link text)
+      return match;
     });
 
-    // Also handle markdown links if present
+    // Also handle markdown links if present (legacy support)
     processedContent = processedContent.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, (match, text, url) => {
       // Check if this URL matches a source file_url
       const source = sources.find(s => s.file_url && url.includes(s.file_url));
