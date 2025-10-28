@@ -231,8 +231,15 @@ function HomeContent() {
     if (loadingChat) {
       setThinkingStep(0);
       const interval = setInterval(() => {
-        setThinkingStep((prev) => (prev + 1) % thinkingMessages.length);
-      }, 5000); // Change message every 5 seconds for longer response times
+        setThinkingStep((prev) => {
+          const next = prev + 1;
+          // Freeze on last step (Compiling results...)
+          if (next >= thinkingMessages.length - 1) {
+            return thinkingMessages.length - 1;
+          }
+          return next;
+        });
+      }, 15000); // Change message every 15 seconds for longer response times
 
       return () => clearInterval(interval);
     }

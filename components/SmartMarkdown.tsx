@@ -39,6 +39,9 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
   let processedContent = content;
 
   if (sources && sources.length > 0) {
+    // Track which sources we've already added bubbles for to avoid duplicates
+    const usedSources = new Set<number>();
+
     // Find all markdown links [text](url) and replace with source bubbles
     processedContent = content.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, (match, text, url) => {
       // Check if this URL matches a source file_url
@@ -46,6 +49,7 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
       if (source) {
         const sourceId = `source_${source.index}_${Date.now()}`;
         citationMap.set(sourceId, source);
+        usedSources.add(source.index);
         // Remove the markdown link text and just add a marker for the bubble
         return `[[BUBBLE:${sourceId}:${getSourceLabel(source)}]]`;
       }
@@ -53,16 +57,42 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
       return match;
     });
 
-    // Also detect "View Document" text and similar patterns
-    processedContent = processedContent.replace(/View Document\./g, (match) => {
-      // Try to find the most relevant source (first one)
-      if (sources.length > 0) {
-        const source = sources[0];
+    // Detect "View Document" patterns
+    processedContent = processedContent.replace(/View Document\.?/gi, (match) => {
+      // Find first unused source
+      const source = sources.find(s => !usedSources.has(s.index));
+      if (source) {
         const sourceId = `source_${source.index}_view_${Date.now()}`;
         citationMap.set(sourceId, source);
+        usedSources.add(source.index);
         return `[[BUBBLE:${sourceId}:${getSourceLabel(source)}]]`;
       }
       return match;
+    });
+
+    // Detect document name mentions in text (e.g., "Workers Compensation Summary Report")
+    sources.forEach((source) => {
+      if (usedSources.has(source.index)) return; // Skip if already used
+
+      const docName = source.document_name;
+      if (!docName || docName.length < 5) return; // Skip very short names
+
+      // Create a regex to find this document name in the text
+      // Escape special regex characters and make it case-insensitive
+      const escapedName = docName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(`\\b${escapedName}\\b`, 'gi');
+
+      // Only replace the FIRST occurrence to avoid cluttering
+      let replaced = false;
+      processedContent = processedContent.replace(regex, (match) => {
+        if (replaced) return match; // Only replace first occurrence
+        replaced = true;
+
+        const sourceId = `source_${source.index}_name_${Date.now()}`;
+        citationMap.set(sourceId, source);
+        usedSources.add(source.index);
+        return `${match} [[BUBBLE:${sourceId}:${getSourceLabel(source)}]]`;
+      });
     });
   }
 
