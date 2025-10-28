@@ -14,17 +14,57 @@ interface SmartMarkdownProps {
 }
 
 const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) => {
-  // Process content to make document mentions clickable
-  const processedContent = sources && sources.length > 0
-    ? content.replace(/\[([^\]]+)\]\(#source-(\d+)\)/g, (match, text, docId) => {
-        // Find matching source
-        const source = sources.find(s => s.document_id === docId);
-        if (source) {
-          return `[${text}](javascript:void(0))`; // Will be handled by click handler
+  // Convert markdown document links to numbered citations like ChatGPT
+  const citationMap = new Map<string, number>();
+  const citationSources = new Map<number, Source>();
+  let citationIndex = 1;
+
+  let processedContent = content;
+
+  if (sources && sources.length > 0) {
+    // Find all markdown links and convert to citations with special marker
+    processedContent = content.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, (match, text, url) => {
+      // Check if this URL matches a source file_url
+      const source = sources.find(s => s.file_url && url.includes(s.file_url));
+      if (source) {
+        // Assign citation number
+        if (!citationMap.has(url)) {
+          citationMap.set(url, citationIndex);
+          citationSources.set(citationIndex, source);
+          citationIndex++;
         }
-        return match;
-      })
-    : content;
+        const citNum = citationMap.get(url);
+        // Return text with citation using special syntax that we'll replace later
+        return `${text} [[CIT:${citNum}]]`;
+      }
+      // Keep regular markdown links as-is
+      return match;
+    });
+  }
+
+  // After markdown rendering, we'll replace [[CIT:X]] with clickable citations
+  const renderContentWithCitations = (text: string) => {
+    const parts = text.split(/(\[\[CIT:\d+\]\])/g);
+    return parts.map((part, index) => {
+      const match = part.match(/\[\[CIT:(\d+)\]\]/);
+      if (match) {
+        const citNum = parseInt(match[1]);
+        const source = citationSources.get(citNum);
+        return (
+          <sup key={index} className="inline-block">
+            <button
+              onClick={() => source && onSourceClick && onSourceClick(source)}
+              className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors cursor-pointer"
+              title={source?.document_name || 'View source'}
+            >
+              [{citNum}]
+            </button>
+          </sup>
+        );
+      }
+      return part;
+    });
+  };
   const components = {
     code({ node, inline, className, children, ...props }: any) {
       return !inline ? (
@@ -71,11 +111,17 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
         {children}
       </h3>
     ),
-    p: ({ children }: any) => (
-      <p className="text-gray-700 leading-relaxed my-3 text-[15px]">
-        {children}
-      </p>
-    ),
+    p: ({ children }: any) => {
+      // Convert children to string and process citations
+      const childText = typeof children === 'string' ? children : children?.toString() || '';
+      const hasCitations = childText.includes('[[CIT:');
+
+      return (
+        <p className="text-gray-700 leading-relaxed my-3 text-[15px]">
+          {hasCitations ? renderContentWithCitations(childText) : children}
+        </p>
+      );
+    },
     strong: ({ children }: any) => (
       <strong className="text-gray-900 font-bold">
         {children}

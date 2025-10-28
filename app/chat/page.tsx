@@ -573,7 +573,11 @@ function HomeContent() {
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                       ) : (
                         <div className="relative">
-                          <SmartMarkdown content={message.content} />
+                          <SmartMarkdown
+                            content={message.content}
+                            sources={message.sources}
+                            onSourceClick={handleSourceClick}
+                          />
 
                           {/* Inline Source Citations - Next to text like ChatGPT */}
                           {message.sources && message.sources.length > 0 && (
