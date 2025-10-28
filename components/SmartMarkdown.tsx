@@ -41,36 +41,50 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
   let processedContent = content;
 
   if (sources && sources.length > 0) {
-    // NEW STRATEGY: LLM generates citations in format [Document_Name.pdf]
+    // STRATEGY: LLM generates citations in format [4747] (document_id) or [Document_Name.pdf]
     // We convert those to numbered citation bubbles [[CIT:1]], [[CIT:2]], etc.
 
-    // First, find all [DocumentName] citations in the text
-    // Pattern: [anything inside square brackets that matches a source document name]
-    processedContent = processedContent.replace(/\[([^\]]+)\]/g, (match, docNameInBrackets) => {
-      // Try to find a source that matches this document name
+    // First, find all [something] citations in the text
+    processedContent = processedContent.replace(/\[([^\]]+)\]/g, (match, citationText) => {
+      // PRIORITY 1: Try document_id matching (if it's a number with 4+ digits)
+      if (/^\d{4,}$/.test(citationText)) {
+        const source = sources.find(s => s.document_id === citationText);
+        if (source) {
+          // Found by document_id! Convert to citation bubble
+          if (!citationMap.has(source.index)) {
+            citationMap.set(source.index, citationNumber);
+            citationSources.set(citationNumber, source);
+            citationNumber++;
+          }
+          const citNum = citationMap.get(source.index);
+          return `[[CIT:${citNum}]]`;
+        }
+      }
+
+      // PRIORITY 2: Fallback to document name matching (existing logic)
       const matchingSource = sources.find(source => {
         const sourceName = source.document_name || '';
         // Exact match (case-insensitive)
-        if (sourceName.toLowerCase() === docNameInBrackets.toLowerCase()) {
+        if (sourceName.toLowerCase() === citationText.toLowerCase()) {
           return true;
         }
         // Partial match - check if the bracketed text is contained in source name
-        if (sourceName.toLowerCase().includes(docNameInBrackets.toLowerCase()) ||
-            docNameInBrackets.toLowerCase().includes(sourceName.toLowerCase())) {
+        if (sourceName.toLowerCase().includes(citationText.toLowerCase()) ||
+            citationText.toLowerCase().includes(sourceName.toLowerCase())) {
           return true;
         }
         return false;
       });
 
       if (matchingSource) {
-        // This is a document citation! Convert to numbered citation
+        // Found by document name! Convert to numbered citation
         if (!citationMap.has(matchingSource.index)) {
           citationMap.set(matchingSource.index, citationNumber);
           citationSources.set(citationNumber, matchingSource);
           citationNumber++;
         }
         const citNum = citationMap.get(matchingSource.index);
-        return `[[CIT:${citNum}]]`; // Remove document name, just show number
+        return `[[CIT:${citNum}]]`;
       }
 
       // Not a document citation, keep original (might be markdown link text)
