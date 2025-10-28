@@ -571,59 +571,61 @@ function HomeContent() {
                       {message.role === "user" ? (
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                       ) : (
-                        <SmartMarkdown content={message.content} />
+                        <>
+                          <SmartMarkdown content={message.content} />
+
+                          {/* Inline Source Citations - Inside message bubble */}
+                          {message.sources && message.sources.length > 0 && (
+                            <div className="mt-4 pt-3 border-t border-gray-200 flex flex-wrap gap-1.5">
+                              {(() => {
+                                // Deduplicate sources by document_id
+                                const uniqueSources = Array.from(
+                                  new Map(
+                                    message.sources
+                                      .filter(s => s.document_id && s.document_id !== 'None' && s.document_id !== 'null' && s.document_id !== null)
+                                      .map(s => [s.document_id, s])
+                                  ).values()
+                                );
+
+                                return uniqueSources.map((source, sourceIndex) => {
+                                  const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
+                                  // Get short label (Gmail, PDF name, etc)
+                                  const sourceLabel = source.document_name
+                                    ? source.document_name.length > 20
+                                      ? source.document_name.substring(0, 20) + '...'
+                                      : source.document_name
+                                    : getDocumentTypeName(source);
+
+                                  return (
+                                    <button
+                                      key={source.document_id || sourceIndex}
+                                      onClick={() => hasDocument && handleSourceClick(source)}
+                                      disabled={!hasDocument}
+                                      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium border transition-all ${
+                                        hasDocument
+                                          ? 'bg-white hover:bg-gray-50 border-gray-300 text-gray-700 cursor-pointer shadow-sm'
+                                          : 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                                      }`}
+                                      title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
+                                    >
+                                      <span className="flex-shrink-0">
+                                        {getDocumentIcon(source)}
+                                      </span>
+                                      <span className="truncate max-w-[100px]">{sourceLabel}</span>
+                                      {source.score && (
+                                        <span className="text-[10px] text-gray-500">
+                                          {(source.score * 100).toFixed(0)}%
+                                        </span>
+                                      )}
+                                    </button>
+                                  );
+                                });
+                              })()}
+                            </div>
+                          )}
+                        </>
                       )}
                     </div>
-
-                    {/* Inline Source Citations - ChatGPT/Claude Style */}
-                    {message.role === "assistant" && message.sources && message.sources.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1.5">
-                        {(() => {
-                          // Deduplicate sources by document_id
-                          const uniqueSources = Array.from(
-                            new Map(
-                              message.sources
-                                .filter(s => s.document_id && s.document_id !== 'None' && s.document_id !== 'null' && s.document_id !== null)
-                                .map(s => [s.document_id, s])
-                            ).values()
-                          );
-
-                          return uniqueSources.map((source, sourceIndex) => {
-                            const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
-                            // Get short label (Gmail, PDF name, etc)
-                            const sourceLabel = source.document_name
-                              ? source.document_name.length > 20
-                                ? source.document_name.substring(0, 20) + '...'
-                                : source.document_name
-                              : getDocumentTypeName(source);
-
-                            return (
-                              <button
-                                key={source.document_id || sourceIndex}
-                                onClick={() => hasDocument && handleSourceClick(source)}
-                                disabled={!hasDocument}
-                                className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium border transition-all ${
-                                  hasDocument
-                                    ? 'bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-700 cursor-pointer'
-                                    : 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
-                                }`}
-                                title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
-                              >
-                                <span className="flex-shrink-0">
-                                  {getDocumentIcon(source)}
-                                </span>
-                                <span className="truncate max-w-[100px]">{sourceLabel}</span>
-                                {source.score && (
-                                  <span className="text-[10px] text-gray-500">
-                                    {(source.score * 100).toFixed(0)}%
-                                  </span>
-                                )}
-                              </button>
-                            );
-                          });
-                        })()}
-                      </div>
-                    )}
                   </div>
                 ))}
                 {loadingChat && (
