@@ -491,11 +491,14 @@ function HomeContent() {
       console.log('📊 Sources received:', result.sources);
 
       // If this was a new chat, update URL with the chat_id
-      const currentChatId = searchParams.get("chat_id");
-      if (!currentChatId && result.chat_id) {
+      const currentChatIdParam = searchParams.get("chat_id");
+      if (!currentChatIdParam && result.chat_id) {
+        setCurrentChatId(result.chat_id);
         const url = new URL(window.location.href);
         url.searchParams.set("chat_id", result.chat_id);
         window.history.replaceState({}, '', url.toString());
+        // Refresh chat history to show the new chat
+        loadChatHistory();
       }
 
       const assistantMessage: Message = {
@@ -657,8 +660,8 @@ function HomeContent() {
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center p-8">
-        <div className="w-full max-w-4xl flex flex-col h-full">
-          {messages.length === 0 ? (
+          <div className="w-full max-w-4xl flex flex-col h-full">
+            {messages.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center space-y-12">
               {/* Greeting */}
               <div className="text-center space-y-3">
@@ -954,6 +957,7 @@ function HomeContent() {
               </form>
             </div>
           )}
+          </div>
         </div>
       </div>
 
