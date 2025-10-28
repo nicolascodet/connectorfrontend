@@ -186,8 +186,18 @@ function HomeContent() {
   const [expandedSources, setExpandedSources] = useState<Set<number>>(new Set());
   const [selectedAttachment, setSelectedAttachment] = useState<any>(null); // NEW: For viewing attachments in-modal
   const [sourcesListOpen, setSourcesListOpen] = useState<number | null>(null); // Track which message's sources are open
+  const [thinkingStep, setThinkingStep] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Dynamic thinking messages
+  const thinkingMessages = [
+    { icon: "🔍", text: "Searching knowledge base..." },
+    { icon: "📊", text: "Analyzing documents..." },
+    { icon: "🧠", text: "Processing information..." },
+    { icon: "🔗", text: "Connecting insights..." },
+    { icon: "✨", text: "Synthesizing response..." },
+  ];
 
   const scrollToBottom = () => {
     // Use setTimeout to ensure DOM has updated
@@ -208,6 +218,18 @@ function HomeContent() {
     // Also scroll when loading state changes (for better UX when chat finishes)
     if (!loadingChat) {
       scrollToBottom();
+    }
+  }, [loadingChat]);
+
+  // Cycle through thinking messages while loading
+  useEffect(() => {
+    if (loadingChat) {
+      setThinkingStep(0);
+      const interval = setInterval(() => {
+        setThinkingStep((prev) => (prev + 1) % thinkingMessages.length);
+      }, 2000); // Change message every 2 seconds
+
+      return () => clearInterval(interval);
     }
   }, [loadingChat]);
 
@@ -712,16 +734,33 @@ function HomeContent() {
                 ))}
                 {loadingChat && (
                   <div className="flex justify-start">
-                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 backdrop-blur-sm rounded-3xl px-6 py-4 border border-purple-200/50 shadow-lg">
+                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 backdrop-blur-sm rounded-3xl px-6 py-4 border border-purple-200/50 shadow-lg animate-pulse">
                       <div className="flex items-center gap-3">
-                        <div className="flex gap-1">
-                          <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                          <div className="w-2 h-2 bg-pink-400 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                        </div>
-                        <span className="text-sm font-medium bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-                          Thinking...
+                        {/* Dynamic emoji */}
+                        <span className="text-2xl animate-bounce">
+                          {thinkingMessages[thinkingStep].icon}
                         </span>
+                        <div className="flex flex-col gap-1">
+                          {/* Main thinking message with fade transition */}
+                          <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent animate-fade-in">
+                            {thinkingMessages[thinkingStep].text}
+                          </span>
+                          {/* Progress dots */}
+                          <div className="flex gap-1">
+                            {thinkingMessages.map((_, index) => (
+                              <div
+                                key={index}
+                                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                                  index === thinkingStep
+                                    ? 'bg-purple-600 w-4'
+                                    : index < thinkingStep
+                                      ? 'bg-purple-400'
+                                      : 'bg-gray-300'
+                                }`}
+                              />
+                            ))}
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>
