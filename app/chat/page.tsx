@@ -2,12 +2,12 @@
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { handleOAuthCallback, searchOptimized, uploadFile, getChatMessages, getSourceDocument } from "@/lib/api";
+import { handleOAuthCallback, searchOptimized, uploadFile, getChatMessages, getSourceDocument, getChatHistory, createNewChat, deleteChat } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, Settings, Link as LinkIcon, Paperclip, ExternalLink } from "lucide-react";
+import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, Settings, Link as LinkIcon, Paperclip, ExternalLink, Menu, X, Trash2 } from "lucide-react";
 import SmartMarkdown from '@/components/SmartMarkdown';
 import Link from 'next/link';
 
@@ -187,6 +187,9 @@ function HomeContent() {
   const [selectedAttachment, setSelectedAttachment] = useState<any>(null); // NEW: For viewing attachments in-modal
   const [sourcesListOpen, setSourcesListOpen] = useState<number | null>(null); // Track which message's sources are open
   const [thinkingStep, setThinkingStep] = useState(0);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [chatHistory, setChatHistory] = useState<any[]>([]);
+  const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -243,22 +246,39 @@ function HomeContent() {
   useEffect(() => {
     const chatId = searchParams.get("chat_id");
     if (chatId && user && !loading) {
+      setCurrentChatId(chatId);
       loadChatMessages(chatId);
     }
   }, [searchParams, user, loading]);
+
+  // Load chat history
+  useEffect(() => {
+    if (user && !loading) {
+      loadChatHistory();
+    }
+  }, [user, loading]);
+
+  const loadChatHistory = async () => {
+    try {
+      const response = await getChatHistory();
+      setChatHistory(response.chats || []);
+    } catch (error) {
+      console.error("Failed to load chat history:", error);
+    }
+  };
 
   const loadChatMessages = async (chatId: string) => {
     try {
       console.log(`📖 Loading chat messages for chat_id: ${chatId}`);
       const result = await getChatMessages(chatId);
-      
+
       // Convert backend message format to frontend format
       const formattedMessages: Message[] = result.messages.map((msg: any) => ({
         role: msg.role,
         content: msg.content,
         sources: msg.role === 'assistant' ? (msg.sources || []) : undefined
       }));
-      
+
       setMessages(formattedMessages);
       console.log(`✅ Loaded ${formattedMessages.length} messages`);
     } catch (error) {
@@ -266,6 +286,52 @@ function HomeContent() {
       toast({
         variant: "destructive",
         title: "Failed to load chat",
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
+  const handleNewChat = async () => {
+    try {
+      const result = await createNewChat();
+      setMessages([]);
+      setCurrentChatId(result.chat_id);
+      router.push(`/chat?chat_id=${result.chat_id}`);
+      await loadChatHistory(); // Refresh history
+    } catch (error) {
+      console.error("Failed to create new chat:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to create chat",
+        description: error instanceof Error ? error.message : "Unknown error",
+      });
+    }
+  };
+
+  const handleSelectChat = (chatId: string) => {
+    setCurrentChatId(chatId);
+    router.push(`/chat?chat_id=${chatId}`);
+  };
+
+  const handleDeleteChat = async (chatId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await deleteChat(chatId);
+      await loadChatHistory();
+      if (currentChatId === chatId) {
+        setMessages([]);
+        setCurrentChatId(null);
+        router.push('/chat');
+      }
+      toast({
+        title: "Chat deleted",
+        description: "Chat has been deleted successfully",
+      });
+    } catch (error) {
+      console.error("Failed to delete chat:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to delete chat",
         description: error instanceof Error ? error.message : "Unknown error",
       });
     }
@@ -465,29 +531,103 @@ function HomeContent() {
   if (!user) return null;
 
   const suggestionChips = [
-    { icon: Sparkles, label: "Create image", action: () => setInput("Create an image of ") },
-    { icon: FileText, label: "Summarize text", action: () => setInput("Summarize this: ") },
-    { icon: Lightbulb, label: "Brainstorm ideas", action: () => setInput("Help me brainstorm ideas for ") },
-    { icon: Calendar, label: "Make a plan", action: () => setInput("Create a plan for ") },
-    { icon: PenTool, label: "Help me write", action: () => setInput("Help me write ") },
+    { icon: Database, label: "Data Source", action: () => setInput("What data sources do we have connected?") },
+    { icon: Building2, label: "Company Insights", action: () => setInput("Give me insights about our company performance") },
+    { icon: DollarSign, label: "Financial Summary", action: () => setInput("Summarize our latest financial reports") },
+    { icon: MessageSquare, label: "Recent Communications", action: () => setInput("Show me recent important emails and communications") },
+    { icon: Lightbulb, label: "Business Intelligence", action: () => setInput("What business insights can you provide?") },
   ];
 
   return (
     <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-      {/* Top Navigation */}
-      <div className="absolute top-0 left-0 right-0 z-10 flex items-center justify-between px-6 py-4 bg-white/70 backdrop-blur-md border-b border-gray-200/50">
-        <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-          CORTEX
-        </h1>
-        <div className="flex items-center gap-3">
-          <Link href="/connections">
-            <Button variant="ghost" size="sm" className="gap-2">
+      {/* Left Sidebar */}
+      <div className={`${sidebarOpen ? 'w-72' : 'w-0'} transition-all duration-300 bg-white border-r border-gray-200 flex flex-col overflow-hidden`}>
+        {/* Sidebar Header */}
+        <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            HighForce
+          </h1>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        {/* New Chat Button */}
+        <div className="p-3">
+          <Button
+            onClick={handleNewChat}
+            className="w-full gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+          >
+            <Plus className="h-4 w-4" />
+            New Chat
+          </Button>
+        </div>
+
+        {/* Chat History */}
+        <div className="flex-1 overflow-y-auto px-3 py-2">
+          <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2 px-2">
+            Recent Chats
+          </div>
+          {chatHistory.slice(0, 20).map((chat) => (
+            <button
+              key={chat.id}
+              onClick={() => handleSelectChat(chat.id)}
+              className={`w-full text-left p-3 mb-1 rounded-lg transition-all group relative ${
+                currentChatId === chat.id
+                  ? 'bg-gradient-to-r from-purple-100 to-blue-100 border border-purple-200'
+                  : 'hover:bg-gray-50 border border-transparent'
+              }`}
+            >
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-medium text-gray-900 truncate">
+                    {chat.title || 'Untitled Chat'}
+                  </div>
+                  <div className="text-xs text-gray-500 mt-0.5">
+                    {new Date(chat.updated_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      hour: 'numeric',
+                      minute: '2-digit'
+                    })}
+                  </div>
+                  {chat.message_count > 0 && (
+                    <div className="text-xs text-gray-400 mt-1">
+                      {chat.message_count} message{chat.message_count !== 1 ? 's' : ''}
+                    </div>
+                  )}
+                </div>
+                <button
+                  onClick={(e) => handleDeleteChat(chat.id, e)}
+                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 hover:bg-red-100 rounded"
+                >
+                  <Trash2 className="h-3 w-3 text-red-600" />
+                </button>
+              </div>
+            </button>
+          ))}
+          {chatHistory.length === 0 && (
+            <div className="text-sm text-gray-400 text-center py-8">
+              No chat history yet
+            </div>
+          )}
+        </div>
+
+        {/* Bottom Navigation */}
+        <div className="p-3 border-t border-gray-200 space-y-1">
+          <Link href="/connections" className="block">
+            <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
               <LinkIcon className="h-4 w-4" />
               Connections
             </Button>
           </Link>
-          <Link href="/settings">
-            <Button variant="ghost" size="sm" className="gap-2">
+          <Link href="/settings" className="block">
+            <Button variant="ghost" size="sm" className="w-full justify-start gap-2">
               <Settings className="h-4 w-4" />
               Settings
             </Button>
@@ -495,7 +635,28 @@ function HomeContent() {
         </div>
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center p-8 pt-20">
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col">
+        {/* Top Bar with Menu Toggle */}
+        <div className="flex items-center gap-3 px-6 py-4 bg-white/70 backdrop-blur-md border-b border-gray-200/50">
+          {!sidebarOpen && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setSidebarOpen(true)}
+              className="gap-2"
+            >
+              <Menu className="h-4 w-4" />
+            </Button>
+          )}
+          {!sidebarOpen && (
+            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+              HighForce
+            </h1>
+          )}
+        </div>
+
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
         <div className="w-full max-w-4xl flex flex-col h-full">
           {messages.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center space-y-12">

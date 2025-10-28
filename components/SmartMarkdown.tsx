@@ -2,9 +2,17 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
 interface Source {
+  index: number;
   document_id: string | null;
   document_name: string;
+  source: string;
+  document_type: string;
+  timestamp: string;
+  text_preview: string;
+  score?: number;
   file_url?: string | null;
+  mime_type?: string | null;
+  file_size_bytes?: number | null;
 }
 
 interface SmartMarkdownProps {
