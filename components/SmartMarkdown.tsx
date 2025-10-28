@@ -22,96 +22,61 @@ interface SmartMarkdownProps {
 }
 
 const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) => {
-  // Convert markdown links to inline source bubbles
-  const citationMap = new Map<string, Source>();
+  // Convert markdown document links to numbered citations
+  const citationMap = new Map<string, number>();
+  const citationSources = new Map<number, Source>();
+  let citationIndex = 1;
 
-  // Helper to get short source name
+  // Helper to get short source name for tooltip
   const getSourceLabel = (source: Source) => {
     const sourceKey = source?.source?.toLowerCase() || '';
     if (sourceKey === 'gmail' || sourceKey === 'outlook') return sourceKey.charAt(0).toUpperCase() + sourceKey.slice(1);
 
     // Use document name, shortened
     const name = source?.document_name || 'Document';
-    if (name.length > 25) return name.substring(0, 22) + '...';
+    if (name.length > 40) return name.substring(0, 37) + '...';
     return name;
   };
 
   let processedContent = content;
 
   if (sources && sources.length > 0) {
-    // Track which sources we've already added bubbles for to avoid duplicates
-    const usedSources = new Set<number>();
-
-    // Find all markdown links [text](url) and replace with source bubbles
+    // Find all markdown links [text](url) and convert to numbered citations
     processedContent = content.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, (match, text, url) => {
       // Check if this URL matches a source file_url
       const source = sources.find(s => s.file_url && url.includes(s.file_url));
       if (source) {
-        const sourceId = `source_${source.index}_${Date.now()}`;
-        citationMap.set(sourceId, source);
-        usedSources.add(source.index);
-        // Remove the markdown link text and just add a marker for the bubble
-        return `[[BUBBLE:${sourceId}:${getSourceLabel(source)}]]`;
+        // Assign citation number (reuse if same URL)
+        if (!citationMap.has(url)) {
+          citationMap.set(url, citationIndex);
+          citationSources.set(citationIndex, source);
+          citationIndex++;
+        }
+        const citNum = citationMap.get(url);
+        // Return text with citation marker
+        return `${text}[[CIT:${citNum}]]`;
       }
       // Keep regular markdown links as-is
       return match;
     });
-
-    // Detect "View Document" patterns
-    processedContent = processedContent.replace(/View Document\.?/gi, (match) => {
-      // Find first unused source
-      const source = sources.find(s => !usedSources.has(s.index));
-      if (source) {
-        const sourceId = `source_${source.index}_view_${Date.now()}`;
-        citationMap.set(sourceId, source);
-        usedSources.add(source.index);
-        return `[[BUBBLE:${sourceId}:${getSourceLabel(source)}]]`;
-      }
-      return match;
-    });
-
-    // Detect document name mentions in text (e.g., "Workers Compensation Summary Report")
-    sources.forEach((source) => {
-      if (usedSources.has(source.index)) return; // Skip if already used
-
-      const docName = source.document_name;
-      if (!docName || docName.length < 5) return; // Skip very short names
-
-      // Create a regex to find this document name in the text
-      // Escape special regex characters and make it case-insensitive
-      const escapedName = docName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-      const regex = new RegExp(`\\b${escapedName}\\b`, 'gi');
-
-      // Only replace the FIRST occurrence to avoid cluttering
-      let replaced = false;
-      processedContent = processedContent.replace(regex, (match) => {
-        if (replaced) return match; // Only replace first occurrence
-        replaced = true;
-
-        const sourceId = `source_${source.index}_name_${Date.now()}`;
-        citationMap.set(sourceId, source);
-        usedSources.add(source.index);
-        return `${match} [[BUBBLE:${sourceId}:${getSourceLabel(source)}]]`;
-      });
-    });
   }
 
-  // Render source bubbles
+  // Render numbered citation bubbles
   const renderContentWithCitations = (text: string) => {
-    const parts = text.split(/(\[\[BUBBLE:[^\]]+\]\])/g);
+    const parts = text.split(/(\[\[CIT:\d+\]\])/g);
     return parts.map((part, index) => {
-      const match = part.match(/\[\[BUBBLE:([^:]+):([^\]]+)\]\]/);
+      const match = part.match(/\[\[CIT:(\d+)\]\]/);
       if (match) {
-        const [, sourceId, label] = match;
-        const source = citationMap.get(sourceId);
+        const citNum = parseInt(match[1]);
+        const source = citationSources.get(citNum);
         return (
           <button
             key={index}
             onClick={() => source && onSourceClick && onSourceClick(source)}
-            className="inline-flex items-center gap-1 px-2 py-0.5 mx-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-full transition-colors cursor-pointer border border-slate-300"
-            title={source?.document_name || 'View source'}
+            className="inline-flex items-center justify-center px-2 py-0.5 mx-0.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-full transition-colors cursor-pointer border border-slate-300"
+            title={source ? getSourceLabel(source) : 'View source'}
           >
-            <span>{label}</span>
+            {citNum}
           </button>
         );
       }
