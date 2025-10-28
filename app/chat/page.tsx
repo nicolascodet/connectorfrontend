@@ -571,12 +571,12 @@ function HomeContent() {
                       {message.role === "user" ? (
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                       ) : (
-                        <>
+                        <div>
                           <SmartMarkdown content={message.content} />
 
-                          {/* Inline Source Citations - Inside message bubble */}
+                          {/* Inline Source Citations - Next to text like ChatGPT */}
                           {message.sources && message.sources.length > 0 && (
-                            <div className="mt-4 pt-3 border-t border-gray-200 flex flex-wrap gap-1.5">
+                            <div className="mt-2 flex flex-wrap gap-1.5 items-center">
                               {(() => {
                                 // Deduplicate sources by document_id
                                 const uniqueSources = Array.from(
@@ -623,7 +623,7 @@ function HomeContent() {
                               })()}
                             </div>
                           )}
-                        </>
+                        </div>
                       )}
                     </div>
                   </div>

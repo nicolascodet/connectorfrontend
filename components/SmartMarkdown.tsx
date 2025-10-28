@@ -1,11 +1,30 @@
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 
-interface SmartMarkdownProps {
-  content: string
+interface Source {
+  document_id: string | null;
+  document_name: string;
+  file_url?: string | null;
 }
 
-const SmartMarkdown = ({ content }: SmartMarkdownProps) => {
+interface SmartMarkdownProps {
+  content: string;
+  sources?: Source[];
+  onSourceClick?: (source: Source) => void;
+}
+
+const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) => {
+  // Process content to make document mentions clickable
+  const processedContent = sources && sources.length > 0
+    ? content.replace(/\[([^\]]+)\]\(#source-(\d+)\)/g, (match, text, docId) => {
+        // Find matching source
+        const source = sources.find(s => s.document_id === docId);
+        if (source) {
+          return `[${text}](javascript:void(0))`; // Will be handled by click handler
+        }
+        return match;
+      })
+    : content;
   const components = {
     code({ node, inline, className, children, ...props }: any) {
       return !inline ? (
