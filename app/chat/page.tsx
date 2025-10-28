@@ -281,12 +281,14 @@ function HomeContent() {
       console.log(`📖 Loading chat messages for chat_id: ${chatId}`);
       const result = await getChatMessages(chatId);
 
-      // Convert backend message format to frontend format
-      const formattedMessages: Message[] = result.messages.map((msg: any) => ({
-        role: msg.role,
-        content: msg.content,
-        sources: msg.role === 'assistant' ? (msg.sources || []) : undefined
-      }));
+      // Convert backend message format to frontend format, filter out empty messages
+      const formattedMessages: Message[] = result.messages
+        .filter((msg: any) => msg.content && msg.content.trim())
+        .map((msg: any) => ({
+          role: msg.role,
+          content: msg.content,
+          sources: msg.role === 'assistant' ? (msg.sources || []) : undefined
+        }));
 
       setMessages(formattedMessages);
       console.log(`✅ Loaded ${formattedMessages.length} messages`);
@@ -510,12 +512,22 @@ function HomeContent() {
         loadChatHistory();
       }
 
-      const assistantMessage: Message = {
-        role: "assistant",
-        content: result.answer,
-        sources: result.sources || [],
-      };
-      setMessages((prev) => [...prev, assistantMessage]);
+      // Only add message if there's actual content
+      if (result.answer && result.answer.trim()) {
+        const assistantMessage: Message = {
+          role: "assistant",
+          content: result.answer,
+          sources: result.sources || [],
+        };
+        setMessages((prev) => [...prev, assistantMessage]);
+      } else {
+        // If no answer, show error message
+        const errorMessage: Message = {
+          role: "assistant",
+          content: "I couldn't generate a response. Please try rephrasing your question.",
+        };
+        setMessages((prev) => [...prev, errorMessage]);
+      }
     } catch (error) {
       toast({
         variant: "destructive",
@@ -752,7 +764,7 @@ function HomeContent() {
           ) : (
             <div className="flex-1 flex flex-col min-h-0">
               <div className="flex-1 overflow-y-auto space-y-6 mb-6 px-4 scroll-smooth">
-                {messages.map((message, index) => (
+                {messages.filter(m => m.content && m.content.trim()).map((message, index) => (
                   <div
                     key={index}
                     className={`flex flex-col ${message.role === "user" ? "items-end" : "items-start"}`}
