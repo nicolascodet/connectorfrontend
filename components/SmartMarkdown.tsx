@@ -22,10 +22,10 @@ interface SmartMarkdownProps {
 }
 
 const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) => {
-  // Convert markdown document links to numbered citations
-  const citationMap = new Map<string, number>();
-  const citationSources = new Map<number, Source>();
-  let citationIndex = 1;
+  // Map to track which sources have been cited and their numbers
+  const citationMap = new Map<number, number>(); // source.index -> citation number
+  const citationSources = new Map<number, Source>(); // citation number -> source
+  let citationNumber = 1;
 
   // Helper to get short source name for tooltip
   const getSourceLabel = (source: Source) => {
@@ -41,22 +41,54 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
   let processedContent = content;
 
   if (sources && sources.length > 0) {
-    // Find all markdown links [text](url) and convert to numbered citations
-    processedContent = content.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, (match, text, url) => {
+    // Strategy: Insert citation numbers after document names mentioned in text
+    // For each source in the sources array, find if its document name is mentioned
+    sources.forEach((source) => {
+      const docName = source.document_name;
+      if (!docName || docName.length < 5) return; // Skip very short/empty names
+
+      // Escape special regex characters
+      const escapedName = docName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Look for mentions of this document name in the text
+      // Use word boundaries to avoid partial matches
+      const regex = new RegExp(`\\b${escapedName}\\b`, 'gi');
+
+      // Check if this document is mentioned
+      if (regex.test(processedContent)) {
+        // Assign a citation number to this source
+        if (!citationMap.has(source.index)) {
+          citationMap.set(source.index, citationNumber);
+          citationSources.set(citationNumber, source);
+          citationNumber++;
+        }
+
+        const citNum = citationMap.get(source.index);
+
+        // Replace FIRST occurrence of document name with name + citation
+        let replaced = false;
+        processedContent = processedContent.replace(regex, (match) => {
+          if (replaced) return match; // Only replace first occurrence
+          replaced = true;
+          return `${match}[[CIT:${citNum}]]`;
+        });
+      }
+    });
+
+    // Also handle markdown links if present
+    processedContent = processedContent.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, (match, text, url) => {
       // Check if this URL matches a source file_url
       const source = sources.find(s => s.file_url && url.includes(s.file_url));
       if (source) {
-        // Assign citation number (reuse if same URL)
-        if (!citationMap.has(url)) {
-          citationMap.set(url, citationIndex);
-          citationSources.set(citationIndex, source);
-          citationIndex++;
+        // Assign citation number (reuse if already cited)
+        if (!citationMap.has(source.index)) {
+          citationMap.set(source.index, citationNumber);
+          citationSources.set(citationNumber, source);
+          citationNumber++;
         }
-        const citNum = citationMap.get(url);
-        // Return text with citation marker
+        const citNum = citationMap.get(source.index);
         return `${text}[[CIT:${citNum}]]`;
       }
-      // Keep regular markdown links as-is
       return match;
     });
   }
