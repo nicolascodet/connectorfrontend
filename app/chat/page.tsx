@@ -193,13 +193,15 @@ function HomeContent() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Dynamic thinking messages
+  // Professional thinking messages - institutional style
   const thinkingMessages = [
-    { icon: "🔍", text: "Searching knowledge base..." },
-    { icon: "📊", text: "Analyzing documents..." },
-    { icon: "🧠", text: "Processing information..." },
-    { icon: "🔗", text: "Connecting insights..." },
-    { icon: "✨", text: "Synthesizing response..." },
+    { text: "Searching knowledge base..." },
+    { text: "Analyzing documents..." },
+    { text: "Processing information..." },
+    { text: "Connecting insights..." },
+    { text: "Synthesizing response..." },
+    { text: "Validating sources..." },
+    { text: "Compiling results..." },
   ];
 
   const scrollToBottom = () => {
@@ -230,7 +232,7 @@ function HomeContent() {
       setThinkingStep(0);
       const interval = setInterval(() => {
         setThinkingStep((prev) => (prev + 1) % thinkingMessages.length);
-      }, 2000); // Change message every 2 seconds
+      }, 5000); // Change message every 5 seconds for longer response times
 
       return () => clearInterval(interval);
     }
@@ -525,8 +527,8 @@ function HomeContent() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
-        <Loader2 className="h-12 w-12 animate-spin text-purple-600" />
+      <div className="flex h-screen items-center justify-center bg-gray-50">
+        <Loader2 className="h-12 w-12 animate-spin text-slate-600" />
       </div>
     );
   }
@@ -542,12 +544,12 @@ function HomeContent() {
   ];
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="flex h-screen bg-gray-50">
       {/* Left Sidebar */}
       <div className={`${sidebarOpen ? 'w-72' : 'w-0'} transition-all duration-300 bg-white border-r border-gray-200 flex flex-col overflow-hidden`}>
         {/* Sidebar Header */}
         <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-          <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+          <h1 className="text-xl font-bold text-slate-800">
             HighForce
           </h1>
           <Button
@@ -564,7 +566,7 @@ function HomeContent() {
         <div className="p-3">
           <Button
             onClick={handleNewChat}
-            className="w-full gap-2 bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+            className="w-full gap-2 bg-slate-700 hover:bg-slate-800 text-white"
           >
             <Plus className="h-4 w-4" />
             New Chat
@@ -582,7 +584,7 @@ function HomeContent() {
               onClick={() => handleSelectChat(chat.id)}
               className={`w-full text-left p-3 mb-1 rounded-lg transition-all group relative ${
                 currentChatId === chat.id
-                  ? 'bg-gradient-to-r from-purple-100 to-blue-100 border border-purple-200'
+                  ? 'bg-slate-100 border border-slate-300'
                   : 'hover:bg-gray-50 border border-transparent'
               }`}
             >
@@ -653,22 +655,22 @@ function HomeContent() {
             </Button>
           )}
           {!sidebarOpen && (
-            <h1 className="text-xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
+            <h1 className="text-xl font-bold text-slate-800">
               HighForce
             </h1>
           )}
         </div>
 
-        <div className="flex-1 flex flex-col items-center justify-center p-8">
+        <div className="flex-1 flex flex-col items-center p-8 overflow-hidden">
           <div className="w-full max-w-4xl flex flex-col h-full">
             {messages.length === 0 ? (
             <div className="flex-1 flex flex-col items-center justify-center space-y-12">
               {/* Greeting */}
               <div className="text-center space-y-3">
-                <h1 className="text-6xl font-bold bg-gradient-to-r from-purple-600 via-blue-600 to-pink-600 bg-clip-text text-transparent">
+                <h1 className="text-5xl font-semibold text-slate-800">
                   Good {new Date().getHours() < 12 ? "Morning" : new Date().getHours() < 18 ? "Afternoon" : "Evening"}
                 </h1>
-                <p className="text-2xl text-gray-600">What can I help you with?</p>
+                <p className="text-xl text-slate-600">How can I assist you today?</p>
               </div>
 
               {/* Input */}
@@ -679,13 +681,13 @@ function HomeContent() {
                     onChange={(e) => setInput(e.target.value)}
                     placeholder="Ask anything..."
                     disabled={loadingChat}
-                    className="w-full bg-white/80 backdrop-blur-sm border-gray-200 text-gray-900 placeholder:text-gray-500 rounded-3xl px-6 py-8 text-lg pr-16 shadow-lg focus:ring-2 focus:ring-purple-400"
+                    className="w-full bg-white/80 backdrop-blur-sm border-gray-200 text-gray-900 placeholder:text-gray-500 rounded-3xl px-6 py-8 text-lg pr-16 shadow-lg focus:ring-2 focus:ring-slate-400"
                   />
                   <Button
                     type="submit"
                     disabled={loadingChat || !input.trim()}
                     size="icon"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 border-0"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full w-12 h-12 bg-slate-700 hover:bg-slate-800 border-0"
                   >
                     {loadingChat ? (
                       <Loader2 className="h-5 w-5 animate-spin text-white" />
@@ -733,7 +735,7 @@ function HomeContent() {
                       onClick={chip.action}
                       className="flex items-center gap-2 px-4 py-2.5 bg-white/70 hover:bg-white backdrop-blur-sm rounded-full transition-all hover:scale-105 border border-gray-200/50 shadow-sm hover:shadow-md"
                     >
-                      <Icon className="h-4 w-4 text-purple-600" />
+                      <Icon className="h-4 w-4 text-slate-600" />
                       <span className="text-sm text-gray-700 font-medium">{chip.label}</span>
                     </button>
                   );
@@ -751,7 +753,7 @@ function HomeContent() {
                     <div
                       className={`max-w-[75%] rounded-3xl px-6 py-4 ${
                         message.role === "user"
-                          ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg"
+                          ? "bg-slate-700 text-white shadow-lg"
                           : "bg-white/70 backdrop-blur-sm text-gray-900 border border-gray-200"
                       }`}
                     >
@@ -898,28 +900,26 @@ function HomeContent() {
                 ))}
                 {loadingChat && (
                   <div className="flex justify-start">
-                    <div className="bg-gradient-to-r from-purple-50 to-blue-50 backdrop-blur-sm rounded-3xl px-6 py-4 border border-purple-200/50 shadow-lg animate-pulse">
+                    <div className="bg-white/70 backdrop-blur-sm rounded-3xl px-6 py-4 border border-gray-200 shadow-lg">
                       <div className="flex items-center gap-3">
-                        {/* Dynamic emoji */}
-                        <span className="text-2xl animate-bounce">
-                          {thinkingMessages[thinkingStep].icon}
-                        </span>
-                        <div className="flex flex-col gap-1">
-                          {/* Main thinking message with fade transition */}
-                          <span className="text-sm font-semibold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent animate-fade-in">
+                        {/* Professional loading indicator */}
+                        <Loader2 className="h-4 w-4 animate-spin text-slate-600" />
+                        <div className="flex flex-col gap-1.5">
+                          {/* Main thinking message */}
+                          <span className="text-sm font-medium text-slate-700">
                             {thinkingMessages[thinkingStep].text}
                           </span>
-                          {/* Progress dots */}
+                          {/* Progress bar */}
                           <div className="flex gap-1">
                             {thinkingMessages.map((_, index) => (
                               <div
                                 key={index}
-                                className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                                className={`h-1 rounded-full transition-all duration-500 ${
                                   index === thinkingStep
-                                    ? 'bg-purple-600 w-4'
+                                    ? 'bg-slate-600 w-6'
                                     : index < thinkingStep
-                                      ? 'bg-purple-400'
-                                      : 'bg-gray-300'
+                                      ? 'bg-slate-400 w-4'
+                                      : 'bg-gray-300 w-4'
                                 }`}
                               />
                             ))}
@@ -945,7 +945,7 @@ function HomeContent() {
                     type="submit"
                     disabled={loadingChat || !input.trim()}
                     size="icon"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 hover:from-purple-600 hover:to-blue-600 border-0"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full w-10 h-10 bg-slate-700 hover:bg-slate-800 border-0"
                   >
                     {loadingChat ? (
                       <Loader2 className="h-5 w-5 animate-spin text-white" />

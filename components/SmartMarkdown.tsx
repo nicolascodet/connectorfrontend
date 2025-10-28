@@ -22,52 +22,67 @@ interface SmartMarkdownProps {
 }
 
 const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) => {
-  // Convert markdown document links to numbered citations like ChatGPT
-  const citationMap = new Map<string, number>();
-  const citationSources = new Map<number, Source>();
-  let citationIndex = 1;
+  // Convert markdown links to inline source bubbles
+  const citationMap = new Map<string, Source>();
+
+  // Helper to get short source name
+  const getSourceLabel = (source: Source) => {
+    const sourceKey = source?.source?.toLowerCase() || '';
+    if (sourceKey === 'gmail' || sourceKey === 'outlook') return sourceKey.charAt(0).toUpperCase() + sourceKey.slice(1);
+
+    // Use document name, shortened
+    const name = source?.document_name || 'Document';
+    if (name.length > 25) return name.substring(0, 22) + '...';
+    return name;
+  };
 
   let processedContent = content;
 
   if (sources && sources.length > 0) {
-    // Find all markdown links and convert to citations with special marker
+    // Find all markdown links [text](url) and replace with source bubbles
     processedContent = content.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, (match, text, url) => {
       // Check if this URL matches a source file_url
       const source = sources.find(s => s.file_url && url.includes(s.file_url));
       if (source) {
-        // Assign citation number
-        if (!citationMap.has(url)) {
-          citationMap.set(url, citationIndex);
-          citationSources.set(citationIndex, source);
-          citationIndex++;
-        }
-        const citNum = citationMap.get(url);
-        // Return text with citation using special syntax that we'll replace later
-        return `${text} [[CIT:${citNum}]]`;
+        const sourceId = `source_${source.index}_${Date.now()}`;
+        citationMap.set(sourceId, source);
+        // Remove the markdown link text and just add a marker for the bubble
+        return `[[BUBBLE:${sourceId}:${getSourceLabel(source)}]]`;
       }
       // Keep regular markdown links as-is
       return match;
     });
+
+    // Also detect "View Document" text and similar patterns
+    processedContent = processedContent.replace(/View Document\./g, (match) => {
+      // Try to find the most relevant source (first one)
+      if (sources.length > 0) {
+        const source = sources[0];
+        const sourceId = `source_${source.index}_view_${Date.now()}`;
+        citationMap.set(sourceId, source);
+        return `[[BUBBLE:${sourceId}:${getSourceLabel(source)}]]`;
+      }
+      return match;
+    });
   }
 
-  // After markdown rendering, we'll replace [[CIT:X]] with clickable citations
+  // Render source bubbles
   const renderContentWithCitations = (text: string) => {
-    const parts = text.split(/(\[\[CIT:\d+\]\])/g);
+    const parts = text.split(/(\[\[BUBBLE:[^\]]+\]\])/g);
     return parts.map((part, index) => {
-      const match = part.match(/\[\[CIT:(\d+)\]\]/);
+      const match = part.match(/\[\[BUBBLE:([^:]+):([^\]]+)\]\]/);
       if (match) {
-        const citNum = parseInt(match[1]);
-        const source = citationSources.get(citNum);
+        const [, sourceId, label] = match;
+        const source = citationMap.get(sourceId);
         return (
-          <sup key={index} className="inline-block">
-            <button
-              onClick={() => source && onSourceClick && onSourceClick(source)}
-              className="inline-flex items-center justify-center w-5 h-5 text-[10px] font-semibold text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors cursor-pointer"
-              title={source?.document_name || 'View source'}
-            >
-              [{citNum}]
-            </button>
-          </sup>
+          <button
+            key={index}
+            onClick={() => source && onSourceClick && onSourceClick(source)}
+            className="inline-flex items-center gap-1 px-2 py-0.5 mx-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-full transition-colors cursor-pointer border border-slate-300"
+            title={source?.document_name || 'View source'}
+          >
+            <span>{label}</span>
+          </button>
         );
       }
       return part;
@@ -82,7 +97,7 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
           </code>
         </pre>
       ) : (
-        <code className="bg-blue-50 text-blue-700 px-2 py-1 rounded-md text-sm font-mono font-semibold" {...props}>
+        <code className="bg-slate-100 text-slate-700 px-2 py-1 rounded-md text-sm font-mono font-semibold" {...props}>
           {children}
         </code>
       )
@@ -95,7 +110,7 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
       </div>
     ),
     th: ({ children }: any) => (
-      <th className="border-b-2 border-gray-200 px-6 py-3 bg-gradient-to-r from-blue-50 to-purple-50 text-left font-bold text-gray-800 text-sm uppercase tracking-wider">
+      <th className="border-b-2 border-gray-200 px-6 py-3 bg-slate-100 text-left font-bold text-gray-800 text-sm uppercase tracking-wider">
         {children}
       </th>
     ),
@@ -105,7 +120,7 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
       </td>
     ),
     h1: ({ children }: any) => (
-      <h1 className="text-3xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 mt-6 mb-4 tracking-tight">
+      <h1 className="text-3xl font-bold text-slate-800 mt-6 mb-4 tracking-tight">
         {children}
       </h1>
     ),
@@ -136,7 +151,7 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
       </strong>
     ),
     em: ({ children }: any) => (
-      <em className="text-blue-600 italic font-medium">
+      <em className="text-slate-600 italic font-medium">
         {children}
       </em>
     ),
@@ -151,19 +166,19 @@ const SmartMarkdown = ({ content, sources, onSourceClick }: SmartMarkdownProps) 
       </ol>
     ),
     li: ({ children }: any) => (
-      <li className="text-gray-700 leading-relaxed marker:text-blue-500 marker:font-bold">
+      <li className="text-gray-700 leading-relaxed marker:text-slate-500 marker:font-bold">
         {children}
       </li>
     ),
     blockquote: ({ children }: any) => (
-      <blockquote className="border-l-4 border-blue-500 bg-blue-50/50 pl-6 py-3 rounded-r-lg italic text-gray-700 my-4 shadow-sm">
+      <blockquote className="border-l-4 border-slate-500 bg-slate-50/50 pl-6 py-3 rounded-r-lg italic text-gray-700 my-4 shadow-sm">
         {children}
       </blockquote>
     ),
     a: ({ children, href, ...props }: any) => (
       <a
         href={href}
-        className="text-blue-600 underline decoration-blue-300 decoration-2 underline-offset-2 font-semibold hover:text-blue-700 hover:decoration-blue-500 transition-all"
+        className="text-slate-600 underline decoration-slate-300 decoration-2 underline-offset-2 font-semibold hover:text-slate-700 hover:decoration-slate-500 transition-all"
         {...props}
       >
         {children}
