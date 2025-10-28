@@ -575,9 +575,9 @@ function HomeContent() {
                       )}
                     </div>
 
-                    {/* Source Bubbles - Enhanced with All Document Types */}
+                    {/* Inline Source Citations - ChatGPT/Claude Style */}
                     {message.role === "assistant" && message.sources && message.sources.length > 0 && (
-                      <div className="mt-3 max-w-[75%]">
+                      <div className="mt-2 flex flex-wrap gap-1.5">
                         {(() => {
                           // Deduplicate sources by document_id
                           const uniqueSources = Array.from(
@@ -588,86 +588,39 @@ function HomeContent() {
                             ).values()
                           );
 
-                          const isExpanded = expandedSources.has(index);
-                          // Show first 5, then expand to show all (better for 9 sources case)
-                          const sourcesToShow = isExpanded ? uniqueSources : uniqueSources.slice(0, 5);
-                          const remainingCount = uniqueSources.length - 5;
+                          return uniqueSources.map((source, sourceIndex) => {
+                            const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
+                            // Get short label (Gmail, PDF name, etc)
+                            const sourceLabel = source.document_name
+                              ? source.document_name.length > 20
+                                ? source.document_name.substring(0, 20) + '...'
+                                : source.document_name
+                              : getDocumentTypeName(source);
 
-                          return (
-                            <div className="space-y-2">
-                              {/* Header */}
-                              <div className="flex items-center gap-2 text-xs text-gray-500">
-                                <span className="font-medium">{uniqueSources.length} source{uniqueSources.length !== 1 ? 's' : ''}</span>
-                                {uniqueSources.length > 5 && (
-                                  <button
-                                    onClick={() => {
-                                      const newExpanded = new Set(expandedSources);
-                                      if (isExpanded) {
-                                        newExpanded.delete(index);
-                                      } else {
-                                        newExpanded.add(index);
-                                      }
-                                      setExpandedSources(newExpanded);
-                                    }}
-                                    className="text-blue-600 hover:text-blue-700 font-medium underline"
-                                  >
-                                    {isExpanded ? 'Show less' : `Show all ${uniqueSources.length}`}
-                                  </button>
+                            return (
+                              <button
+                                key={source.document_id || sourceIndex}
+                                onClick={() => hasDocument && handleSourceClick(source)}
+                                disabled={!hasDocument}
+                                className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] font-medium border transition-all ${
+                                  hasDocument
+                                    ? 'bg-gray-100 hover:bg-gray-200 border-gray-300 text-gray-700 cursor-pointer'
+                                    : 'bg-gray-50 border-gray-200 text-gray-400 cursor-not-allowed'
+                                }`}
+                                title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
+                              >
+                                <span className="flex-shrink-0">
+                                  {getDocumentIcon(source)}
+                                </span>
+                                <span className="truncate max-w-[100px]">{sourceLabel}</span>
+                                {source.score && (
+                                  <span className="text-[10px] text-gray-500">
+                                    {(source.score * 100).toFixed(0)}%
+                                  </span>
                                 )}
-                              </div>
-
-                              {/* Source Cards */}
-                              <div className="space-y-1.5">
-                                {sourcesToShow.map((source, sourceIndex) => {
-                                  const hasDocument = source.document_id && source.document_id !== 'None' && source.document_id !== 'null' && source.document_id !== null;
-                                  // Format date nicely
-                                  const sourceDate = source.timestamp ? new Date(source.timestamp).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : null;
-                                  // Get text preview snippet
-                                  const preview = source.text_preview ? source.text_preview.substring(0, 60).replace(/\n/g, ' ').trim() + '...' : null;
-
-                                  return (
-                                    <button
-                                      key={source.document_id || sourceIndex}
-                                      onClick={() => handleSourceClick(source)}
-                                      disabled={!hasDocument}
-                                      className={`w-full text-left flex items-start gap-3 px-3 py-2.5 rounded-xl border transition-all ${
-                                        hasDocument
-                                          ? `cursor-pointer hover:scale-[1.01] ${getDocumentColor(source)}`
-                                          : `cursor-not-allowed opacity-60 ${getDocumentColor(source)}`
-                                      }`}
-                                      title={hasDocument ? `Click to view: ${source.document_name || 'Document'}` : 'Document not available'}
-                                    >
-                                      <div className="flex-shrink-0 mt-0.5">
-                                        {getDocumentIcon(source)}
-                                      </div>
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-2 mb-0.5">
-                                          <span className="font-semibold text-xs truncate">
-                                            {source.document_name || getDocumentTypeName(source)}
-                                          </span>
-                                          {sourceDate && (
-                                            <span className="text-[10px] text-gray-500 flex-shrink-0">
-                                              {sourceDate}
-                                            </span>
-                                          )}
-                                        </div>
-                                        {preview && (
-                                          <p className="text-[11px] text-gray-600 leading-snug line-clamp-1">
-                                            {preview}
-                                          </p>
-                                        )}
-                                      </div>
-                                      {source.score && (
-                                        <div className="flex-shrink-0 px-1.5 py-0.5 bg-white/60 rounded text-[10px] font-semibold text-gray-600">
-                                          {(source.score * 100).toFixed(0)}%
-                                        </div>
-                                      )}
-                                    </button>
-                                  );
-                                })}
-                              </div>
-                            </div>
-                          );
+                              </button>
+                            );
+                          });
                         })()}
                       </div>
                     )}
