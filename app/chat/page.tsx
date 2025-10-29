@@ -904,8 +904,10 @@ function HomeContent() {
                                                   <button
                                                     onClick={(e) => {
                                                       e.stopPropagation();
-                                                      handleSourceClick({ ...source, document_id: source.parent_document_id });
-                                                      setSourcesListOpen(null);
+                                                      if (source.parent_document_id) {
+                                                        handleSourceClick({ ...source, document_id: source.parent_document_id });
+                                                        setSourcesListOpen(null);
+                                                      }
                                                     }}
                                                     className="text-[10px] text-blue-600 hover:text-blue-700 font-semibold underline"
                                                   >
