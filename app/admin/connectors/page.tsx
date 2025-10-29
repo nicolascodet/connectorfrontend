@@ -31,7 +31,7 @@ export default function AdminConnectorsPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/connectors/users`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/connectors/users`,
         { headers: { "X-Admin-Session": token } }
       );
 
@@ -52,7 +52,7 @@ export default function AdminConnectorsPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/connectors/sync`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/connectors/sync`,
         {
           method: "POST",
           headers: {

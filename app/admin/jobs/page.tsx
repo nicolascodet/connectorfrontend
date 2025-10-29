@@ -36,8 +36,8 @@ export default function AdminJobsPage() {
     try {
       const url =
         filter === "all"
-          ? `${process.env.NEXT_PUBLIC_API_URL}/admin/jobs/all?limit=100`
-          : `${process.env.NEXT_PUBLIC_API_URL}/admin/jobs/all?status=${filter}&limit=100`;
+          ? `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/jobs/all?limit=100`
+          : `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/jobs/all?status=${filter}&limit=100`;
 
       const res = await fetch(url, {
         headers: { "X-Admin-Session": token },
@@ -60,7 +60,7 @@ export default function AdminJobsPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/jobs/${jobId}/retry`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/jobs/${jobId}/retry`,
         {
           method: "POST",
           headers: { "X-Admin-Session": token! },

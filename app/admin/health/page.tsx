@@ -33,7 +33,7 @@ export default function AdminHealthPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/health/full`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/health/full`,
         { headers: { "X-Admin-Session": token } }
       );
 
@@ -53,7 +53,7 @@ export default function AdminHealthPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/health/test-flow`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/health/test-flow`,
         {
           method: "POST",
           headers: { "X-Admin-Session": token! },

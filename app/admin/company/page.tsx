@@ -41,7 +41,7 @@ export default function AdminCompanyPage() {
     try {
       // Fetch company settings
       const settingsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/company/settings`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/company/settings`,
         { headers: { "X-Admin-Session": token } }
       );
       if (settingsRes.ok) {
@@ -50,7 +50,7 @@ export default function AdminCompanyPage() {
 
       // Fetch team
       const teamRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/company/team`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/company/team`,
         { headers: { "X-Admin-Session": token } }
       );
       if (teamRes.ok) {

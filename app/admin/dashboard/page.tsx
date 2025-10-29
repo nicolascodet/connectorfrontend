@@ -39,7 +39,7 @@ export default function AdminDashboard() {
     try {
       // Fetch metrics
       const metricsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/metrics/overview`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/metrics/overview`,
         { headers: { "X-Admin-Session": token } }
       );
       if (metricsRes.ok) {
@@ -48,7 +48,7 @@ export default function AdminDashboard() {
 
       // Fetch recent jobs
       const jobsRes = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/jobs/all?limit=10`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/jobs/all?limit=10`,
         { headers: { "X-Admin-Session": token } }
       );
       if (jobsRes.ok) {

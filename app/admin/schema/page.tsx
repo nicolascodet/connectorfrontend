@@ -30,7 +30,7 @@ export default function AdminSchemaPage() {
 
     try {
       const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/admin/schema`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/admin/schema`,
         { headers: { "X-Admin-Session": token } }
       );
 
