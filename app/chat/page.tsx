@@ -910,25 +910,23 @@ function HomeContent() {
                                               <p className="text-[11px] text-gray-600 line-clamp-2">
                                                 {source.text_preview || 'No preview available'}
                                               </p>
-                                              <div className="flex items-center gap-2 mt-1">
-                                                <p className="text-[10px] text-gray-400">
-                                                  {getDocumentTypeName(source)} • {source.timestamp ? new Date(source.timestamp).toLocaleDateString() : 'No date'}
-                                                </p>
-                                                {source.parent_document_id && (
-                                                  <button
-                                                    onClick={(e) => {
-                                                      e.stopPropagation();
-                                                      if (source.parent_document_id) {
-                                                        handleSourceClick({ ...source, document_id: source.parent_document_id });
-                                                        setSourcesListOpen(null);
-                                                      }
-                                                    }}
-                                                    className="text-[10px] text-blue-600 hover:text-blue-700 font-semibold underline"
-                                                  >
-                                                    Explore Chain →
-                                                  </button>
-                                                )}
-                                              </div>
+                                              <p className="text-[10px] text-gray-400 mt-1">
+                                                {getDocumentTypeName(source)} • {source.timestamp ? new Date(source.timestamp).toLocaleDateString() : 'No date'}
+                                              </p>
+                                              {source.parent_document_id && (
+                                                <button
+                                                  onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    if (source.parent_document_id) {
+                                                      handleSourceClick({ ...source, document_id: source.parent_document_id });
+                                                      setSourcesListOpen(null);
+                                                    }
+                                                  }}
+                                                  className="mt-2 text-xs text-blue-600 hover:text-blue-700 font-bold underline decoration-2 flex items-center gap-1"
+                                                >
+                                                  📧 View Parent Email
+                                                </button>
+                                              )}
                                             </div>
                                           </button>
                                         );
