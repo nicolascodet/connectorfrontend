@@ -101,13 +101,22 @@ const FileViewerModal = ({ isOpen, onClose, fileUrl, fileName, mimeType }: FileV
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-hidden bg-gray-50">
+        <div className="flex-1 overflow-auto bg-gray-50 flex items-center justify-center">
           {isViewable ? (
-            <iframe
-              src={fileUrl}
-              className="w-full h-full border-0"
-              title={fileName}
-            />
+            isImage ? (
+              <img
+                src={fileUrl}
+                alt={fileName}
+                className="max-w-full max-h-full object-contain"
+                style={{ imageRendering: 'auto' }}
+              />
+            ) : (
+              <iframe
+                src={fileUrl}
+                className="w-full h-full border-0"
+                title={fileName}
+              />
+            )
           ) : (
             <div className="flex flex-col items-center justify-center h-full p-8 text-center">
               <div className="w-20 h-20 mb-6 rounded-full bg-gradient-to-br from-blue-400 to-purple-400 flex items-center justify-center">
