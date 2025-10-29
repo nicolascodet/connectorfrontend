@@ -44,6 +44,7 @@ interface Source {
   file_url?: string | null;
   mime_type?: string | null;
   file_size_bytes?: number | null;
+  parent_document_id?: string | null;  // For "Explore Chain" to trace back to parent email
 }
 
 interface Message {
@@ -895,9 +896,23 @@ function HomeContent() {
                                               <p className="text-[11px] text-gray-600 line-clamp-2">
                                                 {source.text_preview || 'No preview available'}
                                               </p>
-                                              <p className="text-[10px] text-gray-400 mt-1">
-                                                {getDocumentTypeName(source)} • {source.timestamp ? new Date(source.timestamp).toLocaleDateString() : 'No date'}
-                                              </p>
+                                              <div className="flex items-center gap-2 mt-1">
+                                                <p className="text-[10px] text-gray-400">
+                                                  {getDocumentTypeName(source)} • {source.timestamp ? new Date(source.timestamp).toLocaleDateString() : 'No date'}
+                                                </p>
+                                                {source.parent_document_id && (
+                                                  <button
+                                                    onClick={(e) => {
+                                                      e.stopPropagation();
+                                                      handleSourceClick({ ...source, document_id: source.parent_document_id });
+                                                      setSourcesListOpen(null);
+                                                    }}
+                                                    className="text-[10px] text-blue-600 hover:text-blue-700 font-semibold underline"
+                                                  >
+                                                    Explore Chain →
+                                                  </button>
+                                                )}
+                                              </div>
                                             </div>
                                           </button>
                                         );
