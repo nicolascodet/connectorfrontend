@@ -48,7 +48,11 @@ const FileViewerModal = ({ isOpen, onClose, fileUrl, fileName, mimeType }: FileV
     }
   };
 
-  const isViewable = mimeType?.startsWith("image/") || mimeType?.includes("pdf");
+  // Determine if file is viewable based on mime type OR file extension
+  const isPDF = mimeType?.includes("pdf") || fileUrl.toLowerCase().includes(".pdf") || fileUrl.toLowerCase().includes("pdf");
+  const isImage = mimeType?.startsWith("image/") ||
+    fileUrl.match(/\.(jpg|jpeg|png|gif|bmp|webp|svg)/i);
+  const isViewable = isPDF || isImage;
 
   return (
     <div
