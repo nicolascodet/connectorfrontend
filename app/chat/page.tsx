@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Send, Loader2, Sparkles, FileText, Lightbulb, Calendar, PenTool, Plus, Upload, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, Settings, Link as LinkIcon, Paperclip, ExternalLink, Menu, X, Trash2 } from "lucide-react";
 import SmartMarkdown from '@/components/SmartMarkdown';
+import FileViewerModal from '@/components/FileViewerModal';
 import Link from 'next/link';
 
 interface Status {
@@ -191,6 +192,8 @@ function HomeContent() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [chatHistory, setChatHistory] = useState<any[]>([]);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [fileViewerOpen, setFileViewerOpen] = useState(false);
+  const [fileViewerData, setFileViewerData] = useState<{ url: string; name: string; mimeType?: string | null }>({ url: '', name: '' });
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -360,10 +363,15 @@ function HomeContent() {
         return;
       }
 
-      // If source has a file_url, open it directly in a new tab (for PDFs, attachments, etc.)
+      // If source has a file_url, open it in the file viewer modal (for PDFs, attachments, etc.)
       if (source.file_url) {
-        console.log(`🔗 Opening file URL: ${source.file_url}`);
-        window.open(source.file_url, '_blank');
+        console.log(`🔗 Opening file in modal: ${source.file_url}`);
+        setFileViewerData({
+          url: source.file_url,
+          name: source.document_name,
+          mimeType: source.mime_type
+        });
+        setFileViewerOpen(true);
         return;
       }
 
@@ -781,7 +789,13 @@ function HomeContent() {
                         <p className="text-sm leading-relaxed whitespace-pre-wrap">{message.content}</p>
                       ) : (
                         <div className="relative">
-                          <SmartMarkdown content={message.content} />
+                          <SmartMarkdown
+                            content={message.content}
+                            onLinkClick={(url, fileName) => {
+                              setFileViewerData({ url, name: fileName, mimeType: null });
+                              setFileViewerOpen(true);
+                            }}
+                          />
 
                           {/* Inline Source Citations - Next to text like ChatGPT */}
                           {message.sources && message.sources.length > 0 && (
@@ -1277,6 +1291,15 @@ function HomeContent() {
           </div>
         </div>
       )}
+
+      {/* File Viewer Modal */}
+      <FileViewerModal
+        isOpen={fileViewerOpen}
+        onClose={() => setFileViewerOpen(false)}
+        fileUrl={fileViewerData.url}
+        fileName={fileViewerData.name}
+        mimeType={fileViewerData.mimeType}
+      />
     </div>
   );
 }

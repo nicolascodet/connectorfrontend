@@ -3,9 +3,10 @@ import remarkGfm from 'remark-gfm'
 
 interface SmartMarkdownProps {
   content: string
+  onLinkClick?: (url: string, fileName: string) => void
 }
 
-const SmartMarkdown = ({ content }: SmartMarkdownProps) => {
+const SmartMarkdown = ({ content, onLinkClick }: SmartMarkdownProps) => {
   const components = {
     code({ node, inline, className, children, ...props }: any) {
       return !inline ? (
@@ -87,15 +88,33 @@ const SmartMarkdown = ({ content }: SmartMarkdownProps) => {
         {children}
       </blockquote>
     ),
-    a: ({ children, href, ...props }: any) => (
-      <a
-        href={href}
-        className="text-blue-600 underline decoration-blue-300 decoration-2 underline-offset-2 font-semibold hover:text-blue-700 hover:decoration-blue-500 transition-all"
-        {...props}
-      >
-        {children}
-      </a>
-    ),
+    a: ({ children, href, ...props }: any) => {
+      const handleClick = (e: React.MouseEvent) => {
+        // If onLinkClick is provided and this looks like a file URL, intercept it
+        if (onLinkClick && href && (
+          href.includes('blob.core.windows.net') ||
+          href.includes('file_url') ||
+          href.includes('download') ||
+          href.match(/\.(pdf|png|jpg|jpeg|gif|doc|docx|xls|xlsx|ppt|pptx)$/i)
+        )) {
+          e.preventDefault();
+          // Extract filename from children or URL
+          const fileName = typeof children === 'string' ? children : 'Document';
+          onLinkClick(href, fileName);
+        }
+      };
+
+      return (
+        <a
+          href={href}
+          onClick={handleClick}
+          className="text-blue-600 underline decoration-blue-300 decoration-2 underline-offset-2 font-semibold hover:text-blue-700 hover:decoration-blue-500 transition-all cursor-pointer"
+          {...props}
+        >
+          {children}
+        </a>
+      );
+    },
     hr: () => (
       <hr className="border-0 h-px bg-gradient-to-r from-transparent via-gray-300 to-transparent my-6" />
     )
