@@ -297,3 +297,20 @@ export async function uploadFile(file: File, chatId?: string): Promise<{
 
   return response.json();
 }
+
+// Dashboard APIs
+export async function getQuickBooksOverview(days: number = 30): Promise<any> {
+  return apiGet("/api/v1/dashboard/quickbooks/overview", { days: days.toString() });
+}
+
+export async function getQuickBooksInvoices(days: number = 30, limit: number = 50): Promise<any> {
+  return apiGet("/api/v1/dashboard/quickbooks/invoices", { days: days.toString(), limit: limit.toString() });
+}
+
+export async function getQuickBooksBills(days: number = 30, limit: number = 50): Promise<any> {
+  return apiGet("/api/v1/dashboard/quickbooks/bills", { days: days.toString(), limit: limit.toString() });
+}
+
+export async function getQuickBooksPayments(days: number = 30, limit: number = 50): Promise<any> {
+  return apiGet("/api/v1/dashboard/quickbooks/payments", { days: days.toString(), limit: limit.toString() });
+}

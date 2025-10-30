@@ -13,8 +13,8 @@ export default function Home() {
     if (!loading && !user) {
       router.push("/login");
     } else if (!loading && user) {
-      // Redirect to chat immediately - no dashboard
-      router.push("/chat");
+      // Redirect to dashboard
+      router.push("/dashboard");
     }
   }, [user, loading, router]);
 
