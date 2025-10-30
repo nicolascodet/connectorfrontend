@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { getQuickBooksOverview, getQuickBooksInvoices, getQuickBooksBills, getQuickBooksPayments } from "@/lib/api";
 import { Loader2, DollarSign, FileText, CreditCard, TrendingUp, TrendingDown, Users, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Sidebar from "@/components/Sidebar";
+import Sidebar from "@/components/sidebar";
 
 interface QuickBooksOverview {
   period_days: number;
