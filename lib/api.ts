@@ -112,6 +112,10 @@ export async function syncGoogleDriveOnce(): Promise<any> {
   return apiGet("/sync/once/drive");
 }
 
+export async function syncQuickBooksOnce(): Promise<any> {
+  return apiGet("/sync/once/quickbooks");
+}
+
 export async function handleOAuthCallback(data: {
   connectionId: string;
   providerConfigKey: string;

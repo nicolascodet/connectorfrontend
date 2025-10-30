@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
-import { fetchStatus, startConnect, syncOutlookOnce, syncGmailOnce, syncGoogleDriveOnce } from "@/lib/api";
+import { fetchStatus, startConnect, syncOutlookOnce, syncGmailOnce, syncGoogleDriveOnce, syncQuickBooksOnce } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Loader2, Mail, HardDrive, RefreshCw, Plug2, Building2, DollarSign } from "lucide-react";
@@ -45,14 +45,16 @@ export default function ConnectionsPage() {
     "google-drive": boolean;
     quickbooks: boolean;
   }>({ microsoft: false, gmail: false, "google-drive": false, quickbooks: false });
-  const [loadingSync, setLoadingSync] = useState<{ 
+  const [loadingSync, setLoadingSync] = useState<{
     outlook: boolean;
     gmail: boolean;
     google_drive: boolean;
+    quickbooks: boolean;
   }>({
     outlook: false,
     gmail: false,
     google_drive: false,
+    quickbooks: false,
   });
 
   useEffect(() => {
@@ -192,6 +194,26 @@ export default function ConnectionsPage() {
       });
     } finally {
       setLoadingSync((prev) => ({ ...prev, google_drive: false }));
+    }
+  };
+
+  const handleSyncQuickBooks = async () => {
+    setLoadingSync((prev) => ({ ...prev, quickbooks: true }));
+    try {
+      const result = await syncQuickBooksOnce();
+      await loadStatus();
+      toast({
+        title: "Sync Complete",
+        description: result.message || "QuickBooks synced successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Sync Failed",
+        description: error instanceof Error ? error.message : "Failed to sync QuickBooks",
+      });
+    } finally {
+      setLoadingSync((prev) => ({ ...prev, quickbooks: false }));
     }
   };
 
@@ -408,6 +430,22 @@ export default function ConnectionsPage() {
                     "Connect QuickBooks"
                   )}
                 </Button>
+
+                {status?.providers?.quickbooks?.connected && (
+                  <Button
+                    onClick={handleSyncQuickBooks}
+                    disabled={loadingSync.quickbooks}
+                    variant="outline"
+                    className="w-full rounded-xl py-4 border-2"
+                  >
+                    {loadingSync.quickbooks ? (
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                    ) : (
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                    )}
+                    {loadingSync.quickbooks ? "Syncing..." : "Sync Now"}
+                  </Button>
+                )}
               </div>
             </div>
           </div>
