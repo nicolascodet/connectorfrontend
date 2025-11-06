@@ -251,30 +251,50 @@ function SearchPageContent() {
                           </button>
 
                           {/* Show first 2 sources always, rest when expanded */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {message.sources.slice(0, expandedSources.has(idx) ? message.sources.length : 2).map((source, sourceIdx) => (
-                              <div
-                                key={sourceIdx}
-                                className="bg-gray-50 rounded-2xl p-4 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-100"
-                              >
-                                <div className="flex items-start gap-3">
-                                  <div className="mt-0.5">
-                                    {getDocumentIcon(source)}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-900 truncate mb-1">
-                                      {source.document_name}
-                                    </p>
-                                    <p className="text-xs text-gray-500 mb-2">
-                                      {getDocumentTypeName(source)} • {new Date(source.timestamp).toLocaleDateString()}
-                                    </p>
-                                    <p className="text-xs text-gray-600 line-clamp-2">
-                                      {source.text_preview}
-                                    </p>
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                            {message.sources.slice(0, expandedSources.has(idx) ? message.sources.length : 2).map((source, sourceIdx) => {
+                              const isClickable = source.file_url || source.document_id;
+                              const handleClick = () => {
+                                if (source.file_url) {
+                                  window.open(source.file_url, '_blank');
+                                } else if (source.document_id) {
+                                  // For emails or other documents, could open in a modal or detail view
+                                  console.log('Document ID:', source.document_id);
+                                }
+                              };
+
+                              return (
+                                <div
+                                  key={sourceIdx}
+                                  onClick={isClickable ? handleClick : undefined}
+                                  className={`bg-gray-50 rounded-xl p-3 transition-colors border border-gray-100 ${
+                                    isClickable ? 'hover:bg-gray-100 cursor-pointer hover:border-blue-200' : ''
+                                  }`}
+                                >
+                                  <div className="flex items-start gap-2">
+                                    <div className="mt-0.5 flex-shrink-0">
+                                      {getDocumentIcon(source)}
+                                    </div>
+                                    <div className="flex-1 min-w-0">
+                                      <div className="flex items-start justify-between gap-1 mb-1">
+                                        <p className="text-xs font-medium text-gray-900 truncate">
+                                          {source.document_name}
+                                        </p>
+                                        {isClickable && (
+                                          <ExternalLink className="h-3 w-3 text-gray-400 flex-shrink-0" />
+                                        )}
+                                      </div>
+                                      <p className="text-xs text-gray-500 mb-1.5">
+                                        {getDocumentTypeName(source)}
+                                      </p>
+                                      <p className="text-xs text-gray-600 line-clamp-2 leading-tight">
+                                        {source.text_preview}
+                                      </p>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
 
                           {/* Show "View more" hint if collapsed and has more than 2 */}
