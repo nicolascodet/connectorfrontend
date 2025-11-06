@@ -1,4 +1,5 @@
 import { supabase } from "./supabase";
+import { withCache, cache } from "./cache";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 
@@ -96,24 +97,33 @@ export async function fetchStatus(): Promise<{
     };
   };
 }> {
-  return apiGet("/status");
+  return withCache("connection-status", () => apiGet("/status"), 30); // Cache for 30 seconds
 }
 
 export async function syncOutlookOnce(): Promise<any> {
-  return apiGet("/sync/once");
+  const result = await apiGet("/sync/once");
+  cache.invalidate("connection-status");
+  return result;
 }
 
 export async function syncGmailOnce(): Promise<any> {
-  return apiGet("/sync/once/gmail");
+  const result = await apiGet("/sync/once/gmail");
+  cache.invalidate("connection-status");
+  return result;
 }
 
 export async function syncGoogleDriveOnce(): Promise<any> {
   // Backend endpoint is /sync/once/drive
-  return apiGet("/sync/once/drive");
+  const result = await apiGet("/sync/once/drive");
+  cache.invalidate("connection-status");
+  return result;
 }
 
 export async function syncQuickBooksOnce(): Promise<any> {
-  return apiGet("/sync/once/quickbooks");
+  const result = await apiGet("/sync/once/quickbooks");
+  cache.invalidate("connection-status");
+  cache.invalidatePattern("quickbooks-"); // Invalidate all QuickBooks dashboard caches
+  return result;
 }
 
 export async function handleOAuthCallback(data: {
@@ -192,11 +202,11 @@ export async function searchOptimized(data: {
 
 // Chat History APIs
 export async function getChatHistory(): Promise<{ chats: ChatHistoryItem[] }> {
-  return apiGet("/api/v1/chats");
+  return withCache("chat-history", () => apiGet("/api/v1/chats"), 60); // Cache for 60 seconds
 }
 
 export async function getChatMessages(chatId: string): Promise<{ messages: ChatMessage[] }> {
-  return apiGet(`/api/v1/chats/${chatId}/messages`);
+  return withCache(`chat-messages-${chatId}`, () => apiGet(`/api/v1/chats/${chatId}/messages`), 300); // Cache for 5 minutes
 }
 
 export async function createNewChat(title?: string): Promise<{ chat_id: string }> {
@@ -256,7 +266,15 @@ export async function sendChatMessage(question: string, chatId?: string): Promis
     throw new Error(`Chat failed: ${response.status} ${response.statusText} - ${errorText}`);
   }
 
-  return response.json();
+  const result = await response.json();
+
+  // Invalidate caches after sending a message
+  cache.invalidate("chat-history");
+  if (result.chat_id) {
+    cache.invalidate(`chat-messages-${result.chat_id}`);
+  }
+
+  return result;
 }
 
 export interface Attachment {
@@ -327,17 +345,17 @@ export async function uploadFile(file: File, chatId?: string): Promise<{
 
 // Dashboard APIs
 export async function getQuickBooksOverview(days: number = 30): Promise<any> {
-  return apiGet("/api/v1/dashboard/quickbooks/overview", { days: days.toString() });
+  return withCache(`quickbooks-overview-${days}`, () => apiGet("/api/v1/dashboard/quickbooks/overview", { days: days.toString() }), 120); // Cache for 2 minutes
 }
 
 export async function getQuickBooksInvoices(days: number = 30, limit: number = 50): Promise<any> {
-  return apiGet("/api/v1/dashboard/quickbooks/invoices", { days: days.toString(), limit: limit.toString() });
+  return withCache(`quickbooks-invoices-${days}-${limit}`, () => apiGet("/api/v1/dashboard/quickbooks/invoices", { days: days.toString(), limit: limit.toString() }), 120);
 }
 
 export async function getQuickBooksBills(days: number = 30, limit: number = 50): Promise<any> {
-  return apiGet("/api/v1/dashboard/quickbooks/bills", { days: days.toString(), limit: limit.toString() });
+  return withCache(`quickbooks-bills-${days}-${limit}`, () => apiGet("/api/v1/dashboard/quickbooks/bills", { days: days.toString(), limit: limit.toString() }), 120);
 }
 
 export async function getQuickBooksPayments(days: number = 30, limit: number = 50): Promise<any> {
-  return apiGet("/api/v1/dashboard/quickbooks/payments", { days: days.toString(), limit: limit.toString() });
+  return withCache(`quickbooks-payments-${days}-${limit}`, () => apiGet("/api/v1/dashboard/quickbooks/payments", { days: days.toString(), limit: limit.toString() }), 120);
 }
