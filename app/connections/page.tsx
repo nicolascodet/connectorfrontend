@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { fetchStatus, startConnect, syncOutlookOnce, syncGmailOnce, syncGoogleDriveOnce, syncQuickBooksOnce } from "@/lib/api";
@@ -163,7 +163,8 @@ export default function ConnectionsPage() {
 
   if (!user) return null;
 
-  const services = [
+  // Build services array inside render so it updates when status changes
+  const services = useMemo(() => [
     {
       id: "outlook",
       name: "Outlook",
@@ -204,7 +205,7 @@ export default function ConnectionsPage() {
       syncKey: "quickbooks" as const,
       connected: status?.providers?.quickbooks?.connected || false,
     },
-  ];
+  ], [status]);
 
   return (
     <div className="flex h-screen bg-gray-50">
