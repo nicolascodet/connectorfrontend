@@ -6,7 +6,7 @@ import { sendChatMessage, getChatMessages } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
-import { Send, Loader2, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, FileText, ExternalLink, Sparkles } from "lucide-react";
+import { Send, Loader2, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, FileText, ExternalLink, Sparkles, ChevronDown, ChevronRight } from "lucide-react";
 import SmartMarkdown from '@/components/SmartMarkdown';
 
 interface Source {
@@ -65,6 +65,7 @@ function SearchPageContent() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [loadingChat, setLoadingChat] = useState(false);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
+  const [expandedSources, setExpandedSources] = useState<Set<number>>(new Set());
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -227,11 +228,31 @@ function SearchPageContent() {
                       {/* Sources */}
                       {message.sources && message.sources.length > 0 && (
                         <div className="mt-6 pt-6 border-t border-gray-100">
-                          <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-4">
-                            Sources ({message.sources.length})
-                          </p>
+                          <button
+                            onClick={() => {
+                              const newExpanded = new Set(expandedSources);
+                              if (newExpanded.has(idx)) {
+                                newExpanded.delete(idx);
+                              } else {
+                                newExpanded.add(idx);
+                              }
+                              setExpandedSources(newExpanded);
+                            }}
+                            className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
+                          >
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                              Sources ({message.sources.length})
+                            </p>
+                            {expandedSources.has(idx) ? (
+                              <ChevronDown className="h-4 w-4 text-gray-500" />
+                            ) : (
+                              <ChevronRight className="h-4 w-4 text-gray-500" />
+                            )}
+                          </button>
+
+                          {/* Show first 2 sources always, rest when expanded */}
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                            {message.sources.map((source, sourceIdx) => (
+                            {message.sources.slice(0, expandedSources.has(idx) ? message.sources.length : 2).map((source, sourceIdx) => (
                               <div
                                 key={sourceIdx}
                                 className="bg-gray-50 rounded-2xl p-4 hover:bg-gray-100 transition-colors cursor-pointer border border-gray-100"
@@ -255,6 +276,15 @@ function SearchPageContent() {
                               </div>
                             ))}
                           </div>
+
+                          {/* Show "View more" hint if collapsed and has more than 2 */}
+                          {!expandedSources.has(idx) && message.sources.length > 2 && (
+                            <div className="mt-3 text-center">
+                              <span className="text-xs text-gray-400">
+                                +{message.sources.length - 2} more sources
+                              </span>
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
