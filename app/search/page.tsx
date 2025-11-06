@@ -6,7 +6,7 @@ import { sendChatMessage, getChatMessages } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
-import { Send, Loader2, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, FileText, ExternalLink, Sparkles, ChevronDown, ChevronRight } from "lucide-react";
+import { Send, Loader2, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, FileText, ExternalLink, Sparkles, ChevronDown, ChevronRight, Download, X } from "lucide-react";
 import SmartMarkdown from '@/components/SmartMarkdown';
 
 interface Source {
@@ -347,22 +347,36 @@ function SearchPageContent() {
       {/* Preview Modal */}
       {previewUrl && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setPreviewUrl(null)}>
-          <div className="bg-white rounded-3xl w-full max-w-6xl h-5/6 flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Document Preview</h3>
-              <button
-                onClick={() => setPreviewUrl(null)}
-                className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
-              >
-                <span className="text-gray-500 text-xl">&times;</span>
-              </button>
+              <div className="flex items-center gap-2">
+                <a
+                  href={previewUrl}
+                  download
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-xl text-sm font-medium transition-colors"
+                >
+                  <Download className="h-4 w-4" />
+                  <span>Download</span>
+                </a>
+                <button
+                  onClick={() => setPreviewUrl(null)}
+                  className="w-9 h-9 rounded-xl hover:bg-gray-100 flex items-center justify-center transition-colors"
+                >
+                  <X className="h-5 w-5 text-gray-500" />
+                </button>
+              </div>
             </div>
-            <div className="flex-1 overflow-hidden">
-              <iframe
-                src={previewUrl}
-                className="w-full h-full"
-                title="Document Preview"
-              />
+            <div className="flex-1 overflow-hidden flex items-center justify-center bg-gray-50 p-8">
+              <div className="w-full h-full flex items-center justify-center">
+                <iframe
+                  src={previewUrl}
+                  className="w-full h-full rounded-2xl border border-gray-200 bg-white shadow-lg"
+                  title="Document Preview"
+                />
+              </div>
             </div>
           </div>
         </div>
