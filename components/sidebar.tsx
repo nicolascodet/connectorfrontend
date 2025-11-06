@@ -8,6 +8,8 @@ import {
   ChevronDown,
   LogOut,
   Plug,
+  LayoutDashboard,
+  Search,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
@@ -27,7 +29,8 @@ export default function Sidebar({ user }: SidebarProps) {
   const [loadingChats, setLoadingChats] = useState(false);
 
   const navigation = [
-    // Removed fake pages - only chat and connections work currently
+    { name: "Dashboard", href: "/", icon: LayoutDashboard },
+    { name: "Search", href: "/search", icon: Search },
   ];
 
   // Load chat history
@@ -137,7 +140,30 @@ export default function Sidebar({ user }: SidebarProps) {
           </div>
         </div>
 
-        {/* Navigation removed - fake pages deleted */}
+        {/* Navigation */}
+        <div className="flex-shrink-0 mb-6">
+          <div className="text-xs font-semibold text-white/50 mb-2 px-4">Menu</div>
+          <nav className="space-y-1">
+            {navigation.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href));
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
+                    isActive
+                      ? "bg-white/10 text-white"
+                      : "text-white/70 hover:bg-white/5 hover:text-white"
+                  }`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="text-sm font-medium">{item.name}</span>
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
       </div>
 
       {/* User Section */}
