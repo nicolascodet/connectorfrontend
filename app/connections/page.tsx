@@ -219,7 +219,7 @@ export default function ConnectionsPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+      <div className="flex h-screen items-center justify-center bg-gray-50">
         <Loader2 className="h-12 w-12 animate-spin text-purple-600" />
       </div>
     );
@@ -228,7 +228,7 @@ export default function ConnectionsPage() {
   if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50">
+    <div className="flex h-screen bg-gray-50">
       <TopNav />
 
       <div className="flex-1 overflow-y-auto p-8 pt-20">

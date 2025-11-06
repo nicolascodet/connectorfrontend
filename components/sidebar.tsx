@@ -87,8 +87,8 @@ export default function Sidebar({ user }: SidebarProps) {
       <div className="p-6">
         <Link href="/">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-pink-500" />
-            <span className="text-xl font-semibold text-white">Cortex</span>
+            <div className="w-8 h-8 rounded-lg bg-blue-600" />
+            <span className="text-xl font-semibold text-white">HighForce</span>
           </div>
         </Link>
       </div>
