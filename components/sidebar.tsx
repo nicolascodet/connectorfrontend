@@ -71,10 +71,10 @@ export default function Sidebar({ user }: SidebarProps) {
   return (
     <div className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col">
       {/* Logo */}
-      <div className="px-5 py-3 border-b border-gray-100">
+      <div className="px-5 py-2 border-b border-gray-100">
         <Link href="/">
           <div className="cursor-pointer hover:opacity-80 transition-opacity ml-3">
-            <img src="/highforce-logo.png" alt="HighForce" className="h-32 w-auto" style={{ objectFit: 'contain', objectPosition: 'left center' }} />
+            <img src="/highforce-logo.png" alt="HighForce" className="h-36 w-auto" style={{ objectFit: 'contain', objectPosition: 'left center' }} />
           </div>
         </Link>
       </div>
