@@ -4,14 +4,19 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  MessageSquarePlus,
   ChevronDown,
   LogOut,
   Plug,
   LayoutDashboard,
-  Search,
+  Search as SearchIcon,
+  Users,
+  FileText,
+  Globe,
+  MessageCircle,
+  CreditCard,
+  FileOutput,
+  Settings,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/auth-context";
 import { getChatHistory, createNewChat, type ChatHistoryItem } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
@@ -25,187 +30,108 @@ export default function Sidebar({ user }: SidebarProps) {
   const router = useRouter();
   const { signOut } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
-  const [loadingChats, setLoadingChats] = useState(false);
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
-    { name: "Search", href: "/search", icon: Search },
+    { name: "Customers", href: "/customers", icon: Users, dropdown: true },
+    { name: "All reports", href: "/reports", icon: FileText },
+    { name: "Geography", href: "/geography", icon: Globe },
+    { name: "Conversations", href: "/conversations", icon: MessageCircle },
+    { name: "Deals", href: "/deals", icon: CreditCard },
+    { name: "Export", href: "/export", icon: FileOutput },
   ];
 
-  // Load chat history
-  useEffect(() => {
-    if (user) {
-      loadChatHistory();
-    }
-  }, [user]);
-
-  const loadChatHistory = async () => {
-    try {
-      setLoadingChats(true);
-      const result = await getChatHistory();
-      setChatHistory(result.chats);
-    } catch (error) {
-      console.error("Failed to load chat history:", error);
-    } finally {
-      setLoadingChats(false);
-    }
-  };
-
-  const handleNewChat = async () => {
-    try {
-      const result = await createNewChat();
-      router.push(`/?chat_id=${result.chat_id}`);
-      toast({ title: "New chat created" });
-      loadChatHistory(); // Refresh history
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Failed to create chat",
-        description: error instanceof Error ? error.message : "Unknown error",
-      });
-    }
-  };
-
-  const formatTimestamp = (timestamp: string) => {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now.getTime() - date.getTime();
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(hours / 24);
-
-    if (hours < 1) return "Just now";
-    if (hours < 24) return `${hours} hour${hours > 1 ? "s" : ""} ago`;
-    if (days === 1) return "Yesterday";
-    if (days < 7) return `${days} days ago`;
-    return date.toLocaleDateString();
-  };
-
   return (
-    <div className="w-64 h-screen bg-gray-900/95 backdrop-blur-xl border-r border-white/10 flex flex-col overflow-hidden">
-      {/* Logo - Clickable to go home */}
-      <div className="p-6">
+    <div className="w-64 h-screen bg-white border-r border-gray-200 flex flex-col">
+      {/* Logo */}
+      <div className="p-6 border-b border-gray-100">
         <Link href="/">
           <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-lg bg-blue-600" />
-            <span className="text-xl font-semibold text-white">HighForce</span>
+            <div className="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center">
+              <span className="text-white font-bold text-lg">H</span>
+            </div>
+            <span className="text-xl font-semibold text-gray-900">HighForce</span>
           </div>
         </Link>
       </div>
 
-      {/* New Chat Button */}
-      <div className="px-4 mb-4">
-        <Button 
-          onClick={handleNewChat}
-          className="w-full justify-start gap-3 bg-white/10 hover:bg-white/20 text-white border border-white/20 rounded-xl py-6"
-        >
-          <MessageSquarePlus className="h-5 w-5" />
-          New chat
-        </Button>
+      {/* Search */}
+      <div className="px-4 py-4">
+        <Link href="/search">
+          <div className="flex items-center gap-3 px-4 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl cursor-pointer transition-colors">
+            <SearchIcon className="h-4 w-4 text-gray-500" />
+            <span className="text-sm text-gray-600">Search</span>
+          </div>
+        </Link>
       </div>
 
-      {/* Scrollable middle section - contains chats and navigation */}
-      <div className="flex-1 flex flex-col min-h-0 px-4">
-        {/* Chat History - Constrained height */}
-        <div className="flex-shrink-0">
-          <div className="text-xs font-semibold text-white/50 mb-2 px-4">Recent Chats</div>
-          <div className="space-y-1 mb-6 max-h-64 overflow-y-auto">
-            {loadingChats ? (
-              <div className="text-center text-white/50 text-sm py-4">Loading...</div>
-            ) : chatHistory.length === 0 ? (
-              <div className="text-center text-white/50 text-sm py-4">No chats yet</div>
-            ) : (
-              <>
-                {chatHistory.slice(0, 5).map((chat) => (
-                  <Link
-                    key={chat.id}
-                    href={`/?chat_id=${chat.id}`}
-                    className="block w-full text-left px-4 py-3 rounded-xl text-white/70 hover:bg-white/5 hover:text-white transition-colors"
-                  >
-                    <div className="text-sm truncate">{chat.title || "New Chat"}</div>
-                    <div className="text-xs text-white/50 mt-1">
-                      {formatTimestamp(chat.updated_at)} • {chat.message_count} messages
-                    </div>
-                  </Link>
-                ))}
-                {chatHistory.length > 5 && (
-                  <div className="text-center py-2">
-                    <span className="text-xs text-white/40">
-                      +{chatHistory.length - 5} more chats
-                    </span>
-                  </div>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        {/* Navigation */}
-        <div className="flex-shrink-0 mb-6">
-          <div className="text-xs font-semibold text-white/50 mb-2 px-4">Menu</div>
-          <nav className="space-y-1">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href || (item.href !== "/" && pathname?.startsWith(item.href));
-              return (
-                <Link
-                  key={item.name}
-                  href={item.href}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-colors ${
-                    isActive
-                      ? "bg-white/10 text-white"
-                      : "text-white/70 hover:bg-white/5 hover:text-white"
-                  }`}
-                >
+      {/* Navigation */}
+      <div className="flex-1 px-4 overflow-y-auto">
+        <nav className="space-y-1">
+          {navigation.map((item) => {
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex items-center justify-between px-4 py-2.5 rounded-xl transition-colors ${
+                  isActive
+                    ? "bg-gray-100 text-gray-900"
+                    : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
+                }`}
+              >
+                <div className="flex items-center gap-3">
                   <Icon className="h-5 w-5" />
                   <span className="text-sm font-medium">{item.name}</span>
-                </Link>
-              );
-            })}
-          </nav>
-        </div>
+                </div>
+                {item.dropdown && <ChevronDown className="h-4 w-4 text-gray-400" />}
+              </Link>
+            );
+          })}
+        </nav>
       </div>
 
       {/* User Section */}
-      <div className="p-4 pb-6 border-t border-white/10">
-        {settingsOpen ? (
-          <div className="bg-white/10 rounded-2xl p-4 space-y-2 mb-3">
-            <Link href="/connections" className="flex items-center gap-3 px-3 py-2 w-full text-left text-white/70 hover:text-white rounded-lg hover:bg-white/10 transition-colors">
-              <Plug className="h-4 w-4" />
-              <span className="text-sm">Connections</span>
-            </Link>
-            <div className="h-px bg-white/10 my-2" />
-            <button
-              onClick={() => signOut()}
-              className="flex items-center gap-3 px-3 py-2 w-full text-left text-red-400 hover:text-red-300 rounded-lg hover:bg-white/10 transition-colors"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="text-sm">Log out</span>
-            </button>
+      <div className="p-4 border-t border-gray-100">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
+            <span className="text-white text-sm font-medium">
+              {user?.email?.[0]?.toUpperCase() || "U"}
+            </span>
           </div>
-        ) : null}
-
-        <button
-          onClick={() => setSettingsOpen(!settingsOpen)}
-          className="flex items-center gap-3 w-full px-3 py-3 rounded-xl hover:bg-white/10 transition-colors"
-        >
-          <div className="w-8 h-8 rounded-full bg-orange-500 flex items-center justify-center text-white font-semibold">
-            {user?.email?.[0]?.toUpperCase() || "S"}
-          </div>
-          <div className="flex-1 text-left">
-            <p className="text-sm font-medium text-white">
-              {user?.email?.split("@")[0] || "Sophia"}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-gray-900 truncate">
+              {user?.email?.split("@")[0] || "User"}
             </p>
-            <p className="text-xs text-white/60">Pro Plan</p>
+            <p className="text-xs text-gray-500">Admin</p>
           </div>
-          <ChevronDown
-            className={`h-4 w-4 text-white/60 transition-transform ${
-              settingsOpen ? "rotate-180" : ""
-            }`}
-          />
-        </button>
+        </div>
+
+        <div className="space-y-1">
+          <button
+            onClick={() => router.push("/connections")}
+            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+          >
+            <Plug className="h-4 w-4" />
+            <span>Connections</span>
+          </button>
+          <button
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+          >
+            <Settings className="h-4 w-4" />
+            <span>Settings</span>
+          </button>
+          <button
+            onClick={() => signOut()}
+            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+          >
+            <LogOut className="h-4 w-4" />
+            <span>Log out</span>
+          </button>
+        </div>
       </div>
     </div>
   );
 }
-
