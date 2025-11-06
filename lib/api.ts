@@ -359,3 +359,55 @@ export async function getQuickBooksBills(days: number = 30, limit: number = 50):
 export async function getQuickBooksPayments(days: number = 30, limit: number = 50): Promise<any> {
   return withCache(`quickbooks-payments-${days}-${limit}`, () => apiGet("/api/v1/dashboard/quickbooks/payments", { days: days.toString(), limit: limit.toString() }), 120);
 }
+
+// Intelligence APIs
+export async function getDailyIntelligence(date?: string): Promise<any> {
+  const path = date ? `/api/v1/intelligence/daily` : `/api/v1/intelligence/daily/latest`;
+  const params = date ? { date } : undefined;
+  return withCache(`daily-intelligence-${date || "latest"}`, () => apiGet(path, params), 300); // 5 min cache
+}
+
+export async function getWeeklyIntelligence(weekStart?: string): Promise<any> {
+  const path = weekStart ? `/api/v1/intelligence/weekly` : `/api/v1/intelligence/weekly/latest`;
+  const params = weekStart ? { week_start: weekStart } : undefined;
+  return withCache(`weekly-intelligence-${weekStart || "latest"}`, () => apiGet(path, params), 600); // 10 min cache
+}
+
+export async function getMonthlyIntelligence(month?: string): Promise<any> {
+  const path = month ? `/api/v1/intelligence/monthly` : `/api/v1/intelligence/monthly/latest`;
+  const params = month ? { month } : undefined;
+  return withCache(`monthly-intelligence-${month || "latest"}`, () => apiGet(path, params), 1800); // 30 min cache
+}
+
+export async function getDailyTrends(days: number = 30): Promise<any> {
+  return withCache(`daily-trends-${days}`, () => apiGet("/api/v1/intelligence/trends/daily", { days: days.toString() }), 300);
+}
+
+export async function getWeeklyTrends(weeks: number = 12): Promise<any> {
+  return withCache(`weekly-trends-${weeks}`, () => apiGet("/api/v1/intelligence/trends/weekly", { weeks: weeks.toString() }), 600);
+}
+
+export async function getMonthlyTrends(months: number = 12): Promise<any> {
+  return withCache(`monthly-trends-${months}`, () => apiGet("/api/v1/intelligence/trends/monthly", { months: months.toString() }), 1800);
+}
+
+// Analytics APIs (to be implemented in backend)
+export async function getTrendingEntities(days: number = 30, limit: number = 10): Promise<any> {
+  return apiGet("/api/v1/analytics/entities/trending", { days: days.toString(), limit: limit.toString() });
+}
+
+export async function getCommunicationPatterns(days: number = 30): Promise<any> {
+  return apiGet("/api/v1/analytics/communication/patterns", { days: days.toString() });
+}
+
+export async function getDealMomentum(days: number = 30): Promise<any> {
+  return apiGet("/api/v1/analytics/deals/momentum", { days: days.toString() });
+}
+
+export async function getSentimentAnalysis(days: number = 30): Promise<any> {
+  return apiGet("/api/v1/analytics/sentiment/analysis", { days: days.toString() });
+}
+
+export async function getRelationshipNetwork(): Promise<any> {
+  return apiGet("/api/v1/analytics/relationships/network");
+}

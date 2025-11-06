@@ -79,6 +79,28 @@ function SearchPageContent() {
     "Examining",
     "Scanning",
     "Investigating",
+    "Coalescing",
+    "Manifesting",
+    "Brewing",
+    "Synthesizing",
+    "Aggregating",
+    "Compiling",
+    "Orchestrating",
+    "Curating",
+    "Assembling",
+    "Materializing",
+    "Conjuring",
+    "Foraging",
+    "Mining",
+    "Excavating",
+    "Harvesting",
+    "Distilling",
+    "Weaving",
+    "Crafting",
+    "Summoning",
+    "Channeling",
+    "Divining",
+    "Contemplating",
   ];
 
   // Cycle through loading texts
@@ -202,7 +224,7 @@ function SearchPageContent() {
 
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-8 py-6">
-          <div className="max-w-5xl mx-auto space-y-6">
+          <div className="max-w-5xl mx-auto space-y-4">
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center py-20">
                 <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6">
@@ -245,14 +267,14 @@ function SearchPageContent() {
                   </div>
                 ) : (
                   <div className="max-w-4xl w-full">
-                    <div className="bg-white rounded-3xl border border-gray-200 p-6">
+                    <div className="bg-white rounded-2xl border border-gray-200 p-5">
                       <div className="prose prose-sm max-w-none">
                         <SmartMarkdown content={message.content} />
                       </div>
 
                       {/* Sources */}
                       {message.sources && message.sources.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-gray-100">
+                        <div className="mt-3 pt-3 border-t border-gray-100">
                           <button
                             onClick={() => {
                               const newExpanded = new Set(expandedSources);
@@ -263,7 +285,7 @@ function SearchPageContent() {
                               }
                               setExpandedSources(newExpanded);
                             }}
-                            className="w-full flex items-center justify-between mb-4 hover:opacity-70 transition-opacity"
+                            className="w-full flex items-center justify-between mb-3 hover:opacity-70 transition-opacity"
                           >
                             <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
                               Sources ({message.sources.length})
