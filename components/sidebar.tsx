@@ -74,7 +74,7 @@ export default function Sidebar({ user }: SidebarProps) {
       <div className="px-5 py-5 border-b border-gray-100">
         <Link href="/">
           <div className="cursor-pointer hover:opacity-80 transition-opacity">
-            <img src="/highforce-logo.png" alt="HighForce" className="h-12 w-auto" />
+            <img src="/highforce-logo.png" alt="HighForce" className="h-16 w-auto" />
           </div>
         </Link>
       </div>
