@@ -74,7 +74,7 @@ export default function Sidebar({ user }: SidebarProps) {
       <div className="px-8 py-6 border-b border-gray-100">
         <Link href="/">
           <div className="cursor-pointer hover:opacity-80 transition-opacity">
-            <img src="/highforce-logo.png" alt="HighForce" className="h-40 w-auto" />
+            <img src="/highforce-logo.png" alt="HighForce" className="h-24 w-auto" />
           </div>
         </Link>
       </div>
@@ -181,13 +181,6 @@ export default function Sidebar({ user }: SidebarProps) {
         <div className="space-y-1">
           <button
             onClick={() => router.push("/connections")}
-            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
-          >
-            <Plug className="h-4 w-4" />
-            <span>Connections</span>
-          </button>
-          <button
-            onClick={() => setSettingsOpen(!settingsOpen)}
             className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
           >
             <Settings className="h-4 w-4" />

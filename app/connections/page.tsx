@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { fetchStatus, startConnect, syncOutlookOnce, syncGmailOnce, syncGoogleDriveOnce, syncQuickBooksOnce } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import Sidebar from "@/components/sidebar";
-import { Loader2, Mail, HardDrive, DollarSign, RefreshCw, Check } from "lucide-react";
+import { Loader2, Mail, HardDrive, DollarSign, RefreshCw, Check, User, Bell, Shield, Trash2 } from "lucide-react";
 
 interface ConnectionStatus {
   tenant_id: string;
@@ -208,12 +208,14 @@ export default function ConnectionsPage() {
         <div className="max-w-6xl mx-auto p-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Connections</h1>
-            <p className="text-gray-600">Connect your data sources to HighForce</p>
+            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Settings</h1>
+            <p className="text-gray-600">Manage your connections and account preferences</p>
           </div>
 
-          {/* Connection Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Connections Section */}
+          <div className="mb-12">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Data Connections</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {services.map((service) => {
               const Icon = service.icon;
               const isConnecting = connecting[service.provider] || false;
@@ -281,26 +283,121 @@ export default function ConnectionsPage() {
                 </div>
               );
             })}
+            </div>
           </div>
 
-          {/* Account Info */}
-          {status && (
-            <div className="bg-white rounded-3xl p-6 border border-gray-200">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">Account Information</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <p className="text-xs text-gray-500 mb-1">Tenant ID</p>
-                  <p className="text-sm font-mono text-gray-900">{status.tenant_id}</p>
+          {/* Settings Sections */}
+          <div className="space-y-6 mt-8">
+            <h2 className="text-xl font-semibold text-gray-900">Account Settings</h2>
+
+            {/* Account Information */}
+            <div className="bg-white rounded-3xl p-8 border border-gray-200">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-blue-400 to-indigo-500 flex items-center justify-center">
+                  <User className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs text-gray-500 mb-1">Active Connections</p>
-                  <p className="text-sm font-semibold text-gray-900">
-                    {Object.values(status.providers).filter((p) => p?.connected).length} of {Object.keys(status.providers).length}
-                  </p>
+                  <h3 className="text-lg font-semibold text-gray-900">Account Information</h3>
+                  <p className="text-sm text-gray-500">Your profile details</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                    Email Address
+                  </label>
+                  <p className="text-sm text-gray-900">{user.email}</p>
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                    User ID
+                  </label>
+                  <p className="text-sm font-mono text-gray-900">{user.id}</p>
+                </div>
+                {status && (
+                  <>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                        Tenant ID
+                      </label>
+                      <p className="text-sm font-mono text-gray-900">{status.tenant_id}</p>
+                    </div>
+                    <div>
+                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                        Active Connections
+                      </label>
+                      <p className="text-sm font-semibold text-gray-900">
+                        {Object.values(status.providers).filter((p) => p?.connected).length} of {Object.keys(status.providers).length}
+                      </p>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+
+            {/* Notifications */}
+            <div className="bg-white rounded-3xl p-8 border border-gray-200">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-green-400 to-emerald-500 flex items-center justify-center">
+                  <Bell className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
+                  <p className="text-sm text-gray-500">Manage notification preferences</p>
+                </div>
+              </div>
+
+              <div className="text-center py-8">
+                <p className="text-sm text-gray-400">Notification settings coming soon</p>
+              </div>
+            </div>
+
+            {/* Privacy & Security */}
+            <div className="bg-white rounded-3xl p-8 border border-gray-200">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-400 to-indigo-500 flex items-center justify-center">
+                  <Shield className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Privacy & Security</h3>
+                  <p className="text-sm text-gray-500">Manage your security settings</p>
+                </div>
+              </div>
+
+              <div className="text-center py-8">
+                <p className="text-sm text-gray-400">Security settings coming soon</p>
+              </div>
+            </div>
+
+            {/* Danger Zone */}
+            <div className="bg-white rounded-3xl p-8 border border-red-200">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-red-400 to-red-500 flex items-center justify-center">
+                  <Trash2 className="h-6 w-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-900">Danger Zone</h3>
+                  <p className="text-sm text-gray-500">Irreversible actions</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-4 bg-red-50 rounded-2xl border border-red-100">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">Delete Account</p>
+                    <p className="text-xs text-gray-500 mt-1">Permanently delete your account and all data</p>
+                  </div>
+                  <button
+                    disabled
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>
-          )}
+          </div>
         </div>
       </div>
     </div>
