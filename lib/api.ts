@@ -232,6 +232,33 @@ export async function deleteChat(chatId: string): Promise<{ success: boolean }> 
   return response.json();
 }
 
+export async function sendChatMessage(question: string, chatId?: string): Promise<{
+  question: string;
+  answer: string;
+  source_count: number;
+  sources: any[];
+  chat_id: string;
+}> {
+  const url = new URL("/api/v1/chat", BACKEND_URL);
+  const headers = await getAuthHeaders();
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      question,
+      chat_id: chatId,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error");
+    throw new Error(`Chat failed: ${response.status} ${response.statusText} - ${errorText}`);
+  }
+
+  return response.json();
+}
+
 export interface Attachment {
   id: string;
   title: string;

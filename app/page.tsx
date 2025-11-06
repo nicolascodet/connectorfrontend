@@ -156,16 +156,16 @@ export default function DashboardPage() {
               <div className="grid grid-cols-1 gap-6">
                 <div>
                   <p className="text-sm text-gray-600 mb-2">Top month</p>
-                  <p className="text-2xl font-semibold text-blue-500 mb-1">November</p>
-                  <p className="text-sm text-gray-500">2019</p>
+                  <p className="text-2xl font-semibold text-blue-500 mb-1">---</p>
+                  <p className="text-sm text-gray-500">No data</p>
                 </div>
                 <div>
                   <p className="text-sm text-gray-600 mb-2">Top year</p>
-                  <p className="text-2xl font-semibold text-blue-500 mb-1">2023</p>
-                  <p className="text-sm text-gray-500">96K sold so far</p>
+                  <p className="text-2xl font-semibold text-blue-500 mb-1">---</p>
+                  <p className="text-sm text-gray-500">No data</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600 mb-2">Top buyer</p>
+                  <p className="text-sm text-gray-600 mb-2">Top contact</p>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 bg-gradient-to-br from-blue-400 to-indigo-400 rounded-full"></div>
                     <div>
@@ -178,54 +178,40 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Bottom Grid - Chats, Top states, New deals */}
+          {/* Bottom Grid - Placeholder for future features */}
           <div className="grid grid-cols-3 gap-6">
-            {/* Chats */}
+            {/* Recent Activity */}
             <div className="bg-white rounded-3xl p-8 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Chats</h3>
-              <p className="text-sm text-gray-500 mb-6">2 unread messages</p>
-
-              {/* Avatar row */}
-              <div className="flex -space-x-2">
-                <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full border-2 border-white"></div>
-                <div className="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-600 rounded-full border-2 border-white"></div>
-                <div className="w-12 h-12 bg-gradient-to-br from-gray-400 to-gray-600 rounded-full border-2 border-white"></div>
-                <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-full border-2 border-white"></div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Recent Activity</h3>
+              <p className="text-sm text-gray-500 mb-6">No activity yet</p>
+              <div className="text-center py-8">
+                <p className="text-sm text-gray-400">Connect data sources to see activity</p>
               </div>
             </div>
 
-            {/* Top states */}
+            {/* Top Sources */}
             <div className="bg-white rounded-3xl p-8 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">Top states</h3>
-
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">NY</span>
-                  <span className="text-sm font-semibold text-gray-900">120K</span>
-                </div>
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-gray-700">MA</span>
-                  <span className="text-sm font-semibold text-gray-900">80K</span>
-                </div>
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Top Sources</h3>
+              <div className="text-center py-8">
+                <p className="text-sm text-gray-400">No data yet</p>
               </div>
             </div>
 
-            {/* New deals */}
+            {/* Quick Actions */}
             <div className="bg-white rounded-3xl p-8 border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-6">New deals</h3>
-
+              <h3 className="text-lg font-semibold text-gray-900 mb-6">Quick Actions</h3>
               <div className="space-y-3">
-                <button className="w-full px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
-                  <span className="text-lg">+</span> Fruit2Go
+                <button
+                  onClick={() => router.push('/search')}
+                  className="w-full px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+                >
+                  Search Documents
                 </button>
-                <button className="w-full px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
-                  <span className="text-lg">+</span> Marshall's MKT
-                </button>
-                <button className="w-full px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
-                  <span className="text-lg">+</span> CCNT
-                </button>
-                <button className="w-full px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors flex items-center justify-center gap-2">
-                  <span className="text-lg">+</span> Joana Mini-market
+                <button
+                  onClick={() => router.push('/connections')}
+                  className="w-full px-4 py-2 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+                >
+                  Connect Data
                 </button>
               </div>
             </div>

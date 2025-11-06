@@ -4,17 +4,10 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  ChevronDown,
   LogOut,
   Plug,
   LayoutDashboard,
   Search as SearchIcon,
-  Users,
-  FileText,
-  Globe,
-  MessageCircle,
-  CreditCard,
-  FileOutput,
   Settings,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
@@ -33,12 +26,6 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
-    { name: "Customers", href: "/customers", icon: Users, dropdown: true },
-    { name: "All reports", href: "/reports", icon: FileText },
-    { name: "Geography", href: "/geography", icon: Globe },
-    { name: "Conversations", href: "/conversations", icon: MessageCircle },
-    { name: "Deals", href: "/deals", icon: CreditCard },
-    { name: "Export", href: "/export", icon: FileOutput },
   ];
 
   return (
@@ -75,17 +62,14 @@ export default function Sidebar({ user }: SidebarProps) {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`flex items-center justify-between px-4 py-2.5 rounded-xl transition-colors ${
+                className={`flex items-center px-4 py-2.5 rounded-xl transition-colors ${
                   isActive
                     ? "bg-gray-100 text-gray-900"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900"
                 }`}
               >
-                <div className="flex items-center gap-3">
-                  <Icon className="h-5 w-5" />
-                  <span className="text-sm font-medium">{item.name}</span>
-                </div>
-                {item.dropdown && <ChevronDown className="h-4 w-4 text-gray-400" />}
+                <Icon className="h-5 w-5 mr-3" />
+                <span className="text-sm font-medium">{item.name}</span>
               </Link>
             );
           })}

@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { searchOptimized, getChatMessages } from "@/lib/api";
+import { sendChatMessage, getChatMessages } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
@@ -121,20 +121,7 @@ function SearchPageContent() {
     setLoadingChat(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/chat/stream`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${localStorage.getItem("access_token")}`,
-        },
-        body: JSON.stringify({
-          question: searchQuery,
-          chat_id: searchParams.get("chat_id"),
-        }),
-      });
-
-      if (!response.ok) throw new Error('Chat request failed');
-      const result = await response.json();
+      const result = await sendChatMessage(searchQuery, searchParams.get("chat_id") || undefined);
 
       const currentChatIdParam = searchParams.get("chat_id");
       if (!currentChatIdParam && result.chat_id) {
