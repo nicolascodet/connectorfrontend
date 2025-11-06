@@ -198,16 +198,16 @@ function SearchPageContent() {
                     Recent business emails
                   </button>
                   <button
-                    onClick={() => setInput("Summarize recent important emails")}
-                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
-                  >
-                    Recent emails
-                  </button>
-                  <button
                     onClick={() => setInput("Show me financial documents")}
                     className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Financial docs
+                  </button>
+                  <button
+                    onClick={() => setInput("What meetings do I have this week?")}
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                  >
+                    This week's meetings
                   </button>
                 </div>
               </div>
