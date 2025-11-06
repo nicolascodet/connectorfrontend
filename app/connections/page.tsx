@@ -5,19 +5,18 @@ import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { fetchStatus, startConnect, syncOutlookOnce, syncGmailOnce, syncGoogleDriveOnce, syncQuickBooksOnce } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
-import { Button } from "@/components/ui/button";
-import { Loader2, Mail, HardDrive, RefreshCw, Plug2, Building2, DollarSign } from "lucide-react";
-import TopNav from "@/components/TopNav";
+import Sidebar from "@/components/sidebar";
+import { Loader2, Mail, HardDrive, DollarSign, RefreshCw, Check } from "lucide-react";
 
-interface Status {
+interface ConnectionStatus {
   tenant_id: string;
   providers: {
-    outlook: {
+    outlook?: {
       configured: boolean;
       connected: boolean;
       connection_id: string | null;
     };
-    gmail: {
+    gmail?: {
       configured: boolean;
       connected: boolean;
       connection_id: string | null;
@@ -36,63 +35,44 @@ interface Status {
 }
 
 export default function ConnectionsPage() {
-  const { user, loading } = useAuth();
+  const { user, loading: authLoading } = useAuth();
   const router = useRouter();
-  const [status, setStatus] = useState<Status | null>(null);
-  const [loadingConnect, setLoadingConnect] = useState<{
-    microsoft: boolean;
-    gmail: boolean;
-    "google-drive": boolean;
-    quickbooks: boolean;
-  }>({ microsoft: false, gmail: false, "google-drive": false, quickbooks: false });
-  const [loadingSync, setLoadingSync] = useState<{
-    outlook: boolean;
-    gmail: boolean;
-    google_drive: boolean;
-    quickbooks: boolean;
-  }>({
-    outlook: false,
-    gmail: false,
-    google_drive: false,
-    quickbooks: false,
-  });
+  const [status, setStatus] = useState<ConnectionStatus | null>(null);
+  const [connecting, setConnecting] = useState<Record<string, boolean>>({});
+  const [syncing, setSyncing] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (!authLoading && !user) {
       router.push("/login");
     }
-  }, [user, loading, router]);
+  }, [user, authLoading, router]);
 
   useEffect(() => {
     if (user) {
-      loadStatus();
+      loadConnectionStatus();
     }
   }, [user]);
 
-  const loadStatus = async () => {
+  const loadConnectionStatus = async () => {
     try {
       const data = await fetchStatus();
       setStatus(data);
     } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch status",
-      });
+      console.error("Failed to fetch connection status:", error);
     }
   };
 
   const handleConnect = async (provider: "microsoft" | "gmail" | "google-drive" | "quickbooks") => {
-    setLoadingConnect((prev) => ({ ...prev, [provider]: true }));
+    setConnecting({ ...connecting, [provider]: true });
     try {
       const result = await startConnect(provider);
-      const popup = window.open(result.auth_url, "oauth", "width=600,height=700,left=100,top=100");
+      const popup = window.open(result.auth_url, "oauth", "width=600,height=700");
 
-      const checkPopup = setInterval(() => {
+      const checkInterval = setInterval(() => {
         if (!popup || popup.closed) {
-          clearInterval(checkPopup);
-          setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
-          loadStatus();
+          clearInterval(checkInterval);
+          setConnecting({ ...connecting, [provider]: false });
+          loadConnectionStatus();
         }
       }, 500);
 
@@ -100,21 +80,21 @@ export default function ConnectionsPage() {
         if (event.origin !== window.location.origin) return;
 
         if (event.data.type === "oauth-success") {
-          clearInterval(checkPopup);
-          setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
+          clearInterval(checkInterval);
+          setConnecting({ ...connecting, [provider]: false });
           toast({
-            title: "Connection Successful",
-            description: `${event.data.provider} connected successfully!`,
+            title: "Connected!",
+            description: `${provider} connected successfully`,
           });
-          loadStatus();
+          loadConnectionStatus();
           window.removeEventListener("message", messageHandler);
         } else if (event.data.type === "oauth-error") {
-          clearInterval(checkPopup);
-          setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
+          clearInterval(checkInterval);
+          setConnecting({ ...connecting, [provider]: false });
           toast({
             variant: "destructive",
             title: "Connection Failed",
-            description: event.data.error || "Failed to save connection",
+            description: event.data.error || "Failed to connect",
           });
           window.removeEventListener("message", messageHandler);
         }
@@ -123,367 +103,199 @@ export default function ConnectionsPage() {
       window.addEventListener("message", messageHandler);
 
       setTimeout(() => {
-        clearInterval(checkPopup);
+        clearInterval(checkInterval);
         window.removeEventListener("message", messageHandler);
-        setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
+        setConnecting({ ...connecting, [provider]: false });
       }, 300000);
     } catch (error) {
-      setLoadingConnect((prev) => ({ ...prev, [provider]: false }));
+      setConnecting({ ...connecting, [provider]: false });
       toast({
         variant: "destructive",
-        title: "Connection Failed",
-        description: error instanceof Error ? error.message : `Failed to connect ${provider}`,
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to start connection",
       });
     }
   };
 
-  const handleSyncOutlook = async () => {
-    setLoadingSync((prev) => ({ ...prev, outlook: true }));
+  const handleSync = async (provider: "outlook" | "gmail" | "google_drive" | "quickbooks") => {
+    setSyncing({ ...syncing, [provider]: true });
     try {
-      const result = await syncOutlookOnce();
-      await loadStatus();
+      let result;
+      if (provider === "outlook") {
+        result = await syncOutlookOnce();
+      } else if (provider === "gmail") {
+        result = await syncGmailOnce();
+      } else if (provider === "google_drive") {
+        result = await syncGoogleDriveOnce();
+      } else if (provider === "quickbooks") {
+        result = await syncQuickBooksOnce();
+      }
+
       toast({
         title: "Sync Complete",
-        description: result.message || "Outlook synced successfully",
+        description: result?.message || "Data synced successfully",
       });
+      loadConnectionStatus();
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Sync Failed",
-        description: error instanceof Error ? error.message : "Failed to sync Outlook",
+        description: error instanceof Error ? error.message : "Failed to sync",
       });
     } finally {
-      setLoadingSync((prev) => ({ ...prev, outlook: false }));
+      setSyncing({ ...syncing, [provider]: false });
     }
   };
 
-  const handleSyncGmail = async () => {
-    setLoadingSync((prev) => ({ ...prev, gmail: true }));
-    try {
-      const result = await syncGmailOnce();
-      await loadStatus();
-      toast({
-        title: "Sync Complete",
-        description: result.message || "Gmail synced successfully",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Sync Failed",
-        description: error instanceof Error ? error.message : "Failed to sync Gmail",
-      });
-    } finally {
-      setLoadingSync((prev) => ({ ...prev, gmail: false }));
-    }
-  };
-
-  const handleSyncGoogleDrive = async () => {
-    setLoadingSync((prev) => ({ ...prev, google_drive: true }));
-    try {
-      const result = await syncGoogleDriveOnce();
-      await loadStatus();
-      toast({
-        title: "Sync Complete",
-        description: result.message || "Google Drive synced successfully",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Sync Failed",
-        description: error instanceof Error ? error.message : "Failed to sync Google Drive",
-      });
-    } finally {
-      setLoadingSync((prev) => ({ ...prev, google_drive: false }));
-    }
-  };
-
-  const handleSyncQuickBooks = async () => {
-    setLoadingSync((prev) => ({ ...prev, quickbooks: true }));
-    try {
-      const result = await syncQuickBooksOnce();
-      await loadStatus();
-      toast({
-        title: "Sync Complete",
-        description: result.message || "QuickBooks synced successfully",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Sync Failed",
-        description: error instanceof Error ? error.message : "Failed to sync QuickBooks",
-      });
-    } finally {
-      setLoadingSync((prev) => ({ ...prev, quickbooks: false }));
-    }
-  };
-
-  if (loading) {
+  if (authLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-gray-50">
-        <Loader2 className="h-12 w-12 animate-spin text-purple-600" />
+        <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
       </div>
     );
   }
 
   if (!user) return null;
 
+  const services = [
+    {
+      id: "outlook",
+      name: "Outlook",
+      description: "Sync emails from Microsoft Outlook",
+      icon: Mail,
+      gradient: "from-blue-500 to-blue-600",
+      provider: "microsoft" as const,
+      syncKey: "outlook" as const,
+      connected: status?.providers?.outlook?.connected || false,
+    },
+    {
+      id: "gmail",
+      name: "Gmail",
+      description: "Sync emails from Google Gmail",
+      icon: Mail,
+      gradient: "from-red-500 to-pink-500",
+      provider: "gmail" as const,
+      syncKey: "gmail" as const,
+      connected: status?.providers?.gmail?.connected || false,
+    },
+    {
+      id: "google-drive",
+      name: "Google Drive",
+      description: "Sync files from Google Drive",
+      icon: HardDrive,
+      gradient: "from-green-500 to-emerald-500",
+      provider: "google-drive" as const,
+      syncKey: "google_drive" as const,
+      connected: status?.providers?.google_drive?.connected || false,
+    },
+    {
+      id: "quickbooks",
+      name: "QuickBooks",
+      description: "Sync financial data",
+      icon: DollarSign,
+      gradient: "from-green-600 to-teal-600",
+      provider: "quickbooks" as const,
+      syncKey: "quickbooks" as const,
+      connected: status?.providers?.quickbooks?.connected || false,
+    },
+  ];
+
   return (
     <div className="flex h-screen bg-gray-50">
-      <TopNav />
+      <Sidebar user={user} />
 
-      <div className="flex-1 overflow-y-auto p-8 pt-20">
-        <div className="max-w-4xl mx-auto space-y-6">
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-6xl mx-auto p-8">
           {/* Header */}
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Data Connections</h1>
-            <p className="text-gray-600">Connect and manage your data sources - Outlook, Gmail, Drive, QuickBooks</p>
+          <div className="mb-8">
+            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Connections</h1>
+            <p className="text-gray-600">Connect your data sources to HighForce</p>
           </div>
 
-          {/* Connect Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Outlook */}
-            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-xl">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-700/10 flex items-center justify-center">
-                    <Building2 className="h-6 w-6 text-blue-700" />
+          {/* Connection Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            {services.map((service) => {
+              const Icon = service.icon;
+              const isConnecting = connecting[service.provider] || false;
+              const isSyncing = syncing[service.syncKey] || false;
+
+              return (
+                <div
+                  key={service.id}
+                  className="bg-white rounded-3xl p-8 border border-gray-200 hover:shadow-lg transition-shadow"
+                >
+                  <div className="flex items-start justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${service.gradient} flex items-center justify-center flex-shrink-0`}>
+                        <Icon className="h-7 w-7 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-semibold text-gray-900">{service.name}</h3>
+                        <p className="text-sm text-gray-500 mt-1">{service.description}</p>
+                      </div>
+                    </div>
+                    {service.connected && (
+                      <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-full flex-shrink-0">
+                        <Check className="h-3.5 w-3.5" />
+                        <span className="text-xs font-medium">Connected</span>
+                      </div>
+                    )}
                   </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Outlook</h3>
-                    <p className="text-sm text-gray-600">Email synchronization</p>
+
+                  <div className="space-y-3">
+                    {!service.connected ? (
+                      <button
+                        onClick={() => handleConnect(service.provider)}
+                        disabled={isConnecting}
+                        className={`w-full py-3 px-4 rounded-xl text-white font-medium transition-all disabled:opacity-50 bg-gradient-to-r ${service.gradient} hover:opacity-90`}
+                      >
+                        {isConnecting ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Connecting...</span>
+                          </div>
+                        ) : (
+                          `Connect ${service.name}`
+                        )}
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleSync(service.syncKey)}
+                        disabled={isSyncing}
+                        className="w-full py-3 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium transition-all disabled:opacity-50"
+                      >
+                        {isSyncing ? (
+                          <div className="flex items-center justify-center gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            <span>Syncing...</span>
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center gap-2">
+                            <RefreshCw className="h-4 w-4" />
+                            <span>Sync Now</span>
+                          </div>
+                        )}
+                      </button>
+                    )}
                   </div>
                 </div>
-                {status?.providers?.outlook?.connected && (
-                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                    Connected
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <Button
-                  onClick={() => handleConnect("microsoft")}
-                  disabled={loadingConnect.microsoft || status?.providers?.outlook?.connected}
-                  className="w-full rounded-xl py-6 bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white border-0"
-                >
-                  {loadingConnect.microsoft ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : status?.providers?.outlook?.connected ? (
-                    "Connected"
-                  ) : (
-                    "Connect Outlook"
-                  )}
-                </Button>
-
-                {status?.providers?.outlook?.connected && (
-                  <Button
-                    onClick={handleSyncOutlook}
-                    disabled={loadingSync.outlook}
-                    variant="outline"
-                    className="w-full rounded-xl py-4 border-2"
-                  >
-                    {loadingSync.outlook ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                    )}
-                    {loadingSync.outlook ? "Syncing..." : "Sync Now"}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Gmail */}
-            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-xl">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-red-500/10 flex items-center justify-center">
-                    <Mail className="h-6 w-6 text-red-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Gmail</h3>
-                    <p className="text-sm text-gray-600">Email synchronization</p>
-                  </div>
-                </div>
-                {status?.providers?.gmail?.connected && (
-                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                    Connected
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <Button
-                  onClick={() => handleConnect("gmail")}
-                  disabled={loadingConnect.gmail || status?.providers?.gmail?.connected}
-                  className="w-full rounded-xl py-6 bg-gradient-to-r from-red-500 to-pink-500 hover:from-red-600 hover:to-pink-600 text-white border-0"
-                >
-                  {loadingConnect.gmail ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : status?.providers?.gmail?.connected ? (
-                    "Connected"
-                  ) : (
-                    "Connect Gmail"
-                  )}
-                </Button>
-
-                {status?.providers?.gmail?.connected && (
-                  <Button
-                    onClick={handleSyncGmail}
-                    disabled={loadingSync.gmail}
-                    variant="outline"
-                    className="w-full rounded-xl py-4 border-2"
-                  >
-                    {loadingSync.gmail ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                    )}
-                    {loadingSync.gmail ? "Syncing..." : "Sync Now"}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* Google Drive */}
-            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-xl">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-500/10 flex items-center justify-center">
-                    <HardDrive className="h-6 w-6 text-blue-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">Google Drive</h3>
-                    <p className="text-sm text-gray-600">File synchronization</p>
-                  </div>
-                </div>
-                {status?.providers?.google_drive?.connected && (
-                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                    Connected
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <Button
-                  onClick={() => handleConnect("google-drive")}
-                  disabled={loadingConnect["google-drive"] || status?.providers?.google_drive?.connected}
-                  className="w-full rounded-xl py-6 bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white border-0"
-                >
-                  {loadingConnect["google-drive"] ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : status?.providers?.google_drive?.connected ? (
-                    "Connected"
-                  ) : (
-                    "Connect Google Drive"
-                  )}
-                </Button>
-
-                {status?.providers?.google_drive?.connected && (
-                  <Button
-                    onClick={handleSyncGoogleDrive}
-                    disabled={loadingSync.google_drive}
-                    variant="outline"
-                    className="w-full rounded-xl py-4 border-2"
-                  >
-                    {loadingSync.google_drive ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                    )}
-                    {loadingSync.google_drive ? "Syncing..." : "Sync Now"}
-                  </Button>
-                )}
-              </div>
-            </div>
-
-            {/* QuickBooks */}
-            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-xl">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-green-600/10 flex items-center justify-center">
-                    <DollarSign className="h-6 w-6 text-green-600" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900">QuickBooks</h3>
-                    <p className="text-sm text-gray-600">Accounting data</p>
-                  </div>
-                </div>
-                {status?.providers?.quickbooks?.connected && (
-                  <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
-                    Connected
-                  </span>
-                )}
-              </div>
-
-              <div className="space-y-3">
-                <Button
-                  onClick={() => handleConnect("quickbooks")}
-                  disabled={loadingConnect.quickbooks || status?.providers?.quickbooks?.connected}
-                  className="w-full rounded-xl py-6 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white border-0"
-                >
-                  {loadingConnect.quickbooks ? (
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                  ) : status?.providers?.quickbooks?.connected ? (
-                    "Connected"
-                  ) : (
-                    "Connect QuickBooks"
-                  )}
-                </Button>
-
-                {status?.providers?.quickbooks?.connected && (
-                  <Button
-                    onClick={handleSyncQuickBooks}
-                    disabled={loadingSync.quickbooks}
-                    variant="outline"
-                    className="w-full rounded-xl py-4 border-2"
-                  >
-                    {loadingSync.quickbooks ? (
-                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
-                    ) : (
-                      <RefreshCw className="h-4 w-4 mr-2" />
-                    )}
-                    {loadingSync.quickbooks ? "Syncing..." : "Sync Now"}
-                  </Button>
-                )}
-              </div>
-            </div>
+              );
+            })}
           </div>
 
-          {/* Status Info */}
+          {/* Account Info */}
           {status && (
-            <div className="bg-white/70 backdrop-blur-xl rounded-3xl p-6 border border-white/20 shadow-xl">
-              <div className="flex items-center gap-3 mb-4">
-                <Plug2 className="h-5 w-5 text-gray-600" />
-                <h3 className="font-semibold text-gray-900">Connection Status</h3>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-gray-600">Tenant ID</p>
-                  <p className="text-xs font-mono text-gray-900 mt-1">{status.tenant_id}</p>
+            <div className="bg-white rounded-3xl p-6 border border-gray-200">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4">Account Information</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Tenant ID</p>
+                  <p className="text-sm font-mono text-gray-900">{status.tenant_id}</p>
                 </div>
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-gray-600">Outlook</p>
-                  <p className="text-xs font-medium text-gray-900 mt-1">
-                    {status.providers?.outlook?.connected ? "✓ Active" : "Not connected"}
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-gray-600">Gmail</p>
-                  <p className="text-xs font-medium text-gray-900 mt-1">
-                    {status.providers.gmail.connected ? "✓ Active" : "Not connected"}
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-gray-600">Google Drive</p>
-                  <p className="text-xs font-medium text-gray-900 mt-1">
-                    {status.providers?.google_drive?.connected ? "✓ Active" : "Not connected"}
-                  </p>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-xl">
-                  <p className="text-sm text-gray-600">QuickBooks</p>
-                  <p className="text-xs font-medium text-gray-900 mt-1">
-                    {status.providers?.quickbooks?.connected ? "✓ Active" : "Not connected"}
+                <div>
+                  <p className="text-xs text-gray-500 mb-1">Active Connections</p>
+                  <p className="text-sm font-semibold text-gray-900">
+                    {Object.values(status.providers).filter((p) => p?.connected).length} of {Object.keys(status.providers).length}
                   </p>
                 </div>
               </div>
@@ -494,4 +306,3 @@ export default function ConnectionsPage() {
     </div>
   );
 }
-
