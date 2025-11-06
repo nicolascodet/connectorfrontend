@@ -1,25 +1,42 @@
-<svg width="216" height="216" viewBox="0 0 216 216" fill="none" xmlns="http://www.w3.org/2000/svg">
-  <!-- Outer nodes -->
-  <rect x="87" y="0" width="42" height="42" rx="6" fill="#1E8B8B"/>
-  <rect x="154" y="34" width="42" height="42" rx="6" fill="#1E8B8B"/>
-  <rect x="174" y="101" width="42" height="42" rx="6" fill="#1E8B8B"/>
-  <rect x="154" y="168" width="42" height="42" rx="6" fill="#1E8B8B"/>
-  <rect x="87" y="202" width="42" height="42" rx="6" fill="#1E8B8B"/>
-  <rect x="20" y="168" width="42" height="42" rx="6" fill="#1E8B8B"/>
-  <rect x="0" y="101" width="42" height="42" rx="6" fill="#1E8B8B"/>
-  <rect x="20" y="34" width="42" height="42" rx="6" fill="#1E8B8B"/>
+<svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Top node -->
+  <rect x="69" y="10" width="42" height="42" rx="6" fill="#1E8B8B"/>
 
-  <!-- Center hub -->
-  <circle cx="108" cy="108" r="32" fill="none" stroke="#1E8B8B" stroke-width="8"/>
-  <circle cx="108" cy="108" r="18" fill="#1E8B8B"/>
+  <!-- Top-right node -->
+  <rect x="128" y="45" width="42" height="42" rx="6" fill="#1E8B8B"/>
 
-  <!-- Connection lines -->
-  <line x1="108" y1="42" x2="108" y2="76" stroke="#1E8B8B" stroke-width="8"/>
-  <line x1="154" y1="55" x2="130" y2="86" stroke="#1E8B8B" stroke-width="8"/>
-  <line x1="175" y1="122" x2="140" y2="108" stroke="#1E8B8B" stroke-width="8"/>
-  <line x1="154" y1="189" x2="130" y2="130" stroke="#1E8B8B" stroke-width="8"/>
-  <line x1="108" y1="202" x2="108" y2="140" stroke="#1E8B8B" stroke-width="8"/>
-  <line x1="41" y1="189" x2="86" y2="130" stroke="#1E8B8B" stroke-width="8"/>
-  <line x1="41" y1="122" x2="76" y2="108" stroke="#1E8B8B" stroke-width="8"/>
-  <line x1="41" y1="55" x2="86" y2="86" stroke="#1E8B8B" stroke-width="8"/>
+  <!-- Bottom-right node -->
+  <rect x="128" y="115" width="42" height="42" rx="6" fill="#1E8B8B"/>
+
+  <!-- Bottom node -->
+  <rect x="69" y="150" width="42" height="42" rx="6" fill="#1E8B8B"/>
+
+  <!-- Bottom-left node -->
+  <rect x="10" y="115" width="42" height="42" rx="6" fill="#1E8B8B"/>
+
+  <!-- Top-left node -->
+  <rect x="10" y="45" width="42" height="42" rx="6" fill="#1E8B8B"/>
+
+  <!-- Center hub circle -->
+  <circle cx="90" cy="90" r="28" fill="none" stroke="#1E8B8B" stroke-width="6"/>
+  <circle cx="90" cy="90" r="14" fill="#1E8B8B"/>
+
+  <!-- Connection lines from center to nodes -->
+  <!-- Top -->
+  <line x1="90" y1="52" x2="90" y2="62" stroke="#1E8B8B" stroke-width="6"/>
+
+  <!-- Top-right -->
+  <line x1="114" y1="66" x2="128" y2="66" stroke="#1E8B8B" stroke-width="6"/>
+
+  <!-- Bottom-right -->
+  <line x1="114" y1="114" x2="128" y2="136" stroke="#1E8B8B" stroke-width="6"/>
+
+  <!-- Bottom -->
+  <line x1="90" y1="118" x2="90" y2="150" stroke="#1E8B8B" stroke-width="6"/>
+
+  <!-- Bottom-left -->
+  <line x1="66" y1="114" x2="52" y2="136" stroke="#1E8B8B" stroke-width="6"/>
+
+  <!-- Top-left -->
+  <line x1="66" y1="66" x2="52" y2="66" stroke="#1E8B8B" stroke-width="6"/>
 </svg>
