@@ -49,16 +49,22 @@ export default function ConnectionsPage() {
 
   useEffect(() => {
     if (user) {
-      loadConnectionStatus();
+      loadConnectionStatus(true); // Force refresh on page load
     }
   }, [user]);
 
-  const loadConnectionStatus = async () => {
+  const loadConnectionStatus = async (forceRefresh: boolean = false) => {
     try {
-      const data = await fetchStatus();
+      const data = await fetchStatus(forceRefresh);
       setStatus(data);
+      console.log("Connection status loaded:", data);
     } catch (error) {
       console.error("Failed to fetch connection status:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to load connections",
+        description: error instanceof Error ? error.message : "Unknown error"
+      });
     }
   };
 

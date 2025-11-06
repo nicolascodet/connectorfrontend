@@ -77,7 +77,7 @@ export async function startConnect(
   return apiGet("/connect/start", { provider });
 }
 
-export async function fetchStatus(): Promise<{
+export async function fetchStatus(skipCache: boolean = false): Promise<{
   tenant_id: string;
   providers: {
     outlook: {
@@ -97,7 +97,10 @@ export async function fetchStatus(): Promise<{
     };
   };
 }> {
-  return withCache("connection-status", () => apiGet("/status"), 30); // Cache for 30 seconds
+  if (skipCache) {
+    cache.invalidate("connection-status");
+  }
+  return withCache("connection-status", () => apiGet("/status"), 10); // Cache for 10 seconds (reduced from 30)
 }
 
 export async function syncOutlookOnce(): Promise<any> {
