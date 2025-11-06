@@ -13,9 +13,10 @@ import {
   ChevronDown,
   ChevronRight,
   Clock,
+  Trash2,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
-import { getChatHistory, type ChatHistoryItem } from "@/lib/api";
+import { getChatHistory, deleteChat, type ChatHistoryItem } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 
 interface SidebarProps {
@@ -35,9 +36,9 @@ export default function Sidebar({ user }: SidebarProps) {
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
   ];
 
-  // Load chat history
+  // Load chat history only once when user is available
   useEffect(() => {
-    if (user) {
+    if (user && chatHistory.length === 0) {
       loadChatHistory();
     }
   }, [user]);
@@ -51,6 +52,24 @@ export default function Sidebar({ user }: SidebarProps) {
       console.error("Failed to load chat history:", error);
     } finally {
       setLoadingHistory(false);
+    }
+  };
+
+  const handleDeleteChat = async (chatId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await deleteChat(chatId);
+      setChatHistory((prev) => prev.filter((chat) => chat.id !== chatId));
+      toast({
+        title: "Chat deleted",
+        description: "Chat has been deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete chat",
+      });
     }
   };
 
@@ -138,23 +157,33 @@ export default function Sidebar({ user }: SidebarProps) {
                 <div className="px-4 py-2 text-xs text-gray-500">No chats yet</div>
               ) : (
                 chatHistory.slice(0, 10).map((chat) => (
-                  <button
+                  <div
                     key={chat.id}
-                    onClick={() => router.push(`/search?chat_id=${chat.id}`)}
-                    className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors group"
+                    className="relative group/chat"
                   >
-                    <div className="flex items-start gap-2">
-                      <Clock className="h-3 w-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <p className="text-xs font-medium text-gray-700 truncate group-hover:text-gray-900">
-                          {chat.title || "Untitled Chat"}
-                        </p>
-                        <p className="text-xs text-gray-400 mt-0.5">
-                          {formatTimestamp(chat.created_at)}
-                        </p>
+                    <button
+                      onClick={() => router.push(`/search?chat_id=${chat.id}`)}
+                      className="w-full text-left px-4 py-2 rounded-lg hover:bg-gray-50 transition-colors group"
+                    >
+                      <div className="flex items-start gap-2">
+                        <Clock className="h-3 w-3 text-gray-400 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0 pr-6">
+                          <p className="text-xs font-medium text-gray-700 truncate group-hover:text-gray-900">
+                            {chat.title || "Untitled Chat"}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            {formatTimestamp(chat.created_at)}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                  </button>
+                    </button>
+                    <button
+                      onClick={(e) => handleDeleteChat(chat.id, e)}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 p-1.5 rounded-md hover:bg-red-50 transition-all"
+                    >
+                      <Trash2 className="h-3 w-3 text-gray-400 hover:text-red-600" />
+                    </button>
+                  </div>
                 ))
               )}
             </div>
