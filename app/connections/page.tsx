@@ -316,22 +316,12 @@ export default function ConnectionsPage() {
                   <p className="text-sm font-mono text-gray-900">{user.id}</p>
                 </div>
                 {status && (
-                  <>
-                    <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
-                        Tenant ID
-                      </label>
-                      <p className="text-sm font-mono text-gray-900">{status.tenant_id}</p>
-                    </div>
-                    <div>
-                      <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
-                        Active Connections
-                      </label>
-                      <p className="text-sm font-semibold text-gray-900">
-                        {Object.values(status.providers).filter((p) => p?.connected).length} of {Object.keys(status.providers).length}
-                      </p>
-                    </div>
-                  </>
+                  <div>
+                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 block">
+                      Tenant ID
+                    </label>
+                    <p className="text-sm font-mono text-gray-900">{status.tenant_id}</p>
+                  </div>
                 )}
               </div>
             </div>

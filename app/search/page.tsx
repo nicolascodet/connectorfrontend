@@ -66,6 +66,7 @@ function SearchPageContent() {
   const [loadingChat, setLoadingChat] = useState(false);
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [expandedSources, setExpandedSources] = useState<Set<number>>(new Set());
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -191,10 +192,10 @@ function SearchPageContent() {
                 {/* Suggestion chips */}
                 <div className="flex flex-wrap gap-3 justify-center max-w-2xl">
                   <button
-                    onClick={() => setInput("What data sources do we have connected?")}
+                    onClick={() => setInput("Summarize recent business emails")}
                     className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                   >
-                    Connected sources
+                    Recent business emails
                   </button>
                   <button
                     onClick={() => setInput("Summarize recent important emails")}
@@ -251,14 +252,13 @@ function SearchPageContent() {
                           </button>
 
                           {/* Show first 2 sources always, rest when expanded */}
-                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             {message.sources.slice(0, expandedSources.has(idx) ? message.sources.length : 2).map((source, sourceIdx) => {
                               const isClickable = source.file_url || source.document_id;
                               const handleClick = () => {
                                 if (source.file_url) {
-                                  window.open(source.file_url, '_blank');
+                                  setPreviewUrl(source.file_url);
                                 } else if (source.document_id) {
-                                  // For emails or other documents, could open in a modal or detail view
                                   console.log('Document ID:', source.document_id);
                                 }
                               };
@@ -267,28 +267,20 @@ function SearchPageContent() {
                                 <div
                                   key={sourceIdx}
                                   onClick={isClickable ? handleClick : undefined}
-                                  className={`bg-gray-50 rounded-xl p-3 transition-colors border border-gray-100 ${
+                                  className={`bg-gray-50 rounded-lg p-2 transition-colors border border-gray-100 ${
                                     isClickable ? 'hover:bg-gray-100 cursor-pointer hover:border-blue-200' : ''
                                   }`}
                                 >
-                                  <div className="flex items-start gap-2">
+                                  <div className="flex items-start gap-1.5">
                                     <div className="mt-0.5 flex-shrink-0">
                                       {getDocumentIcon(source)}
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                      <div className="flex items-start justify-between gap-1 mb-1">
-                                        <p className="text-xs font-medium text-gray-900 truncate">
-                                          {source.document_name}
-                                        </p>
-                                        {isClickable && (
-                                          <ExternalLink className="h-3 w-3 text-gray-400 flex-shrink-0" />
-                                        )}
-                                      </div>
-                                      <p className="text-xs text-gray-500 mb-1.5">
-                                        {getDocumentTypeName(source)}
+                                      <p className="text-xs font-medium text-gray-900 truncate mb-0.5">
+                                        {source.document_name}
                                       </p>
-                                      <p className="text-xs text-gray-600 line-clamp-2 leading-tight">
-                                        {source.text_preview}
+                                      <p className="text-xs text-gray-500 truncate">
+                                        {getDocumentTypeName(source)}
                                       </p>
                                     </div>
                                   </div>
@@ -351,6 +343,30 @@ function SearchPageContent() {
           </div>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      {previewUrl && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setPreviewUrl(null)}>
+          <div className="bg-white rounded-3xl w-full max-w-6xl h-5/6 flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">Document Preview</h3>
+              <button
+                onClick={() => setPreviewUrl(null)}
+                className="w-8 h-8 rounded-lg hover:bg-gray-100 flex items-center justify-center transition-colors"
+              >
+                <span className="text-gray-500 text-xl">&times;</span>
+              </button>
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <iframe
+                src={previewUrl}
+                className="w-full h-full"
+                title="Document Preview"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
