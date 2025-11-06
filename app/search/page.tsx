@@ -245,14 +245,14 @@ function SearchPageContent() {
                   </div>
                 ) : (
                   <div className="max-w-4xl w-full">
-                    <div className="bg-white rounded-3xl border border-gray-200 p-8">
+                    <div className="bg-white rounded-3xl border border-gray-200 p-6">
                       <div className="prose prose-sm max-w-none">
                         <SmartMarkdown content={message.content} />
                       </div>
 
                       {/* Sources */}
                       {message.sources && message.sources.length > 0 && (
-                        <div className="mt-6 pt-6 border-t border-gray-100">
+                        <div className="mt-4 pt-4 border-t border-gray-100">
                           <button
                             onClick={() => {
                               const newExpanded = new Set(expandedSources);
