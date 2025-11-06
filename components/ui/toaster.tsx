@@ -11,11 +11,11 @@ export function Toaster() {
   const { toasts, removeToast } = useToast();
 
   return (
-    <div className="fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:bottom-0 sm:right-0 sm:top-auto sm:flex-col md:max-w-[420px]">
+    <div className="fixed bottom-4 right-4 z-[100] flex max-h-screen w-full flex-col gap-2 md:max-w-[380px]">
       {toasts.map(({ id, title, description, variant, ...props }) => (
         <div
           key={id}
-          className="mb-2 animate-in slide-in-from-top-full sm:slide-in-from-bottom-full"
+          className="animate-in slide-in-from-right fade-in"
         >
           <Toast
             variant={variant}

@@ -10,7 +10,7 @@ export interface ToastProps {
 }
 
 const TOAST_LIMIT = 3;
-const TOAST_REMOVE_DELAY = 5000;
+const TOAST_REMOVE_DELAY = 3000;
 
 type ToasterToast = ToastProps;
 
@@ -147,6 +147,11 @@ function toast({ ...props }: Toast) {
       id,
     },
   });
+
+  // Auto-dismiss after delay
+  setTimeout(() => {
+    dismiss();
+  }, TOAST_REMOVE_DELAY);
 
   return {
     id,

@@ -67,7 +67,31 @@ function SearchPageContent() {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [expandedSources, setExpandedSources] = useState<Set<number>>(new Set());
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [loadingTextIndex, setLoadingTextIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const loadingTexts = [
+    "Searching",
+    "Analyzing",
+    "Processing",
+    "Finding",
+    "Reviewing",
+    "Examining",
+    "Scanning",
+    "Investigating",
+  ];
+
+  // Cycle through loading texts
+  useEffect(() => {
+    if (loadingChat) {
+      const interval = setInterval(() => {
+        setLoadingTextIndex((prev) => (prev + 1) % loadingTexts.length);
+      }, 800);
+      return () => clearInterval(interval);
+    } else {
+      setLoadingTextIndex(0);
+    }
+  }, [loadingChat]);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -310,7 +334,7 @@ function SearchPageContent() {
                 <div className="bg-white rounded-3xl border border-gray-200 px-6 py-4">
                   <div className="flex items-center gap-3">
                     <Loader2 className="h-4 w-4 animate-spin text-blue-500" />
-                    <span className="text-sm text-gray-600">Searching...</span>
+                    <span className="text-sm text-gray-600">{loadingTexts[loadingTextIndex]}...</span>
                   </div>
                 </div>
               </div>
