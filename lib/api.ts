@@ -414,34 +414,3 @@ export async function getSentimentAnalysis(days: number = 30): Promise<any> {
 export async function getRelationshipNetwork(): Promise<any> {
   return apiGet("/api/v1/analytics/relationships/network");
 }
-
-// ============================================================================
-// RAG-POWERED INTELLIGENCE INSIGHTS
-// ============================================================================
-
-export async function getDailyInsights(date?: string): Promise<any> {
-  const params = date ? { insight_date: date } : undefined;
-  return withCache(`daily-insights-${date || "today"}`, () => apiGet("/api/v1/insights/daily", params), 300);
-}
-
-export async function getWeeklyInsights(weekStart?: string): Promise<any> {
-  const params = weekStart ? { week_start: weekStart } : undefined;
-  return withCache(`weekly-insights-${weekStart || "current"}`, () => apiGet("/api/v1/insights/weekly", params), 300);
-}
-
-export async function getMonthlyInsights(month?: string): Promise<any> {
-  const params = month ? { month } : undefined;
-  return withCache(`monthly-insights-${month || "current"}`, () => apiGet("/api/v1/insights/monthly", params), 300);
-}
-
-export async function getLatestInsights(timePeriod: "daily" | "weekly" | "monthly" = "daily", limit: number = 5): Promise<any> {
-  return withCache(`latest-insights-${timePeriod}-${limit}`, () => apiGet("/api/v1/insights/latest", { time_period: timePeriod, limit: limit.toString() }), 180);
-}
-
-export async function getInsightsByCategory(category: string, timePeriod: string = "daily", days: number = 7): Promise<any> {
-  return apiGet("/api/v1/insights/categories", {
-    category,
-    time_period: timePeriod,
-    days: days.toString()
-  });
-}
