@@ -352,7 +352,6 @@ export default function ReportsPage() {
             Showing {filteredReports.length} {filteredReports.length === 1 ? "report" : "reports"}
           </div>
         )}
-      </div>
 
         {/* Report Modal */}
         {selectedReport && (
