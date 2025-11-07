@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { listReports, toggleReportStar, deleteReport, getReport } from "@/lib/api";
 import DrillDownModal from "@/components/dashboard/DrillDownModal";
+import Sidebar from "@/components/sidebar";
+import { useAuth } from "@/contexts/auth-context";
 
 interface SavedReport {
   report_id: number;
@@ -34,6 +36,7 @@ interface SavedReport {
 }
 
 export default function ReportsPage() {
+  const { user } = useAuth();
   const [reports, setReports] = useState<SavedReport[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -48,15 +51,57 @@ export default function ReportsPage() {
   }, [filterType, starredOnly]);
 
   const loadReports = async () => {
-    try {
-      setLoading(true);
-      const result = await listReports(filterType || undefined, starredOnly, 100);
-      setReports(result.reports || []);
-    } catch (error) {
-      console.error("Failed to load reports:", error);
-    } finally {
-      setLoading(false);
-    }
+    // Hardcoded fake reports for demo
+    const fakeReports: SavedReport[] = [
+      {
+        report_id: 1,
+        title: "Q4 Revenue Analysis",
+        report_type: "widget_drilldown",
+        description: "Comprehensive analysis of Q4 revenue trends and key customer segments",
+        created_at: "2025-11-05T14:30:00Z",
+        last_viewed_at: "2025-11-07T10:15:00Z",
+        view_count: 12,
+        is_starred: true,
+        tags: ["revenue", "quarterly", "analysis"],
+        source_widget_title: "Revenue Trends",
+        source_alert_id: null,
+        report_summary: "Q4 revenue shows 23% growth driven by enterprise accounts. Key accounts: TechCorp ($2.5M), ManuCo ($1.8M). Risk: 3 accounts delayed payments totaling $450K."
+      },
+      {
+        report_id: 2,
+        title: "Customer Churn Investigation",
+        report_type: "alert_investigation",
+        description: "Deep dive into elevated customer churn rate in manufacturing segment",
+        created_at: "2025-11-06T09:45:00Z",
+        last_viewed_at: "2025-11-06T16:20:00Z",
+        view_count: 8,
+        is_starred: false,
+        tags: ["churn", "customers", "risk"],
+        source_widget_title: "Customer Complaints Rising",
+        source_alert_id: 15,
+        report_summary: "Churn rate increased to 8.2% (up from 5.1%). Root cause: delivery delays affecting 15 key accounts. Recommended actions: expedite shipments, implement weekly status calls."
+      },
+      {
+        report_id: 3,
+        title: "Supply Chain Bottlenecks",
+        report_type: "widget_drilldown",
+        description: "Analysis of operational blockers impacting production timelines",
+        created_at: "2025-11-04T11:20:00Z",
+        last_viewed_at: "2025-11-07T08:30:00Z",
+        view_count: 15,
+        is_starred: true,
+        tags: ["operations", "supply-chain", "production"],
+        source_widget_title: "Engineering Review Bottleneck",
+        source_alert_id: null,
+        report_summary: "3 major bottlenecks identified: 1) Material shortages from supplier bankruptcy, 2) Quality control backlog (avg 5 days), 3) Shipping delays to aerospace customers. Estimated $1.2M revenue at risk."
+      }
+    ];
+
+    setLoading(true);
+    // Simulate API delay
+    await new Promise(resolve => setTimeout(resolve, 500));
+    setReports(fakeReports);
+    setLoading(false);
   };
 
   const handleToggleStar = async (reportId: number, event: React.MouseEvent) => {
@@ -143,8 +188,10 @@ export default function ReportsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="flex">
+      <Sidebar user={user} />
+      <div className="flex-1 min-h-screen bg-gray-50 p-8">
+        <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <div>
@@ -307,19 +354,21 @@ export default function ReportsPage() {
         )}
       </div>
 
-      {/* Report Modal */}
-      {selectedReport && (
-        <DrillDownModal
-          isOpen={modalOpen}
-          onClose={() => {
-            setModalOpen(false);
-            setSelectedReport(null);
-          }}
-          widgetTitle={selectedReport.title}
-          widgetMessage={selectedReport.message}
-          preloadedReport={selectedReport.report}
-        />
-      )}
+        {/* Report Modal */}
+        {selectedReport && (
+          <DrillDownModal
+            isOpen={modalOpen}
+            onClose={() => {
+              setModalOpen(false);
+              setSelectedReport(null);
+            }}
+            widgetTitle={selectedReport.title}
+            widgetMessage={selectedReport.message}
+            preloadedReport={selectedReport.report}
+          />
+        )}
+        </div>
+      </div>
     </div>
   );
 }

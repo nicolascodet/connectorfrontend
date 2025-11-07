@@ -36,7 +36,6 @@ export default function Sidebar({ user }: SidebarProps) {
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
-    { name: "Alerts", href: "/alerts", icon: Bell },
     { name: "Reports", href: "/reports", icon: FileText },
   ];
 
