@@ -123,6 +123,7 @@ export default function AlertsPage() {
 
   const handleInvestigate = async (alert: Alert) => {
     try {
+      // Try backend investigation first
       const result = await investigateAlert(alert.alert_id);
       setSelectedAlert({
         title: `Alert: ${alert.alert_type}`,
@@ -131,8 +132,21 @@ export default function AlertsPage() {
       });
       setModalOpen(true);
     } catch (error) {
-      console.error("Failed to investigate alert:", error);
-      window.alert("Failed to investigate alert");
+      console.error("Backend investigation failed, showing alert details directly:", error);
+
+      // Fallback: Show alert details directly without backend call
+      setSelectedAlert({
+        title: alert.document_title || `Alert: ${alert.alert_type}`,
+        message: alert.summary,
+        report: {
+          executive_summary: alert.summary,
+          key_entities: alert.key_entities || [],
+          urgency_level: alert.urgency_level,
+          alert_type: alert.alert_type,
+          detected_at: alert.detected_at
+        }
+      });
+      setModalOpen(true);
     }
   };
 
