@@ -50,55 +50,16 @@ export default function ReportsPage() {
   }, [filterType, starredOnly]);
 
   const loadReports = async () => {
-    const fakeReports: SavedReport[] = [
-      {
-        report_id: 1,
-        title: "Q4 Revenue Analysis",
-        report_type: "widget_drilldown",
-        description: "Comprehensive analysis of Q4 revenue trends and key customer segments",
-        created_at: "2025-11-05T14:30:00Z",
-        last_viewed_at: "2025-11-07T10:15:00Z",
-        view_count: 12,
-        is_starred: true,
-        tags: ["revenue", "quarterly", "analysis"],
-        source_widget_title: "Revenue Trends",
-        source_alert_id: null,
-        report_summary: "Q4 revenue shows 23% growth driven by enterprise accounts. Key accounts: TechCorp ($2.5M), ManuCo ($1.8M). Risk: 3 accounts delayed payments totaling $450K."
-      },
-      {
-        report_id: 2,
-        title: "Customer Churn Investigation",
-        report_type: "alert_investigation",
-        description: "Deep dive into elevated customer churn rate in manufacturing segment",
-        created_at: "2025-11-06T09:45:00Z",
-        last_viewed_at: "2025-11-06T16:20:00Z",
-        view_count: 8,
-        is_starred: false,
-        tags: ["churn", "customers", "risk"],
-        source_widget_title: "Customer Complaints Rising",
-        source_alert_id: 15,
-        report_summary: "Churn rate increased to 8.2% (up from 5.1%). Root cause: delivery delays affecting 15 key accounts. Recommended actions: expedite shipments, implement weekly status calls."
-      },
-      {
-        report_id: 3,
-        title: "Supply Chain Bottlenecks",
-        report_type: "widget_drilldown",
-        description: "Analysis of operational blockers impacting production timelines",
-        created_at: "2025-11-04T11:20:00Z",
-        last_viewed_at: "2025-11-07T08:30:00Z",
-        view_count: 15,
-        is_starred: true,
-        tags: ["operations", "supply-chain", "production"],
-        source_widget_title: "Engineering Review Bottleneck",
-        source_alert_id: null,
-        report_summary: "3 major bottlenecks identified: 1) Material shortages from supplier bankruptcy, 2) Quality control backlog (avg 5 days), 3) Shipping delays to aerospace customers. Estimated $1.2M revenue at risk."
-      }
-    ];
-
-    setLoading(true);
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setReports(fakeReports);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const result = await listReports(filterType, starredOnly);
+      setReports(result.reports || []);
+    } catch (error) {
+      console.error("Failed to load reports:", error);
+      setReports([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleToggleStar = async (reportId: number, event: React.MouseEvent) => {

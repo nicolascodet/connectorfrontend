@@ -98,10 +98,33 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange }: Mod
   const handleGenerate = async () => {
     try {
       setGenerating(true);
+
+      // Trigger alert detection on last 10 documents
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/alerts/backfill`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify({ limit: 10 })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to trigger alert detection');
+      }
+
+      // Also regenerate insights
       await generateInsights();
-      alert("Generating insights... Takes 45-75 minutes. Refresh later.");
+
+      alert("Generating alerts and insights... This may take a few minutes. Refresh to see updates.");
+
+      // Reload data after a short delay
+      setTimeout(() => {
+        loadInsights();
+      }, 2000);
     } catch (error) {
       console.error("Failed:", error);
+      alert("Failed to trigger regeneration. Please try again.");
     } finally {
       setGenerating(false);
     }
@@ -298,59 +321,6 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange }: Mod
           )}
           Regenerate
         </Button>
-      </div>
-
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Total Revenue</CardDescription>
-            <div className="flex items-baseline gap-2">
-              <CardTitle className="text-3xl">$1,250.00</CardTitle>
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />
-                +12.5%
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">Trending up this month</p>
-            <p className="text-xs text-muted-foreground mt-1">Visitors for the last 6 months</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>New Customers</CardDescription>
-            <div className="flex items-baseline gap-2">
-              <CardTitle className="text-3xl">1,234</CardTitle>
-              <Badge variant="destructive" className="flex items-center gap-1">
-                <TrendingDown className="h-3 w-3" />
-                -20%
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">Down 20% this period</p>
-            <p className="text-xs text-muted-foreground mt-1">Acquisition needs attention</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="pb-3">
-            <CardDescription>Active Accounts</CardDescription>
-            <div className="flex items-baseline gap-2">
-              <CardTitle className="text-3xl">45,678</CardTitle>
-              <Badge variant="secondary" className="flex items-center gap-1">
-                <TrendingUp className="h-3 w-3" />
-                +12.5%
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <p className="text-xs text-muted-foreground">Strong user retention</p>
-            <p className="text-xs text-muted-foreground mt-1">Engagement exceed targets</p>
-          </CardContent>
-        </Card>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
