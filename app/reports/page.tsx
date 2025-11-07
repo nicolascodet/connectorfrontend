@@ -7,18 +7,17 @@ import {
   Star,
   Trash2,
   Search,
-  Filter,
   Calendar,
   Eye,
-  Download,
-  AlertTriangle,
-  TrendingUp,
-  Clock
 } from "lucide-react";
 import { listReports, toggleReportStar, deleteReport, getReport } from "@/lib/api";
 import DrillDownModal from "@/components/dashboard/DrillDownModal";
 import Sidebar from "@/components/sidebar";
 import { useAuth } from "@/contexts/auth-context";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 interface SavedReport {
   report_id: number;
@@ -51,7 +50,6 @@ export default function ReportsPage() {
   }, [filterType, starredOnly]);
 
   const loadReports = async () => {
-    // Hardcoded fake reports for demo
     const fakeReports: SavedReport[] = [
       {
         report_id: 1,
@@ -98,7 +96,6 @@ export default function ReportsPage() {
     ];
 
     setLoading(true);
-    // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 500));
     setReports(fakeReports);
     setLoading(false);
@@ -108,7 +105,6 @@ export default function ReportsPage() {
     event.stopPropagation();
     try {
       await toggleReportStar(reportId);
-      // Update local state
       setReports(reports.map(r =>
         r.report_id === reportId ? { ...r, is_starred: !r.is_starred } : r
       ));
@@ -154,12 +150,12 @@ export default function ReportsPage() {
     }
   };
 
-  const getReportTypeColor = (type: string) => {
+  const getReportTypeVariant = (type: string): "default" | "secondary" | "destructive" | "outline" => {
     switch (type) {
-      case "widget_drilldown": return "bg-blue-100 text-blue-800 border-blue-200";
-      case "alert_investigation": return "bg-red-100 text-red-800 border-red-200";
-      case "manual_query": return "bg-green-100 text-green-800 border-green-200";
-      default: return "bg-gray-100 text-gray-800 border-gray-200";
+      case "widget_drilldown": return "default";
+      case "alert_investigation": return "destructive";
+      case "manual_query": return "secondary";
+      default: return "outline";
     }
   };
 
@@ -190,182 +186,162 @@ export default function ReportsPage() {
   return (
     <div className="flex">
       <Sidebar user={user} />
-      <div className="flex-1 min-h-screen bg-gray-50 p-8">
+      <div className="flex-1 min-h-screen bg-background p-8">
         <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Saved Reports</h1>
-            <p className="text-gray-600">Access your saved intelligence reports</p>
-          </div>
-          <button
-            onClick={() => router.push("/dash")}
-            className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors"
-          >
-            Back to Dashboard
-          </button>
-        </div>
-
-        {/* Filters */}
-        <div className="bg-white rounded-3xl border border-gray-200 p-6 mb-6">
-          <div className="flex flex-wrap items-center gap-4">
-            {/* Search */}
-            <div className="flex-1 min-w-[300px]">
-              <div className="relative">
-                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search reports..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
+          <div className="flex items-center justify-between mb-8">
+            <div>
+              <h1 className="text-4xl font-bold mb-2">Saved Reports</h1>
+              <p className="text-muted-foreground">Access your saved intelligence reports</p>
             </div>
-
-            {/* Type Filter */}
-            <select
-              value={filterType || ""}
-              onChange={(e) => setFilterType(e.target.value || null)}
-              className="px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="">All Types</option>
-              <option value="widget_drilldown">Widget Analysis</option>
-              <option value="alert_investigation">Alert Investigation</option>
-              <option value="manual_query">Manual Query</option>
-            </select>
-
-            {/* Starred Filter */}
-            <button
-              onClick={() => setStarredOnly(!starredOnly)}
-              className={`px-6 py-3 rounded-xl font-medium transition-colors ${
-                starredOnly
-                  ? "bg-yellow-100 text-yellow-800 border-2 border-yellow-300"
-                  : "bg-gray-100 text-gray-700 border-2 border-gray-200 hover:bg-gray-200"
-              }`}
-            >
-              <Star className={`w-5 h-5 inline mr-2 ${starredOnly ? "fill-yellow-500" : ""}`} />
-              {starredOnly ? "Starred Only" : "Show All"}
-            </button>
+            <Button onClick={() => router.push("/dash")}>
+              Back to Dashboard
+            </Button>
           </div>
-        </div>
 
-        {/* Reports List */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
-        ) : filteredReports.length === 0 ? (
-          <div className="bg-white rounded-3xl border border-gray-200 p-16 text-center">
-            <FileText className="w-20 h-20 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-2xl font-semibold text-gray-900 mb-3">No Reports Found</h3>
-            <p className="text-gray-500 mb-8">
-              {searchTerm
-                ? "No reports match your search"
-                : starredOnly
-                ? "You haven't starred any reports yet"
-                : "Save drill-down reports to access them here"}
-            </p>
-            <button
-              onClick={() => router.push("/dash")}
-              className="px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-2xl transition-colors"
-            >
-              Go to Dashboard
-            </button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-            {filteredReports.map((report) => (
-              <div
-                key={report.report_id}
-                onClick={() => handleViewReport(report)}
-                className="bg-white rounded-2xl border border-gray-200 p-6 hover:shadow-lg transition-all cursor-pointer group"
-              >
-                {/* Header */}
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1 pr-2">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
-                      {report.title}
-                    </h3>
-                    <span className={`inline-block px-3 py-1 rounded-full text-xs font-medium border ${getReportTypeColor(report.report_type)}`}>
-                      {getReportTypeLabel(report.report_type)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={(e) => handleToggleStar(report.report_id, e)}
-                      className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-                    >
-                      <Star className={`w-5 h-5 ${report.is_starred ? "fill-yellow-400 text-yellow-400" : "text-gray-400"}`} />
-                    </button>
-                    <button
-                      onClick={(e) => handleDelete(report.report_id, e)}
-                      className="p-2 hover:bg-red-50 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-5 h-5 text-gray-400 hover:text-red-600" />
-                    </button>
-                  </div>
+          <Card className="mb-6">
+            <CardContent className="pt-6">
+              <div className="flex flex-wrap items-center gap-4">
+                <div className="flex-1 min-w-[300px] relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                  <Input
+                    type="text"
+                    placeholder="Search reports..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10"
+                  />
                 </div>
 
-                {/* Summary */}
-                {report.report_summary && (
-                  <p className="text-sm text-gray-600 mb-4 line-clamp-2">
-                    {report.report_summary}
-                  </p>
-                )}
+                <select
+                  value={filterType || ""}
+                  onChange={(e) => setFilterType(e.target.value || null)}
+                  className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="">All Types</option>
+                  <option value="widget_drilldown">Widget Analysis</option>
+                  <option value="alert_investigation">Alert Investigation</option>
+                  <option value="manual_query">Manual Query</option>
+                </select>
 
-                {/* Metadata */}
-                <div className="flex items-center gap-4 text-xs text-gray-500 pt-4 border-t border-gray-100">
-                  <span className="flex items-center gap-1">
-                    <Calendar className="w-3 h-3" />
-                    {formatDate(report.created_at)}
-                  </span>
-                  {report.view_count > 0 && (
-                    <span className="flex items-center gap-1">
-                      <Eye className="w-3 h-3" />
-                      {report.view_count} views
-                    </span>
-                  )}
-                </div>
-
-                {/* Tags */}
-                {report.tags && report.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-2 mt-3">
-                    {report.tags.slice(0, 3).map((tag, idx) => (
-                      <span
-                        key={idx}
-                        className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                  </div>
-                )}
+                <Button
+                  variant={starredOnly ? "default" : "outline"}
+                  onClick={() => setStarredOnly(!starredOnly)}
+                >
+                  <Star className={`w-4 h-4 mr-2 ${starredOnly ? "fill-current" : ""}`} />
+                  {starredOnly ? "Starred Only" : "Show All"}
+                </Button>
               </div>
-            ))}
-          </div>
-        )}
+            </CardContent>
+          </Card>
 
-        {/* Stats Footer */}
-        {!loading && filteredReports.length > 0 && (
-          <div className="mt-8 text-center text-sm text-gray-500">
-            Showing {filteredReports.length} {filteredReports.length === 1 ? "report" : "reports"}
-          </div>
-        )}
+          {loading ? (
+            <div className="flex items-center justify-center py-20">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : filteredReports.length === 0 ? (
+            <Card className="p-16 text-center">
+              <FileText className="w-20 h-20 mx-auto mb-4 text-muted-foreground" />
+              <h3 className="text-2xl font-semibold mb-3">No Reports Found</h3>
+              <p className="text-muted-foreground mb-8">
+                {searchTerm
+                  ? "No reports match your search"
+                  : starredOnly
+                  ? "You haven't starred any reports yet"
+                  : "Save drill-down reports to access them here"}
+              </p>
+              <Button onClick={() => router.push("/dash")}>
+                Go to Dashboard
+              </Button>
+            </Card>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {filteredReports.map((report) => (
+                <Card
+                  key={report.report_id}
+                  className="cursor-pointer hover:shadow-lg transition-shadow group"
+                  onClick={() => handleViewReport(report)}
+                >
+                  <CardHeader>
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex-1 pr-2">
+                        <CardTitle className="text-lg group-hover:text-primary transition-colors">
+                          {report.title}
+                        </CardTitle>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => handleToggleStar(report.report_id, e)}
+                          className="h-8 w-8"
+                        >
+                          <Star className={`h-4 w-4 ${report.is_starred ? "fill-yellow-400 text-yellow-400" : ""}`} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => handleDelete(report.report_id, e)}
+                          className="h-8 w-8 hover:bg-destructive hover:text-destructive-foreground"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    <Badge variant={getReportTypeVariant(report.report_type)}>
+                      {getReportTypeLabel(report.report_type)}
+                    </Badge>
+                  </CardHeader>
+                  <CardContent>
+                    {report.report_summary && (
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                        {report.report_summary}
+                      </p>
+                    )}
+                    {report.tags && report.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        {report.tags.slice(0, 3).map((tag, idx) => (
+                          <Badge key={idx} variant="secondary">
+                            {tag}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                  <CardFooter className="text-xs text-muted-foreground flex items-center gap-4">
+                    <span className="flex items-center gap-1">
+                      <Calendar className="w-3 h-3" />
+                      {formatDate(report.created_at)}
+                    </span>
+                    {report.view_count > 0 && (
+                      <span className="flex items-center gap-1">
+                        <Eye className="w-3 h-3" />
+                        {report.view_count} views
+                      </span>
+                    )}
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          )}
 
-        {/* Report Modal */}
-        {selectedReport && (
-          <DrillDownModal
-            isOpen={modalOpen}
-            onClose={() => {
-              setModalOpen(false);
-              setSelectedReport(null);
-            }}
-            widgetTitle={selectedReport.title}
-            widgetMessage={selectedReport.message}
-            preloadedReport={selectedReport.report}
-          />
-        )}
+          {!loading && filteredReports.length > 0 && (
+            <div className="mt-8 text-center text-sm text-muted-foreground">
+              Showing {filteredReports.length} {filteredReports.length === 1 ? "report" : "reports"}
+            </div>
+          )}
+
+          {selectedReport && (
+            <DrillDownModal
+              isOpen={modalOpen}
+              onClose={() => {
+                setModalOpen(false);
+                setSelectedReport(null);
+              }}
+              widgetTitle={selectedReport.title}
+              widgetMessage={selectedReport.message}
+              preloadedReport={selectedReport.report}
+            />
+          )}
         </div>
       </div>
     </div>
