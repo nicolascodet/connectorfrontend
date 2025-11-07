@@ -127,19 +127,23 @@ export default function CleanBusinessDashboard() {
 
     // Widget type: stat (big number card)
     if (widget.widget_type === 'stat') {
+      const messageParts = (widget.message || '').split(' ');
+      const bigNumber = messageParts[0] || '';
+      const description = messageParts.slice(1).join(' ') || widget.message;
+
       return (
         <div key={idx} className={baseClasses}>
           <div className="flex items-start justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-              {widget.title}
+              {widget.title || 'Metric'}
             </h3>
             <DollarSign className="w-5 h-5 text-green-600" />
           </div>
           <p className="text-3xl font-bold text-gray-900 mb-2">
-            {widget.message.split(' ')[0]}
+            {bigNumber}
           </p>
           <p className="text-sm text-gray-600 mb-4">
-            {widget.message.split(' ').slice(1).join(' ')}
+            {description}
           </p>
           {renderSources(widget.sources)}
         </div>
@@ -152,7 +156,7 @@ export default function CleanBusinessDashboard() {
         <div key={idx} className={baseClasses}>
           <div className="flex items-start justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-              {widget.title}
+              {widget.title || 'Trend'}
             </h3>
             <TrendingUp className="w-5 h-5 text-blue-600" />
           </div>
@@ -160,7 +164,7 @@ export default function CleanBusinessDashboard() {
             <Activity className="w-5 h-5 text-gray-400" />
             <span className="text-lg font-semibold text-gray-900">Trending Up</span>
           </div>
-          <p className="text-sm text-gray-600 mb-4">{widget.message}</p>
+          <p className="text-sm text-gray-600 mb-4">{widget.message || 'No details available'}</p>
           {renderSources(widget.sources)}
         </div>
       );
@@ -172,9 +176,9 @@ export default function CleanBusinessDashboard() {
         <div key={idx} className="bg-white rounded-2xl border-2 border-red-200 p-6 shadow-sm">
           <div className="flex items-start gap-3 mb-3">
             <AlertTriangle className="w-6 h-6 text-red-600 flex-shrink-0" />
-            <h3 className="text-lg font-bold text-gray-900">{widget.title}</h3>
+            <h3 className="text-lg font-bold text-gray-900">{widget.title || 'Alert'}</h3>
           </div>
-          <p className="text-sm text-gray-700 mb-4">{widget.message}</p>
+          <p className="text-sm text-gray-700 mb-4">{widget.message || 'No details available'}</p>
           {renderSources(widget.sources)}
         </div>
       );
@@ -186,11 +190,11 @@ export default function CleanBusinessDashboard() {
         <div key={idx} className={baseClasses}>
           <div className="flex items-start justify-between mb-3">
             <h3 className="text-sm font-semibold text-gray-700 uppercase tracking-wide">
-              {widget.title}
+              {widget.title || 'Snapshot'}
             </h3>
             <Activity className="w-5 h-5 text-purple-600" />
           </div>
-          <p className="text-sm text-gray-700 mb-4">{widget.message}</p>
+          <p className="text-sm text-gray-700 mb-4">{widget.message || 'No details available'}</p>
           {renderSources(widget.sources)}
         </div>
       );
@@ -202,11 +206,11 @@ export default function CleanBusinessDashboard() {
         <div key={idx} className="bg-gradient-to-br from-green-50 to-white rounded-2xl border border-green-200 p-6 shadow-sm">
           <div className="flex items-start justify-between mb-3">
             <h3 className="text-sm font-semibold text-green-800 uppercase tracking-wide">
-              {widget.title}
+              {widget.title || 'Highlight'}
             </h3>
             <ArrowUp className="w-5 h-5 text-green-600" />
           </div>
-          <p className="text-sm text-gray-700 mb-4">{widget.message}</p>
+          <p className="text-sm text-gray-700 mb-4">{widget.message || 'No details available'}</p>
           {renderSources(widget.sources)}
         </div>
       );
@@ -215,8 +219,8 @@ export default function CleanBusinessDashboard() {
     // Default fallback
     return (
       <div key={idx} className={baseClasses}>
-        <h3 className="text-lg font-semibold text-gray-900 mb-2">{widget.title}</h3>
-        <p className="text-sm text-gray-600 mb-4">{widget.message}</p>
+        <h3 className="text-lg font-semibold text-gray-900 mb-2">{widget.title || 'Insight'}</h3>
+        <p className="text-sm text-gray-600 mb-4">{widget.message || 'No details available'}</p>
         {renderSources(widget.sources)}
       </div>
     );
