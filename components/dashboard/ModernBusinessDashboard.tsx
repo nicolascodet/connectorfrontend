@@ -166,7 +166,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           <button
             className="text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
-            View details →
+            Generate full report →
           </button>
         </div>
       );
@@ -197,7 +197,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           <button
             className="text-sm text-blue-600 hover:text-blue-700 font-medium mt-4"
           >
-            View details →
+            Generate full report →
           </button>
         </div>
       );
@@ -235,7 +235,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           <button
             className="text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
-            View details →
+            Generate full report →
           </button>
         </div>
       );
@@ -295,7 +295,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           <button
             className="text-sm text-blue-600 hover:text-blue-700 font-medium"
           >
-            View details →
+            Generate full report →
           </button>
         </div>
       );
@@ -337,7 +337,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           <button
             className="text-sm text-green-600 hover:text-green-700 font-medium"
           >
-            View details →
+            Generate full report →
           </button>
         </div>
       );
