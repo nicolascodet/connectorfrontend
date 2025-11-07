@@ -456,3 +456,41 @@ export async function getDrillDownReport(widgetTitle: string, widgetMessage: str
     widget_message: widgetMessage
   });
 }
+
+// ============================================================================
+// Real-Time Alerts API
+// ============================================================================
+
+export async function getActiveAlerts(urgencyFilter?: string, limit?: number): Promise<any> {
+  const params: Record<string, string> = {};
+  if (urgencyFilter) params.urgency_filter = urgencyFilter;
+  if (limit) params.limit = limit.toString();
+  return apiGet("/api/v1/alerts/active", params);
+}
+
+export async function getAlertStats(): Promise<any> {
+  return apiGet("/api/v1/alerts/stats");
+}
+
+export async function dismissAlert(alertId: number, note?: string): Promise<any> {
+  return apiPost(`/api/v1/alerts/${alertId}/dismiss`, { note });
+}
+
+export async function investigateAlert(alertId: number): Promise<any> {
+  return apiPost(`/api/v1/alerts/${alertId}/investigate`, {});
+}
+
+export async function getAlertDetails(alertId: number): Promise<any> {
+  return apiGet(`/api/v1/alerts/${alertId}`);
+}
+
+export async function getAlertHistory(days: number = 30, includeDismissed: boolean = true): Promise<any> {
+  return apiGet("/api/v1/alerts/history", {
+    days: days.toString(),
+    include_dismissed: includeDismissed.toString()
+  });
+}
+
+export async function backfillUrgencyDetection(limit: number = 100, onlyRecent: boolean = true): Promise<any> {
+  return apiPost("/api/v1/alerts/backfill", {}, { limit: limit.toString(), only_recent: onlyRecent.toString() });
+}

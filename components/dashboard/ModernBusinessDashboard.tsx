@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { getLatestInsights, generateInsights } from "@/lib/api";
+import { getLatestInsights, generateInsights, investigateAlert } from "@/lib/api";
 import {
   Brain, RefreshCw, Sparkles, ArrowUp, ArrowDown, TrendingUp,
   TrendingDown, AlertTriangle, CheckCircle, Users, DollarSign
 } from "lucide-react";
 import DrillDownModal from "./DrillDownModal";
+import AlertsWidget from "./AlertsWidget";
 
 interface Widget {
   widget_type: string;
@@ -39,6 +40,8 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
   const [generating, setGenerating] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedWidget, setSelectedWidget] = useState<Widget | null>(null);
+  const [alertReport, setAlertReport] = useState<any | null>(null);
+  const [investigating, setInvestigating] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -118,7 +121,32 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
 
   const handleWidgetClick = (widget: Widget) => {
     setSelectedWidget(widget);
+    setAlertReport(null);
     setModalOpen(true);
+  };
+
+  const handleAlertInvestigate = async (alertId: number, summary: string) => {
+    try {
+      setInvestigating(true);
+      const result = await investigateAlert(alertId);
+
+      setAlertReport(result.report);
+      setSelectedWidget({
+        widget_type: "alert",
+        title: result.report.alert_context?.alert_type?.replace("_", " ") || "Alert Investigation",
+        message: summary,
+        urgency: result.report.alert_context?.urgency_level || "high",
+        value: null,
+        value_label: null,
+        sources: []
+      });
+      setModalOpen(true);
+    } catch (error) {
+      console.error("Failed to investigate alert:", error);
+      alert("Failed to generate investigation report");
+    } finally {
+      setInvestigating(false);
+    }
   };
 
   // Flatten all widgets and filter out empty ones
@@ -442,13 +470,30 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
       </div>
 
       {/* Intelligence Story: GPT fills these based on communications */}
-      <div className="mb-4">
+      <div className="mb-6">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">Today's Intelligence Brief</h2>
         <p className="text-gray-600">AI-synthesized insights from your communications</p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {displayWidgets.map((widget, idx) => renderWidget(widget, idx))}
+      {/* Side-by-Side Layout: Alerts on Left, Intelligence Widgets on Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Alerts Widget - Left Side (4 columns) */}
+        <div className="lg:col-span-4">
+          <AlertsWidget onInvestigate={handleAlertInvestigate} />
+          {investigating && (
+            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-2xl p-4 flex items-center gap-3">
+              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600"></div>
+              <p className="text-sm text-blue-900 font-medium">Generating investigation report...</p>
+            </div>
+          )}
+        </div>
+
+        {/* Intelligence Widgets - Right Side (8 columns) */}
+        <div className="lg:col-span-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {displayWidgets.map((widget, idx) => renderWidget(widget, idx))}
+          </div>
+        </div>
       </div>
 
       {/* Drill-Down Modal */}
@@ -458,9 +503,11 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           onClose={() => {
             setModalOpen(false);
             setSelectedWidget(null);
+            setAlertReport(null);
           }}
           widgetTitle={selectedWidget.title}
           widgetMessage={selectedWidget.message}
+          preloadedReport={alertReport}
         />
       )}
     </div>

@@ -11,6 +11,7 @@ interface DrillDownModalProps {
   onClose: () => void;
   widgetTitle: string;
   widgetMessage: string;
+  preloadedReport?: any;  // For alert investigations
 }
 
 interface ReportData {
@@ -67,7 +68,7 @@ interface ReportData {
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
-export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMessage }: DrillDownModalProps) {
+export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMessage, preloadedReport }: DrillDownModalProps) {
   const [loading, setLoading] = useState(true);
   const [report, setReport] = useState<ReportData | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -78,9 +79,15 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
 
   useEffect(() => {
     if (isOpen) {
-      loadReport();
+      // Use preloaded report if available (from alert investigation)
+      if (preloadedReport) {
+        setReport(preloadedReport);
+        setLoading(false);
+      } else {
+        loadReport();
+      }
     }
-  }, [isOpen, widgetTitle, widgetMessage]);
+  }, [isOpen, widgetTitle, widgetMessage, preloadedReport]);
 
   const loadReport = async () => {
     setLoading(true);
