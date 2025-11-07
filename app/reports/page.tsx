@@ -52,7 +52,7 @@ export default function ReportsPage() {
   const loadReports = async () => {
     try {
       setLoading(true);
-      const result = await listReports(filterType, starredOnly);
+      const result = await listReports(filterType || undefined, starredOnly);
       setReports(result.reports || []);
     } catch (error) {
       console.error("Failed to load reports:", error);
