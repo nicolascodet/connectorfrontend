@@ -55,23 +55,24 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           console.log('Type:', typeof insight.structured_data);
 
           let structured_data = insight.structured_data || [];
+
+          // Handle if it's a string (parse it first)
           if (typeof structured_data === 'string') {
             try {
-              const parsed_json = JSON.parse(structured_data);
-              console.log('Parsed JSON:', parsed_json);
-              // Check if it has the wrapper {"type": "array", "items": [...]}
-              if (parsed_json && parsed_json.type === 'array' && parsed_json.items) {
-                console.log('Found wrapper, extracting items:', parsed_json.items);
-                structured_data = parsed_json.items;
-              } else {
-                console.log('No wrapper, using directly');
-                structured_data = parsed_json;
-              }
+              structured_data = JSON.parse(structured_data);
+              console.log('Parsed from string:', structured_data);
             } catch (e) {
               console.error('Failed to parse structured_data:', e);
               structured_data = [];
             }
           }
+
+          // Now check if it has the wrapper {"type": "array", "items": [...]}
+          if (structured_data && typeof structured_data === 'object' && structured_data.type === 'array' && structured_data.items) {
+            console.log('Found wrapper, extracting items:', structured_data.items);
+            structured_data = structured_data.items;
+          }
+
           console.log('Final structured_data:', structured_data);
           console.log('Is array?', Array.isArray(structured_data));
           console.log('Length:', structured_data?.length);
