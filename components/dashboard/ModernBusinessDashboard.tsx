@@ -135,8 +135,12 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
     }
   });
 
+  // Only show the last 6 widgets
+  const displayWidgets = allWidgets.slice(-6);
+
   console.log('Total widgets loaded:', allWidgets.length);
-  console.log('Widget types:', allWidgets.map(w => w.widget_type));
+  console.log('Showing last 6 widgets:', displayWidgets.length);
+  console.log('Widget types:', displayWidgets.map(w => w.widget_type));
 
   if (loading) {
     return (
@@ -488,7 +492,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {allWidgets.map((widget, idx) => renderWidget(widget, idx))}
+        {displayWidgets.map((widget, idx) => renderWidget(widget, idx))}
       </div>
 
       {/* Drill-Down Modal */}
