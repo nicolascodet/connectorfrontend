@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
-import { X, TrendingUp, TrendingDown, Users, DollarSign, Calendar, AlertCircle, CheckCircle, Clock, ExternalLink, FileText, Mail, Loader2 } from 'lucide-react';
+import React, { useEffect, useState, useRef } from 'react';
+import { X, TrendingUp, TrendingDown, Users, DollarSign, Calendar, AlertCircle, CheckCircle, Clock, ExternalLink, FileText, Mail, Loader2, Download } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getDrillDownReport, getSourceDocument } from '@/lib/api';
 import SmartMarkdown from '@/components/SmartMarkdown';
@@ -73,6 +73,8 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
   const [error, setError] = useState<string | null>(null);
   const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
   const [loadingDocument, setLoadingDocument] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (isOpen) {
@@ -107,6 +109,41 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
       alert('Failed to load document: ' + err.message);
     } finally {
       setLoadingDocument(false);
+    }
+  };
+
+  const handleExportPDF = async () => {
+    if (!reportRef.current) return;
+
+    setExporting(true);
+    try {
+      // Dynamically import html2pdf to avoid SSR issues
+      const html2pdf = (await import('html2pdf.js')).default;
+
+      const opt = {
+        margin: [0.5, 0.5],
+        filename: `${widgetTitle.replace(/\s+/g, '_')}_Report_${new Date().toISOString().split('T')[0]}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: {
+          scale: 2,
+          useCORS: true,
+          logging: false,
+          letterRendering: true
+        },
+        jsPDF: {
+          unit: 'in',
+          format: 'letter',
+          orientation: 'portrait'
+        },
+        pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+      };
+
+      await html2pdf().set(opt).from(reportRef.current).save();
+    } catch (err) {
+      console.error('Failed to export PDF:', err);
+      alert('Failed to export PDF. Please try again.');
+    } finally {
+      setExporting(false);
     }
   };
 
@@ -161,7 +198,8 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
           </div>
 
           {/* Content */}
-          <div className="flex-1 overflow-y-auto p-8 space-y-8">
+          <div className="flex-1 overflow-y-auto p-8" ref={reportRef}>
+            <div className="space-y-6">
             {loading && (
               <div className="flex items-center justify-center py-20">
                 <div className="text-center">
@@ -188,24 +226,24 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
               <>
                 {/* Executive Summary */}
                 {report.executive_summary && (
-                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-6 border border-blue-100">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                  <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
+                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
                       <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                       Executive Summary
                     </h3>
-                    <p className="text-gray-700 leading-relaxed">{report.executive_summary}</p>
+                    <p className="text-gray-700 leading-relaxed text-base">{report.executive_summary}</p>
                   </div>
                 )}
 
                 {/* Impact Assessment */}
                 {report.impact && (
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="bg-white rounded-2xl border border-gray-200 p-8">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                       <DollarSign className="w-5 h-5 text-green-600" />
                       Impact Assessment
                     </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
                       {/* Financial Impact */}
                       <div className="bg-green-50 rounded-xl p-4 border border-green-200">
                         <div className="text-sm text-green-600 font-medium mb-1">Financial Impact</div>
@@ -271,8 +309,8 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
 
                 {/* Root Cause Analysis */}
                 {report.root_cause && (
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Root Cause Analysis</h3>
+                  <div className="bg-white rounded-2xl border border-gray-200 p-8">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6">Root Cause Analysis</h3>
 
                     <div className="bg-red-50 border border-red-200 rounded-xl p-4 mb-4">
                       <div className="text-sm text-red-600 font-medium mb-2">Primary Cause</div>
@@ -312,8 +350,8 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
 
                 {/* Timeline */}
                 {report.timeline && report.timeline.length > 0 && (
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="bg-white rounded-2xl border border-gray-200 p-8">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                       <Calendar className="w-5 h-5 text-blue-600" />
                       Timeline
                     </h3>
@@ -340,10 +378,10 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
 
                 {/* Metrics */}
                 {report.metrics && report.metrics.length > 0 && (
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Key Metrics</h3>
+                  <div className="bg-white rounded-2xl border border-gray-200 p-8">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6">Key Metrics</h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       {report.metrics.map((metric, idx) => (
                         <div key={idx} className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200">
                           <div className="flex items-start justify-between mb-2">
@@ -360,13 +398,13 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
 
                 {/* Stakeholders */}
                 {report.key_stakeholders && report.key_stakeholders.length > 0 && (
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="bg-white rounded-2xl border border-gray-200 p-8">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                       <Users className="w-5 h-5 text-purple-600" />
                       Key Stakeholders
                     </h3>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                       {report.key_stakeholders.map((stakeholder, idx) => (
                         <div key={idx} className="bg-purple-50 rounded-xl p-4 border border-purple-200">
                           <div className="font-semibold text-purple-900 mb-1">{stakeholder.name}</div>
@@ -380,13 +418,13 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
 
                 {/* Recommendations */}
                 {report.recommendations && report.recommendations.length > 0 && (
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <div className="bg-white rounded-2xl border border-gray-200 p-8">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
                       <CheckCircle className="w-5 h-5 text-green-600" />
                       Recommended Actions
                     </h3>
 
-                    <div className="space-y-4">
+                    <div className="space-y-5">
                       {report.recommendations
                         .sort((a, b) => (a.priority || 999) - (b.priority || 999))
                         .map((rec, idx) => (
@@ -421,12 +459,12 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
 
                 {/* Source Documents */}
                 {report.sources && report.sources.length > 0 && (
-                  <div className="bg-white rounded-2xl border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  <div className="bg-white rounded-2xl border border-gray-200 p-8">
+                    <h3 className="text-xl font-bold text-gray-900 mb-6">
                       Source Documents ({report.total_sources || report.sources.length})
                     </h3>
 
-                    <div className="space-y-3">
+                    <div className="space-y-4">
                       {report.sources.slice(0, 10).map((source, idx) => (
                         <div
                           key={idx}
@@ -469,16 +507,34 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
 
                 {/* Generation Info */}
                 {report.generation_time_ms && (
-                  <div className="text-center text-xs text-gray-400">
+                  <div className="text-center text-xs text-gray-400 mt-4">
                     Report generated in {(report.generation_time_ms / 1000).toFixed(2)}s
                   </div>
                 )}
               </>
             )}
+            </div>
           </div>
 
           {/* Footer */}
-          <div className="border-t border-gray-100 p-6 bg-gray-50 flex justify-end">
+          <div className="border-t border-gray-100 p-6 bg-gray-50 flex justify-between items-center">
+            <button
+              onClick={handleExportPDF}
+              disabled={exporting || loading}
+              className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {exporting ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  Exporting...
+                </>
+              ) : (
+                <>
+                  <Download className="w-4 h-4" />
+                  Download PDF
+                </>
+              )}
+            </button>
             <button
               onClick={onClose}
               className="px-6 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors font-medium"
