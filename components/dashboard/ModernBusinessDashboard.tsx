@@ -382,7 +382,54 @@ export default function ModernBusinessDashboard() {
         </button>
       </div>
 
-      {/* Dashboard Grid - Responsive layout */}
+      {/* Top Row: Hardcoded QuickBooks Stats (3 cards) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        {/* Revenue Card */}
+        <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm hover:shadow-lg transition-shadow">
+          <h3 className="text-sm font-medium text-gray-500 mb-4">Monthly Revenue</h3>
+          <div className="flex items-baseline gap-3 mb-2">
+            <span className="text-5xl font-bold text-gray-900">$127K</span>
+            <ArrowUp className="w-6 h-6 text-green-600" />
+          </div>
+          <p className="text-sm text-gray-600 mb-6">+12% vs last month</p>
+          <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+            View QuickBooks →
+          </button>
+        </div>
+
+        {/* Expenses Card */}
+        <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm hover:shadow-lg transition-shadow">
+          <h3 className="text-sm font-medium text-gray-500 mb-4">Monthly Expenses</h3>
+          <div className="flex items-baseline gap-3 mb-2">
+            <span className="text-5xl font-bold text-gray-900">$89K</span>
+            <ArrowDown className="w-6 h-6 text-red-600" />
+          </div>
+          <p className="text-sm text-gray-600 mb-6">+8% vs last month</p>
+          <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+            View QuickBooks →
+          </button>
+        </div>
+
+        {/* Profit Card */}
+        <div className="bg-white rounded-3xl border border-gray-100 p-8 shadow-sm hover:shadow-lg transition-shadow">
+          <h3 className="text-sm font-medium text-gray-500 mb-4">Net Profit</h3>
+          <div className="flex items-baseline gap-3 mb-2">
+            <span className="text-5xl font-bold text-gray-900">$38K</span>
+            <ArrowUp className="w-6 h-6 text-green-600" />
+          </div>
+          <p className="text-sm text-gray-600 mb-6">30% margin</p>
+          <button className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+            View QuickBooks →
+          </button>
+        </div>
+      </div>
+
+      {/* Intelligence Story: GPT fills these based on communications */}
+      <div className="mb-4">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Today's Intelligence Brief</h2>
+        <p className="text-gray-600">AI-synthesized insights from your communications</p>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {allWidgets.map((widget, idx) => renderWidget(widget, idx))}
       </div>
