@@ -185,40 +185,17 @@ export default function ModernBusinessDashboard() {
       );
     }
 
-    // ALERT CARD - Critical issues
+    // ALERT CARD - Critical issues with visual indicator
     if (widget.widget_type === 'alert') {
       return (
-        <div key={idx} className="bg-white rounded-3xl border-2 border-red-100 p-8 hover:shadow-lg transition-shadow">
-          <div className="flex items-start gap-4 mb-4">
-            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center flex-shrink-0">
+        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-gray-500">{widget.title}</h3>
+            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
               <AlertTriangle className="w-5 h-5 text-red-600" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{widget.title}</h3>
-              <p className="text-sm text-gray-600 leading-relaxed">{widget.message}</p>
             </div>
           </div>
 
-          {widget.sources?.[0] && (
-            <div className="mt-4 pt-4 border-t border-gray-100">
-              <p className="text-xs text-gray-500 mb-2">Source</p>
-              <button
-                onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-                className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-              >
-                {widget.sources[0].from} →
-              </button>
-            </div>
-          )}
-        </div>
-      );
-    }
-
-    // SNAPSHOT CARD - Status update
-    if (widget.widget_type === 'snapshot') {
-      return (
-        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
-          <h3 className="text-sm font-medium text-gray-500 mb-4">{widget.title}</h3>
           <p className="text-base text-gray-700 leading-relaxed mb-6">{widget.message}</p>
 
           {widget.sources?.[0] && (
@@ -226,31 +203,63 @@ export default function ModernBusinessDashboard() {
               onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
               className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
-              View source →
+              {widget.sources[0].from} →
             </button>
           )}
         </div>
       );
     }
 
-    // HIGHLIGHT CARD - Good news
-    if (widget.widget_type === 'highlight') {
+    // SNAPSHOT CARD - Status update with progress indicator
+    if (widget.widget_type === 'snapshot') {
+      // Try to extract a number for visual representation
+      const numberMatch = (widget.message || '').match(/(\d+)/);
+      const hasNumber = numberMatch !== null;
+      const numberValue = hasNumber ? parseInt(numberMatch[0]) : 0;
+      const percentage = hasNumber ? Math.min(numberValue * 10, 100) : 50; // Scale for visual
+
       return (
-        <div key={idx} className="bg-gradient-to-br from-green-50 to-white rounded-3xl border border-green-100 p-8 hover:shadow-lg transition-shadow">
-          <div className="flex items-start gap-4 mb-4">
-            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center flex-shrink-0">
-              <CheckCircle className="w-5 h-5 text-green-600" />
+        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
+          <h3 className="text-sm font-medium text-gray-500 mb-4">{widget.title}</h3>
+
+          {hasNumber && (
+            <div className="flex items-baseline gap-3 mb-4">
+              <span className="text-5xl font-bold text-gray-900">{numberValue}</span>
+              <ArrowUp className="w-6 h-6 text-blue-600" />
             </div>
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">{widget.title}</h3>
-              <p className="text-sm text-gray-700 leading-relaxed">{widget.message}</p>
-            </div>
-          </div>
+          )}
+
+          <p className="text-base text-gray-700 leading-relaxed mb-6">{widget.message}</p>
 
           {widget.sources?.[0] && (
             <button
               onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-              className="text-sm text-green-600 hover:text-green-700 font-medium"
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+            >
+              View report →
+            </button>
+          )}
+        </div>
+      );
+    }
+
+    // HIGHLIGHT CARD - Good news with checkmark
+    if (widget.widget_type === 'highlight') {
+      return (
+        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-sm font-medium text-gray-500">{widget.title}</h3>
+            <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+              <CheckCircle className="w-5 h-5 text-green-600" />
+            </div>
+          </div>
+
+          <p className="text-base text-gray-700 leading-relaxed mb-6">{widget.message}</p>
+
+          {widget.sources?.[0] && (
+            <button
+              onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
+              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
             >
               View details →
             </button>
@@ -259,11 +268,20 @@ export default function ModernBusinessDashboard() {
       );
     }
 
-    // DEFAULT CARD
+    // DEFAULT CARD - Generic insight with icon
     return (
       <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3">{widget.title || 'Insight'}</h3>
-        <p className="text-sm text-gray-600 leading-relaxed">{widget.message || 'No details available'}</p>
+        <h3 className="text-sm font-medium text-gray-500 mb-4">{widget.title || 'Insight'}</h3>
+        <p className="text-base text-gray-700 leading-relaxed mb-6">{widget.message || 'No details available'}</p>
+
+        {widget.sources?.[0] && (
+          <button
+            onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            View source →
+          </button>
+        )}
       </div>
     );
   };
