@@ -414,3 +414,15 @@ export async function getSentimentAnalysis(days: number = 30): Promise<any> {
 export async function getRelationshipNetwork(): Promise<any> {
   return apiGet("/api/v1/analytics/relationships/network");
 }
+
+// ============================================================================
+// RAG-Powered Intelligence Insights
+// ============================================================================
+
+export async function getLatestInsights(timePeriod: string = "daily", limit: number = 5): Promise<any> {
+  return apiGet("/api/v1/insights/latest", { time_period: timePeriod, limit: limit.toString() });
+}
+
+export async function generateInsights(): Promise<any> {
+  return apiPost("/api/v1/insights/generate", {});
+}

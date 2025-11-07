@@ -11,6 +11,7 @@ import TrendingEntities from "@/components/dashboard/TrendingEntities";
 import DealMomentum from "@/components/dashboard/DealMomentum";
 import SentimentAlerts from "@/components/dashboard/SentimentAlerts";
 import CommunicationPatterns from "@/components/dashboard/CommunicationPatterns";
+import IntelligenceInsights from "@/components/dashboard/IntelligenceInsights";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -55,7 +56,12 @@ export default function DashboardPage() {
             <p className="text-gray-600">Real-time insights from your connected data sources</p>
           </div>
 
-          {/* Top Row - Activity Pulse + Intelligence Feed */}
+          {/* Top Row - AI Intelligence Insights (Full Width) */}
+          <div className="grid grid-cols-1 gap-6">
+            <IntelligenceInsights />
+          </div>
+
+          {/* Second Row - Activity Pulse + Intelligence Feed */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             <ActivityPulse />
             <IntelligenceFeed />
