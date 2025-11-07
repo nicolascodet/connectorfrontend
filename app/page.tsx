@@ -44,55 +44,15 @@ export default function DashboardPage() {
       <Sidebar user={user} />
 
       <div className="flex-1 overflow-y-auto pb-32">
-        <div className="max-w-[1800px] mx-auto p-6 space-y-6">
-          {/* Header with Time Period Selector */}
-          <div className="flex items-center justify-between mb-6">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                Unit Industries Manufacturing Intelligence
-              </h1>
-              <p className="text-gray-600">
-                AI-powered insights from your production operations
-              </p>
-            </div>
-
-            {/* Time Period Tabs */}
-            <div className="flex items-center gap-2 bg-white rounded-xl p-1 border border-gray-200 shadow-sm">
-              <button
-                onClick={() => setTimePeriod("daily")}
-                className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                  timePeriod === "daily"
-                    ? "bg-purple-600 text-white shadow-md"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                Today
-              </button>
-              <button
-                onClick={() => setTimePeriod("weekly")}
-                className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                  timePeriod === "weekly"
-                    ? "bg-purple-600 text-white shadow-md"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                This Week
-              </button>
-              <button
-                onClick={() => setTimePeriod("monthly")}
-                className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
-                  timePeriod === "monthly"
-                    ? "bg-purple-600 text-white shadow-md"
-                    : "text-gray-600 hover:bg-gray-100"
-                }`}
-              >
-                This Month
-              </button>
-            </div>
+        <div className="max-w-[1600px] mx-auto p-8 space-y-6">
+          {/* Header */}
+          <div className="mb-6">
+            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Manufacturing Intelligence</h1>
+            <p className="text-gray-600">Real-time insights from your production operations</p>
           </div>
 
-          {/* Manufacturing Dashboard */}
-          <ManufacturingDashboard timePeriod={timePeriod} />
+          {/* Manufacturing Dashboard - Original Layout */}
+          <ManufacturingDashboard timePeriod="daily" />
         </div>
       </div>
 
