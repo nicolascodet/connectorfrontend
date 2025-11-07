@@ -492,5 +492,76 @@ export async function getAlertHistory(days: number = 30, includeDismissed: boole
 }
 
 export async function backfillUrgencyDetection(limit: number = 100, onlyRecent: boolean = true): Promise<any> {
-  return apiPost("/api/v1/alerts/backfill", {}, { limit: limit.toString(), only_recent: onlyRecent.toString() });
+  const params = { limit: limit.toString(), only_recent: onlyRecent.toString() };
+  return apiGet("/api/v1/alerts/backfill", params);
+}
+
+// ============================================================================
+// Saved Reports API
+// ============================================================================
+
+export async function saveReport(data: {
+  title: string;
+  report_type: string;
+  report_data: any;
+  description?: string;
+  source_widget_title?: string;
+  source_widget_message?: string;
+  source_alert_id?: number;
+  source_query?: string;
+  tags?: string[];
+}): Promise<any> {
+  return apiPost("/api/v1/reports/save", data);
+}
+
+export async function listReports(reportType?: string, starredOnly?: boolean, limit?: number, offset?: number): Promise<any> {
+  const params: Record<string, string> = {};
+  if (reportType) params.report_type = reportType;
+  if (starredOnly) params.starred_only = "true";
+  if (limit) params.limit = limit.toString();
+  if (offset) params.offset = offset.toString();
+  return apiGet("/api/v1/reports/list", params);
+}
+
+export async function getReport(reportId: number): Promise<any> {
+  return apiGet(`/api/v1/reports/${reportId}`);
+}
+
+export async function toggleReportStar(reportId: number): Promise<any> {
+  return apiPost(`/api/v1/reports/${reportId}/star`, {});
+}
+
+export async function updateReport(reportId: number, data: {
+  title?: string;
+  description?: string;
+  tags?: string[];
+}): Promise<any> {
+  return apiPost(`/api/v1/reports/${reportId}`, data);
+}
+
+export async function deleteReport(reportId: number): Promise<any> {
+  const url = new URL(`/api/v1/reports/${reportId}`, BACKEND_URL);
+  const headers = await getAuthHeaders();
+
+  const response = await fetch(url.toString(), {
+    method: "DELETE",
+    headers,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error");
+    throw new Error(`API request failed: ${response.status} - ${errorText}`);
+  }
+
+  return response.json();
+}
+
+export async function searchReports(query: string, limit?: number): Promise<any> {
+  const params: Record<string, string> = { q: query };
+  if (limit) params.limit = limit.toString();
+  return apiGet("/api/v1/reports/search", params);
+}
+
+export async function getReportStats(): Promise<any> {
+  return apiGet("/api/v1/reports/stats");
 }

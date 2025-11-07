@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useEffect, useState, useRef } from 'react';
-import { X, TrendingUp, TrendingDown, Users, DollarSign, Calendar, AlertCircle, CheckCircle, Clock, ExternalLink, FileText, Mail, Loader2, Download } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, Users, DollarSign, Calendar, AlertCircle, CheckCircle, Clock, ExternalLink, FileText, Mail, Loader2, Download, Save } from 'lucide-react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { getDrillDownReport, getSourceDocument } from '@/lib/api';
+import { getDrillDownReport, getSourceDocument, saveReport } from '@/lib/api';
 import SmartMarkdown from '@/components/SmartMarkdown';
 
 interface DrillDownModalProps {
@@ -75,6 +75,8 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
   const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
   const [loadingDocument, setLoadingDocument] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -151,6 +153,32 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
       alert('Failed to export PDF. Please try again.');
     } finally {
       setExporting(false);
+    }
+  };
+
+  const handleSaveReport = async () => {
+    if (!report) return;
+
+    setSaving(true);
+    try {
+      const result = await saveReport({
+        title: widgetTitle,
+        report_type: preloadedReport ? 'alert_investigation' : 'widget_drilldown',
+        report_data: report,
+        source_widget_title: widgetTitle,
+        source_widget_message: widgetMessage,
+        source_alert_id: report.alert_context?.alert_id || undefined
+      });
+
+      setSaved(true);
+      // Reset saved state after 3 seconds
+      setTimeout(() => setSaved(false), 3000);
+
+    } catch (err) {
+      console.error('Failed to save report:', err);
+      alert('Failed to save report. Please try again.');
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -525,23 +553,47 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
 
           {/* Footer */}
           <div className="border-t border-gray-100 p-6 bg-gray-50 flex justify-between items-center">
-            <button
-              onClick={handleExportPDF}
-              disabled={exporting || loading}
-              className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {exporting ? (
-                <>
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                  Exporting...
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  Download PDF
-                </>
-              )}
-            </button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={handleExportPDF}
+                disabled={exporting || loading}
+                className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {exporting ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Exporting...
+                  </>
+                ) : (
+                  <>
+                    <Download className="w-4 h-4" />
+                    Download PDF
+                  </>
+                )}
+              </button>
+              <button
+                onClick={handleSaveReport}
+                disabled={saving || loading || saved}
+                className="px-6 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Saving...
+                  </>
+                ) : saved ? (
+                  <>
+                    <CheckCircle className="w-4 h-4" />
+                    Saved!
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4" />
+                    Save Report
+                  </>
+                )}
+              </button>
+            </div>
             <button
               onClick={onClose}
               className="px-6 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors font-medium"
