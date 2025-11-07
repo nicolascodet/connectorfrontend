@@ -422,7 +422,7 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange }: Mod
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-bold text-gray-900 mb-2">
-            Hey {user?.email?.split('@')[0] || 'there'} 👋
+            Hey {user?.email?.split('@')[0] || 'there'}
           </h1>
           <p className="text-gray-500 text-lg">Here's what's happening in your business today</p>
         </div>

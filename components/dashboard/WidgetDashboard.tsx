@@ -30,14 +30,14 @@ export default function WidgetDashboard() {
       setLoading(true);
       const result = await getLatestInsights("daily", 1);
 
-      console.log("🔍 API Response:", result);
-      console.log("🔍 Insights array:", result.insights);
+      console.log("API Response:", result);
+      console.log("Insights array:", result.insights);
 
       if (result.insights && result.insights.length > 0) {
         const data = result.insights[0];
-        console.log("🔍 First insight:", data);
-        console.log("🔍 structured_data:", data.structured_data);
-        console.log("🔍 structured_data type:", typeof data.structured_data);
+        console.log("First insight:", data);
+        console.log("structured_data:", data.structured_data);
+        console.log("structured_data type:", typeof data.structured_data);
 
         let parsedWidgets = data.structured_data || [];
 
@@ -45,22 +45,22 @@ export default function WidgetDashboard() {
         if (typeof parsedWidgets === 'string') {
           try {
             parsedWidgets = JSON.parse(parsedWidgets);
-            console.log("🔍 Parsed from JSON string:", parsedWidgets);
+            console.log("Parsed from JSON string:", parsedWidgets);
           } catch (e) {
-            console.error("❌ Failed to parse structured_data string:", e);
+            console.error("Failed to parse structured_data string:", e);
             parsedWidgets = [];
           }
         }
 
-        console.log("🔍 Final widgets array:", parsedWidgets);
-        console.log("🔍 Setting widgets state with:", parsedWidgets.length, "widgets");
+        console.log("Final widgets array:", parsedWidgets);
+        console.log("Setting widgets state with:", parsedWidgets.length, "widgets");
 
         setWidgets(parsedWidgets);
       } else {
-        console.log("⚠️  No insights found in response");
+        console.log("No insights found in response");
       }
     } catch (error) {
-      console.error("❌ Failed to load widgets:", error);
+      console.error("Failed to load widgets:", error);
     } finally {
       setLoading(false);
     }
@@ -321,7 +321,7 @@ export default function WidgetDashboard() {
       {/* Debug Panel */}
       <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
         <p className="text-sm font-mono text-yellow-900">
-          🐛 DEBUG: Found {widgets.length} widgets in state
+          DEBUG: Found {widgets.length} widgets in state
         </p>
         <button
           onClick={() => console.log("Current widgets state:", widgets)}

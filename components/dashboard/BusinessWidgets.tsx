@@ -40,7 +40,7 @@ export default function BusinessWidgets() {
       setLoading(true);
       const result = await getLatestInsights("daily", 10);
 
-      console.log("🔍 API Response:", result);
+      console.log("API Response:", result);
 
       if (result.insights && result.insights.length > 0) {
         const parsed = result.insights.map((insight: any) => {
