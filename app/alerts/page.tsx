@@ -71,7 +71,7 @@ export default function AlertsPage() {
       setAlerts(alerts.filter(a => a.alert_id !== alertId));
     } catch (error) {
       console.error("Failed to dismiss alert:", error);
-      alert("Failed to dismiss alert");
+      window.alert("Failed to dismiss alert");
     } finally {
       setDismissing(null);
     }
@@ -88,7 +88,7 @@ export default function AlertsPage() {
       setModalOpen(true);
     } catch (error) {
       console.error("Failed to investigate alert:", error);
-      alert("Failed to investigate alert");
+      window.alert("Failed to investigate alert");
     }
   };
 
