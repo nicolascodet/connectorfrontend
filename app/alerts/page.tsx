@@ -51,6 +51,8 @@ export default function AlertsPage() {
     try {
       setLoading(true);
       const result = await getActiveAlerts(filterUrgency || undefined, 100);
+      console.log("Alerts API response:", result);
+      console.log("Alerts count:", result.alerts?.length || 0);
       setAlerts(result.alerts || []);
     } catch (error) {
       console.error("Failed to load alerts:", error);
