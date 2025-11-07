@@ -82,12 +82,15 @@ export default function ModernBusinessDashboard() {
     router.push(`/sources/${documentId}`);
   };
 
-  // Flatten all widgets
+  // Flatten all widgets and filter out empty ones
   const allWidgets: Widget[] = [];
   insights.forEach(insight => {
     if (Array.isArray(insight.structured_data)) {
       insight.structured_data.forEach(widget => {
-        allWidgets.push(widget);
+        // Only include widgets that have actual content
+        if (widget && widget.title && widget.message && widget.message.trim() !== '' && widget.message !== 'No details available') {
+          allWidgets.push(widget);
+        }
       });
     }
   });
