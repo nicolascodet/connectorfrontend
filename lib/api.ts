@@ -449,3 +449,10 @@ export async function getLatestInsights(timePeriod: string = "daily", limit: num
 export async function generateInsights(): Promise<any> {
   return apiPost("/api/v1/insights/generate", {});
 }
+
+export async function getDrillDownReport(widgetTitle: string, widgetMessage: string): Promise<any> {
+  return apiPost("/api/v1/insights/drill-down", {
+    widget_title: widgetTitle,
+    widget_message: widgetMessage
+  });
+}

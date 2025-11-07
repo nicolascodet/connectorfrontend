@@ -7,6 +7,7 @@ import {
   Brain, RefreshCw, Sparkles, ArrowUp, ArrowDown, TrendingUp,
   TrendingDown, AlertTriangle, CheckCircle, Users, DollarSign
 } from "lucide-react";
+import DrillDownModal from "./DrillDownModal";
 
 interface Widget {
   widget_type: string;
@@ -34,6 +35,8 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
   const [insights, setInsights] = useState<Insight[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedWidget, setSelectedWidget] = useState<Widget | null>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -84,6 +87,11 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
 
   const handleSourceClick = (documentId: string) => {
     router.push(`/sources/${documentId}`);
+  };
+
+  const handleWidgetClick = (widget: Widget) => {
+    setSelectedWidget(widget);
+    setModalOpen(true);
   };
 
   // Flatten all widgets and filter out empty ones
@@ -147,7 +155,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
       const description = widget.message?.replace(mainValue, '').trim() || widget.title;
 
       return (
-        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
+        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleWidgetClick(widget)}>
           <h3 className="text-sm font-medium text-gray-500 mb-4">{widget.title}</h3>
           <div className="flex items-baseline gap-3 mb-2">
             <span className="text-5xl font-bold text-gray-900">{mainValue || 'N/A'}</span>
@@ -155,14 +163,11 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           </div>
           <p className="text-sm text-gray-600 mb-6">{description}</p>
 
-          {widget.sources?.[0] && (
-            <button
-              onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-            >
-              View report →
-            </button>
-          )}
+          <button
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            View details →
+          </button>
         </div>
       );
     }
@@ -170,7 +175,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
     // TREND CARD - Shows trending metric
     if (effectiveType === 'trend') {
       return (
-        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
+        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleWidgetClick(widget)}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-500">{widget.title}</h3>
             <TrendingUp className="w-5 h-5 text-blue-600" />
@@ -189,14 +194,11 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
             ))}
           </div>
 
-          {widget.sources?.[0] && (
-            <button
-              onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium mt-4"
-            >
-              View details →
-            </button>
-          )}
+          <button
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium mt-4"
+          >
+            View details →
+          </button>
         </div>
       );
     }
@@ -206,7 +208,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
       const severityLevel = widget.urgency === 'critical' ? 100 : widget.urgency === 'high' ? 70 : 40;
 
       return (
-        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
+        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleWidgetClick(widget)}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-gray-500">{widget.title}</h3>
             <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
@@ -230,14 +232,11 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
             </div>
           </div>
 
-          {widget.sources?.[0] && (
-            <button
-              onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-            >
-              {widget.sources[0].from} →
-            </button>
-          )}
+          <button
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            View details →
+          </button>
         </div>
       );
     }
@@ -251,7 +250,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
       const percentage = Math.min((numberValue / 10) * 100, 100);
 
       return (
-        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
+        <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleWidgetClick(widget)}>
           <h3 className="text-sm font-medium text-gray-500 mb-6">{widget.title}</h3>
 
           {/* Circular progress indicator */}
@@ -293,14 +292,11 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
             </div>
           </div>
 
-          {widget.sources?.[0] && (
-            <button
-              onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-            >
-              View report →
-            </button>
-          )}
+          <button
+            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          >
+            View details →
+          </button>
         </div>
       );
     }
@@ -311,7 +307,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
       const sparklineData = [40, 45, 50, 48, 60, 70, 85, 90];
 
       return (
-        <div key={idx} className="bg-gradient-to-br from-green-50 via-white to-white rounded-3xl border border-green-100 p-8 hover:shadow-lg transition-shadow">
+        <div key={idx} className="bg-gradient-to-br from-green-50 via-white to-white rounded-3xl border border-green-100 p-8 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleWidgetClick(widget)}>
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-sm font-medium text-green-700">{widget.title}</h3>
             <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center">
@@ -338,32 +334,26 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
             </div>
           </div>
 
-          {widget.sources?.[0] && (
-            <button
-              onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-              className="text-sm text-green-600 hover:text-green-700 font-medium"
-            >
-              View details →
-            </button>
-          )}
+          <button
+            className="text-sm text-green-600 hover:text-green-700 font-medium"
+          >
+            View details →
+          </button>
         </div>
       );
     }
 
     // DEFAULT CARD - Generic insight with icon
     return (
-      <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
+      <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleWidgetClick(widget)}>
         <h3 className="text-sm font-medium text-gray-500 mb-4">{widget.title || 'Insight'}</h3>
         <p className="text-base text-gray-700 leading-relaxed mb-6">{widget.message || 'No details available'}</p>
 
-        {widget.sources?.[0] && (
-          <button
-            onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-          >
-            View source →
-          </button>
-        )}
+        <button
+          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+        >
+          View details →
+        </button>
       </div>
     );
   };
@@ -439,6 +429,19 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {allWidgets.map((widget, idx) => renderWidget(widget, idx))}
       </div>
+
+      {/* Drill-Down Modal */}
+      {selectedWidget && (
+        <DrillDownModal
+          isOpen={modalOpen}
+          onClose={() => {
+            setModalOpen(false);
+            setSelectedWidget(null);
+          }}
+          widgetTitle={selectedWidget.title}
+          widgetMessage={selectedWidget.message}
+        />
+      )}
     </div>
   );
 }
