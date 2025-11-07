@@ -353,30 +353,36 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange }: Mod
         </Card>
       </div>
 
-      <Tabs defaultValue="all" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="all">All Insights</TabsTrigger>
-          <TabsTrigger value="critical">Critical</TabsTrigger>
-          <TabsTrigger value="high">High Priority</TabsTrigger>
-        </TabsList>
-        <TabsContent value="all" className="space-y-4">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {displayWidgets.map((widget, idx) => renderWidget(widget, idx))}
-          </div>
-        </TabsContent>
-        <TabsContent value="critical" className="space-y-4">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {displayWidgets.filter(w => w.urgency?.toLowerCase() === 'critical').map((widget, idx) => renderWidget(widget, idx))}
-          </div>
-        </TabsContent>
-        <TabsContent value="high" className="space-y-4">
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {displayWidgets.filter(w => w.urgency?.toLowerCase() === 'high').map((widget, idx) => renderWidget(widget, idx))}
-          </div>
-        </TabsContent>
-      </Tabs>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="lg:col-span-2">
+          <Tabs defaultValue="all" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="all">All Insights</TabsTrigger>
+              <TabsTrigger value="critical">Critical</TabsTrigger>
+              <TabsTrigger value="high">High Priority</TabsTrigger>
+            </TabsList>
+            <TabsContent value="all" className="space-y-4">
+              <div className="grid gap-6 md:grid-cols-2">
+                {displayWidgets.map((widget, idx) => renderWidget(widget, idx))}
+              </div>
+            </TabsContent>
+            <TabsContent value="critical" className="space-y-4">
+              <div className="grid gap-6 md:grid-cols-2">
+                {displayWidgets.filter(w => w.urgency?.toLowerCase() === 'critical').map((widget, idx) => renderWidget(widget, idx))}
+              </div>
+            </TabsContent>
+            <TabsContent value="high" className="space-y-4">
+              <div className="grid gap-6 md:grid-cols-2">
+                {displayWidgets.filter(w => w.urgency?.toLowerCase() === 'high').map((widget, idx) => renderWidget(widget, idx))}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
 
-      <AlertsWidget onInvestigate={handleAlertInvestigate} investigating={investigating} />
+        <div className="lg:col-span-1">
+          <AlertsWidget onInvestigate={handleAlertInvestigate} investigating={investigating} />
+        </div>
+      </div>
 
       {modalOpen && selectedWidget && (
         <DrillDownModal
