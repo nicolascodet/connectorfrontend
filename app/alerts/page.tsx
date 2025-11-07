@@ -50,13 +50,17 @@ export default function AlertsPage() {
   const loadAlerts = async () => {
     try {
       setLoading(true);
-      const result = await getActiveAlerts(filterUrgency || undefined, 100);
       console.log("=== ALERTS DEBUG ===");
+      console.log("Current user object:", user);
+      console.log("User ID:", user?.id);
+
+      const result = await getActiveAlerts(filterUrgency || undefined, 100);
       console.log("Full API response:", JSON.stringify(result, null, 2));
       console.log("result.alerts exists?", !!result.alerts);
       console.log("result.alerts type:", typeof result.alerts);
       console.log("result.alerts:", result.alerts);
       console.log("Alerts count:", result.alerts?.length || 0);
+      console.log("Expected tenant_id: 23e4af88-7df0-4ca4-9e60-fc2a12569a93");
       console.log("===================");
       setAlerts(result.alerts || []);
     } catch (error) {
