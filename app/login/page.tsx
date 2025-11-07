@@ -11,17 +11,23 @@ import { toast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
   const router = useRouter();
-  const { user, loading } = useAuth();
+  const { user, loading, isDemoMode } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
+    // If demo mode is enabled, always redirect to dashboard
+    if (isDemoMode) {
+      router.push("/");
+      return;
+    }
+
     if (!loading && user) {
       router.push("/");
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, isDemoMode]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
