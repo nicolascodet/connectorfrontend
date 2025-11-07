@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
 import { Loader2, Send } from "lucide-react";
-import ManufacturingDashboard from "@/components/dashboard/ManufacturingDashboard";
+import NewsletterDashboard from "@/components/dashboard/NewsletterDashboard";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -45,14 +45,8 @@ export default function DashboardPage() {
 
       <div className="flex-1 overflow-y-auto pb-32">
         <div className="max-w-[1600px] mx-auto p-8 space-y-6">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Manufacturing Intelligence</h1>
-            <p className="text-gray-600">Real-time insights from your production operations</p>
-          </div>
-
-          {/* Manufacturing Dashboard - Original Layout */}
-          <ManufacturingDashboard timePeriod="daily" />
+          {/* Newsletter Dashboard */}
+          <NewsletterDashboard />
         </div>
       </div>
 
