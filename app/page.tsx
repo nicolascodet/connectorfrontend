@@ -5,13 +5,12 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
 import { Loader2, Send } from "lucide-react";
-import WidgetDashboard from "@/components/dashboard/WidgetDashboard";
+import BusinessWidgets from "@/components/dashboard/BusinessWidgets";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [chatInput, setChatInput] = useState("");
-  const [timePeriod, setTimePeriod] = useState<"daily" | "weekly" | "monthly">("daily");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -45,8 +44,8 @@ export default function DashboardPage() {
 
       <div className="flex-1 overflow-y-auto pb-32">
         <div className="max-w-[1600px] mx-auto p-8 space-y-6">
-          {/* Widget Dashboard */}
-          <WidgetDashboard />
+          {/* Business Intelligence Widgets */}
+          <BusinessWidgets />
         </div>
       </div>
 
