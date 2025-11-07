@@ -175,13 +175,13 @@ export default function ReportsPage() {
     return date.toLocaleDateString();
   };
 
-  const filteredReports = reports.filter(report => {
+  const filteredReports = reports.filter((report) => {
     if (searchTerm) {
       const search = searchTerm.toLowerCase();
       return (
         report.title.toLowerCase().includes(search) ||
-        report.description?.toLowerCase().includes(search) ||
-        report.report_summary?.toLowerCase().includes(search)
+        (report.description && report.description.toLowerCase().includes(search)) ||
+        (report.report_summary && report.report_summary.toLowerCase().includes(search))
       );
     }
     return true;
