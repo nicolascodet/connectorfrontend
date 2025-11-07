@@ -13,6 +13,8 @@ interface Widget {
   widget_type: string;
   title: string;
   message: string;
+  value?: string | null;
+  value_label?: string | null;
   urgency: string;
   sources: Array<{
     quote: string;
@@ -172,21 +174,29 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
                           widget.widget_type === 'alert' && idx % 3 === 2 ? 'trend' :
                           widget.widget_type;
 
-    // STAT CARD - Big number with trend arrow (like "15% Revenues")
+    // STAT CARD - Big number with trend arrow
     if (effectiveType === 'stat') {
-      // Try to extract number from message
-      const numberMatch = (widget.message || '').match(/(\d+\.?\d*%?|\$[\d,]+\.?\d*)/);
-      const mainValue = numberMatch ? numberMatch[0] : '';
-      const description = widget.message?.replace(mainValue, '').trim() || widget.title;
+      // Use structured value field if available, otherwise fallback to regex
+      let mainValue = widget.value || 'N/A';
+      let valueLabel = widget.value_label || '';
+
+      // Fallback to old regex extraction if value field not present
+      if (!widget.value) {
+        const numberMatch = (widget.message || '').match(/(\d+\.?\d*%?|\$[\d,]+\.?\d*)/);
+        mainValue = numberMatch ? numberMatch[0] : 'N/A';
+      }
 
       return (
         <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleWidgetClick(widget)}>
           <h3 className="text-sm font-medium text-gray-500 mb-4">{widget.title}</h3>
           <div className="flex items-baseline gap-3 mb-2">
-            <span className="text-5xl font-bold text-gray-900">{mainValue || 'N/A'}</span>
+            <span className="text-5xl font-bold text-gray-900">{mainValue}</span>
             <ArrowUp className="w-6 h-6 text-blue-600" />
           </div>
-          <p className="text-sm text-gray-600 mb-6">{description}</p>
+          {valueLabel && (
+            <p className="text-sm text-gray-500 mb-2">{valueLabel}</p>
+          )}
+          <p className="text-sm text-gray-600 mb-6">{widget.message}</p>
 
           <button
             className="text-sm text-blue-600 hover:text-blue-700 font-medium"
@@ -274,10 +284,21 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
 
     // SNAPSHOT CARD - Status update with circular progress and mini metrics
     if (effectiveType === 'snapshot') {
-      // Try to extract a number for visual representation
-      const numberMatch = (widget.message || '').match(/(\d+)/);
-      const hasNumber = numberMatch !== null;
-      const numberValue = hasNumber ? parseInt(numberMatch[0]) : 7; // Default to 7 for visual
+      // Use structured value field if available, otherwise fallback to regex
+      let displayValue = widget.value || '7';
+      let numberValue = 7;
+
+      if (widget.value) {
+        // Parse the value to get a number for the progress ring
+        const parsed = parseInt(widget.value.replace(/[^0-9]/g, ''));
+        numberValue = isNaN(parsed) ? 7 : parsed;
+      } else {
+        // Fallback to old regex extraction
+        const numberMatch = (widget.message || '').match(/(\d+)/);
+        numberValue = numberMatch ? parseInt(numberMatch[0]) : 7;
+        displayValue = numberValue.toString();
+      }
+
       const percentage = Math.min((numberValue / 10) * 100, 100);
 
       return (
@@ -288,10 +309,13 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           <div className="flex items-center justify-between mb-6">
             <div className="flex-1">
               <div className="flex items-baseline gap-3 mb-2">
-                <span className="text-5xl font-bold text-gray-900">{numberValue}</span>
+                <span className="text-5xl font-bold text-gray-900">{displayValue}</span>
                 <ArrowUp className="w-6 h-6 text-blue-600" />
               </div>
-              <p className="text-sm text-gray-600">{widget.message.substring(0, 60)}...</p>
+              {widget.value_label && (
+                <p className="text-sm text-gray-500 mb-2">{widget.value_label}</p>
+              )}
+              <p className="text-sm text-gray-600">{widget.message.substring(0, 80)}...</p>
             </div>
 
             {/* Circular progress ring */}
