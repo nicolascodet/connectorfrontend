@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { getLatestInsights, generateInsights } from "@/lib/api";
 import {
   Brain, RefreshCw, Sparkles, ChevronDown, ChevronUp, FileText,
-  AlertTriangle, DollarSign, TrendingUp, TrendingDown, Package, Tool,
+  AlertTriangle, DollarSign, TrendingUp, TrendingDown, Package, Wrench,
   AlertCircle, ArrowUp, ArrowDown, Minus
 } from "lucide-react";
 
@@ -414,7 +414,7 @@ function getCategoryIcon(category: string) {
     case 'financials':
       return <DollarSign className={`${iconClass} text-green-600`} />;
     case 'machines':
-      return <Tool className={`${iconClass} text-orange-600`} />;
+      return <Wrench className={`${iconClass} text-orange-600`} />;
     case 'customers':
       return <AlertCircle className={`${iconClass} text-blue-600`} />;
     case 'materials':
