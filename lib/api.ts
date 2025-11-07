@@ -70,6 +70,29 @@ export async function apiGet(
   return response.json();
 }
 
+export async function apiPost(
+  path: string,
+  body?: any
+): Promise<any> {
+  const url = new URL(path, BACKEND_URL);
+  const headers = await getAuthHeaders();
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error");
+    throw new Error(
+      `API request failed: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  return response.json();
+}
+
 export async function startConnect(
   provider: "microsoft" | "gmail" | "google-drive" | "quickbooks"
 ): Promise<{ auth_url: string; provider: string; tenant_id: string }> {
