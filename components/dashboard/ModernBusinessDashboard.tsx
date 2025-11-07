@@ -50,8 +50,15 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           let structured_data = insight.structured_data || [];
           if (typeof structured_data === 'string') {
             try {
-              structured_data = JSON.parse(structured_data);
+              const parsed_json = JSON.parse(structured_data);
+              // Check if it has the wrapper {"type": "array", "items": [...]}
+              if (parsed_json && parsed_json.type === 'array' && parsed_json.items) {
+                structured_data = parsed_json.items;
+              } else {
+                structured_data = parsed_json;
+              }
             } catch (e) {
+              console.error('Failed to parse structured_data:', e);
               structured_data = [];
             }
           }
