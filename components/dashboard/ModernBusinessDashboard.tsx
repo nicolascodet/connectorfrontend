@@ -45,16 +45,26 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
       setLoading(true);
       const result = await getLatestInsights("daily", 10);
 
+      console.log('=== API Response ===', result);
+      console.log('Number of insights:', result.insights?.length);
+
       if (result.insights && result.insights.length > 0) {
         const parsed = result.insights.map((insight: any) => {
+          console.log('Processing insight:', insight.title);
+          console.log('Raw structured_data:', insight.structured_data);
+          console.log('Type:', typeof insight.structured_data);
+
           let structured_data = insight.structured_data || [];
           if (typeof structured_data === 'string') {
             try {
               const parsed_json = JSON.parse(structured_data);
+              console.log('Parsed JSON:', parsed_json);
               // Check if it has the wrapper {"type": "array", "items": [...]}
               if (parsed_json && parsed_json.type === 'array' && parsed_json.items) {
+                console.log('Found wrapper, extracting items:', parsed_json.items);
                 structured_data = parsed_json.items;
               } else {
+                console.log('No wrapper, using directly');
                 structured_data = parsed_json;
               }
             } catch (e) {
@@ -62,13 +72,20 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
               structured_data = [];
             }
           }
+          console.log('Final structured_data:', structured_data);
+          console.log('Is array?', Array.isArray(structured_data));
+          console.log('Length:', structured_data?.length);
+
           return {
             category: insight.category,
             title: insight.title,
             structured_data
           };
         });
+        console.log('=== Parsed insights ===', parsed);
         setInsights(parsed);
+      } else {
+        console.log('No insights in response');
       }
     } catch (error) {
       console.error("Failed to load insights:", error);
