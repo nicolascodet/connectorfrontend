@@ -1,18 +1,34 @@
 import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+// Lazy initialization to avoid build-time errors
+let supabaseInstance: ReturnType<typeof createClient> | null = null;
 
-// During build time, env vars might not be set - use dummy values to allow build
-// At runtime, the actual values from Vercel env vars will be used
-const url = supabaseUrl || "https://placeholder.supabase.co";
-const key = supabaseAnonKey || "placeholder-key";
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  if (typeof window !== "undefined") {
-    // Only throw error at runtime in the browser, not during build
-    console.error("Missing Supabase environment variables");
+function getSupabase() {
+  if (supabaseInstance) {
+    return supabaseInstance;
   }
+
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  // During build time or if env vars are missing, use placeholder values
+  const url = supabaseUrl || "https://placeholder.supabase.co";
+  const key = supabaseAnonKey || "placeholder-anon-key";
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    if (typeof window !== "undefined") {
+      console.error("⚠️ Missing Supabase environment variables. Please configure NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY");
+    }
+  }
+
+  supabaseInstance = createClient(url, key);
+  return supabaseInstance;
 }
 
-export const supabase = createClient(url, key);
+// Export as a getter to ensure lazy initialization
+export const supabase = new Proxy({} as ReturnType<typeof createClient>, {
+  get(target, prop) {
+    const client = getSupabase();
+    return (client as any)[prop];
+  }
+});
