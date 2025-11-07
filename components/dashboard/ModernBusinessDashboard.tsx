@@ -200,13 +200,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
           {valueLabel && (
             <p className="text-sm text-gray-500 mb-2">{valueLabel}</p>
           )}
-          <p className="text-sm text-gray-600 mb-6">{widget.message}</p>
-
-          <button
-            className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-          >
-            Generate full report →
-          </button>
+          <p className="text-sm text-gray-600">{widget.message}</p>
         </div>
       );
     }
@@ -233,14 +227,6 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
             ))}
           </div>
 
-          {widget.sources?.[0] && (
-            <button
-              onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium mt-4"
-            >
-              View details →
-            </button>
-          )}
         </div>
       );
     }
@@ -274,14 +260,6 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
             </div>
           </div>
 
-          {widget.sources?.[0] && (
-            <button
-              onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-            >
-              {widget.sources[0].from} →
-            </button>
-          )}
         </div>
       );
     }
@@ -351,14 +329,6 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
             </div>
           </div>
 
-          {widget.sources?.[0] && (
-            <button
-              onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-              className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-            >
-              Generate full report →
-            </button>
-          )}
         </div>
       );
     }
@@ -396,14 +366,6 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
             </div>
           </div>
 
-          {widget.sources?.[0] && (
-            <button
-              onClick={() => widget.sources[0].document_id && handleSourceClick(widget.sources[0].document_id)}
-              className="text-sm text-green-600 hover:text-green-700 font-medium"
-            >
-              View details →
-            </button>
-          )}
         </div>
       );
     }
@@ -412,13 +374,7 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
     return (
       <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => handleWidgetClick(widget)}>
         <h3 className="text-sm font-medium text-gray-500 mb-4">{widget.title || 'Insight'}</h3>
-        <p className="text-base text-gray-700 leading-relaxed mb-6">{widget.message || 'No details available'}</p>
-
-        <button
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
-        >
-          Generate full report →
-        </button>
+        <p className="text-base text-gray-700 leading-relaxed">{widget.message || 'No details available'}</p>
       </div>
     );
   };
