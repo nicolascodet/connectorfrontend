@@ -32,9 +32,10 @@ interface Insight {
 
 interface ModernBusinessDashboardProps {
   user: any;
+  onModalOpenChange?: (isOpen: boolean) => void;
 }
 
-export default function ModernBusinessDashboard({ user }: ModernBusinessDashboardProps) {
+export default function ModernBusinessDashboard({ user, onModalOpenChange }: ModernBusinessDashboardProps) {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -47,6 +48,11 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
   useEffect(() => {
     loadInsights();
   }, []);
+
+  // Notify parent when modal state changes
+  useEffect(() => {
+    onModalOpenChange?.(modalOpen);
+  }, [modalOpen, onModalOpenChange]);
 
   const loadInsights = async () => {
     try {

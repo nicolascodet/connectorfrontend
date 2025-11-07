@@ -11,6 +11,7 @@ export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [chatInput, setChatInput] = useState("");
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) {
@@ -45,11 +46,12 @@ export default function DashboardPage() {
       <div className="flex-1 overflow-y-auto pb-32">
         <div className="max-w-[1600px] mx-auto p-8 space-y-6">
           {/* Business Intelligence Dashboard */}
-          <ModernBusinessDashboard user={user} />
+          <ModernBusinessDashboard user={user} onModalOpenChange={setIsModalOpen} />
         </div>
       </div>
 
-      {/* Glassmorphism Chat Bar */}
+      {/* Glassmorphism Chat Bar - Hidden when modal is open */}
+      {!isModalOpen && (
       <div className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-50 pointer-events-none">
         <div className="w-full max-w-3xl pointer-events-auto">
           <form onSubmit={handleChatSubmit}>
@@ -80,6 +82,7 @@ export default function DashboardPage() {
           </p>
         </div>
       </div>
+      )}
     </div>
   );
 }
