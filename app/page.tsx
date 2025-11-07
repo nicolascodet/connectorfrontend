@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
 import { Loader2, Send } from "lucide-react";
-import BusinessWidgets from "@/components/dashboard/BusinessWidgets";
+import CleanBusinessDashboard from "@/components/dashboard/CleanBusinessDashboard";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
@@ -44,8 +44,8 @@ export default function DashboardPage() {
 
       <div className="flex-1 overflow-y-auto pb-32">
         <div className="max-w-[1600px] mx-auto p-8 space-y-6">
-          {/* Business Intelligence Widgets */}
-          <BusinessWidgets />
+          {/* Business Intelligence Dashboard */}
+          <CleanBusinessDashboard />
         </div>
       </div>
 
