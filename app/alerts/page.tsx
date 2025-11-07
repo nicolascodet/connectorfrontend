@@ -17,6 +17,7 @@ import { getActiveAlerts, dismissAlert, investigateAlert } from "@/lib/api";
 import Sidebar from "@/components/sidebar";
 import { useAuth } from "@/contexts/auth-context";
 import DrillDownModal from "@/components/dashboard/DrillDownModal";
+import { supabase } from "@/lib/supabase";
 
 interface Alert {
   alert_id: number;
@@ -54,15 +55,49 @@ export default function AlertsPage() {
       console.log("Current user object:", user);
       console.log("User ID:", user?.id);
 
-      const result = await getActiveAlerts(filterUrgency || undefined, 100);
-      console.log("Full API response:", JSON.stringify(result, null, 2));
-      console.log("result.alerts exists?", !!result.alerts);
-      console.log("result.alerts type:", typeof result.alerts);
-      console.log("result.alerts:", result.alerts);
-      console.log("Alerts count:", result.alerts?.length || 0);
-      console.log("Expected tenant_id: 23e4af88-7df0-4ca4-9e60-fc2a12569a93");
+      // Query alerts directly from Supabase (like dashboard widgets do)
+      const { data: alertsData, error } = await supabase
+        .from('document_alerts')
+        .select(`
+          id,
+          document_id,
+          alert_type,
+          urgency_level,
+          summary,
+          key_entities,
+          detected_at,
+          investigation_count,
+          documents!inner(title, source)
+        `)
+        .is('dismissed_at', null)
+        .eq('tenant_id', user?.id)
+        .order('detected_at', { ascending: false })
+        .limit(100);
+
+      if (error) {
+        console.error("Supabase query error:", error);
+        throw error;
+      }
+
+      // Transform to match Alert interface
+      const transformedAlerts = (alertsData || []).map((alert: any) => ({
+        alert_id: alert.id,
+        document_id: alert.document_id,
+        document_title: alert.documents?.title || 'Unknown',
+        document_source: alert.documents?.source || 'unknown',
+        alert_type: alert.alert_type,
+        urgency_level: alert.urgency_level,
+        summary: alert.summary,
+        key_entities: alert.key_entities || [],
+        detected_at: alert.detected_at,
+        investigation_count: alert.investigation_count || 0
+      }));
+
+      console.log("Direct Supabase query result:", transformedAlerts);
+      console.log("Alerts count:", transformedAlerts.length);
       console.log("===================");
-      setAlerts(result.alerts || []);
+
+      setAlerts(transformedAlerts);
     } catch (error) {
       console.error("Failed to load alerts:", error);
     } finally {
