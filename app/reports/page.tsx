@@ -141,7 +141,7 @@ export default function ReportsPage() {
       setModalOpen(true);
     } catch (error) {
       console.error("Failed to load report:", error);
-      alert("Failed to load report");
+      window.alert("Failed to load report");
     }
   };
 
