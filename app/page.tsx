@@ -13,11 +13,25 @@ export default function DashboardPage() {
   const [chatInput, setChatInput] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Debug: Log demo mode status
+  useEffect(() => {
+    console.log("🎭 Demo Mode Status:", {
+      isDemoMode,
+      user: user ? "Present" : "None",
+      loading,
+      env: process.env.NEXT_PUBLIC_DEMO_MODE
+    });
+  }, [isDemoMode, user, loading]);
+
   useEffect(() => {
     // Skip login redirect in demo mode
-    if (isDemoMode) return;
+    if (isDemoMode) {
+      console.log("✅ Demo mode active - skipping login redirect");
+      return;
+    }
 
     if (!loading && !user) {
+      console.log("❌ No user and not demo mode - redirecting to login");
       router.push("/login");
     }
   }, [user, loading, router, isDemoMode]);
