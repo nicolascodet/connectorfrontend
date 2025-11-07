@@ -45,7 +45,7 @@ export default function DashboardPage() {
       <div className="flex-1 overflow-y-auto pb-32">
         <div className="max-w-[1600px] mx-auto p-8 space-y-6">
           {/* Business Intelligence Dashboard */}
-          <ModernBusinessDashboard />
+          <ModernBusinessDashboard user={user} />
         </div>
       </div>
 

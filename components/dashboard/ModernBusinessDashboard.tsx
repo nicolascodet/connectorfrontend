@@ -26,7 +26,11 @@ interface Insight {
   structured_data: Widget[];
 }
 
-export default function ModernBusinessDashboard() {
+interface ModernBusinessDashboardProps {
+  user: any;
+}
+
+export default function ModernBusinessDashboard({ user }: ModernBusinessDashboardProps) {
   const [insights, setInsights] = useState<Insight[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
@@ -369,8 +373,10 @@ export default function ModernBusinessDashboard() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">Business Intelligence</h1>
-          <p className="text-gray-500 text-lg">{allWidgets.length} insights • AI-curated from your communications</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+            Hey {user?.email?.split('@')[0] || 'there'} 👋
+          </h1>
+          <p className="text-gray-500 text-lg">Here's what's happening in your business today</p>
         </div>
         <button
           onClick={handleGenerate}
