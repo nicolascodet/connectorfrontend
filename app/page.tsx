@@ -5,18 +5,13 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
 import { Loader2, Send } from "lucide-react";
-import ActivityPulse from "@/components/dashboard/ActivityPulse";
-import IntelligenceFeed from "@/components/dashboard/IntelligenceFeed";
-import TrendingEntities from "@/components/dashboard/TrendingEntities";
-import DealMomentum from "@/components/dashboard/DealMomentum";
-import SentimentAlerts from "@/components/dashboard/SentimentAlerts";
-import CommunicationPatterns from "@/components/dashboard/CommunicationPatterns";
-import IntelligenceInsights from "@/components/dashboard/IntelligenceInsights";
+import ManufacturingDashboard from "@/components/dashboard/ManufacturingDashboard";
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [chatInput, setChatInput] = useState("");
+  const [timePeriod, setTimePeriod] = useState<"daily" | "weekly" | "monthly">("daily");
 
   useEffect(() => {
     if (!loading && !user) {
@@ -49,64 +44,55 @@ export default function DashboardPage() {
       <Sidebar user={user} />
 
       <div className="flex-1 overflow-y-auto pb-32">
-        <div className="max-w-[1600px] mx-auto p-8 space-y-6">
-          {/* Header */}
-          <div className="mb-6">
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Business Intelligence</h1>
-            <p className="text-gray-600">Real-time insights from your connected data sources</p>
-          </div>
+        <div className="max-w-[1800px] mx-auto p-6 space-y-6">
+          {/* Header with Time Period Selector */}
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+                Unit Industries Manufacturing Intelligence
+              </h1>
+              <p className="text-gray-600">
+                AI-powered insights from your production operations
+              </p>
+            </div>
 
-          {/* Top Row - AI Intelligence Insights (Full Width) */}
-          <div className="grid grid-cols-1 gap-6">
-            <IntelligenceInsights />
-          </div>
-
-          {/* Second Row - Activity Pulse + Intelligence Feed */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <ActivityPulse />
-            <IntelligenceFeed />
-          </div>
-
-          {/* Second Row - Trending Entities (Full Width) */}
-          <div className="grid grid-cols-1 gap-6">
-            <TrendingEntities />
-          </div>
-
-          {/* Third Row - Deal Momentum + Sentiment Alerts */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <DealMomentum />
-            <SentimentAlerts />
-          </div>
-
-          {/* Fourth Row - Communication Patterns (Full Width) */}
-          <div className="grid grid-cols-1 gap-6">
-            <CommunicationPatterns />
-          </div>
-
-          {/* Quick Actions Card */}
-          <div className="bg-white rounded-3xl p-6 border border-gray-200">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {/* Time Period Tabs */}
+            <div className="flex items-center gap-2 bg-white rounded-xl p-1 border border-gray-200 shadow-sm">
               <button
-                onClick={() => router.push('/search')}
-                className="px-4 py-3 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+                onClick={() => setTimePeriod("daily")}
+                className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                  timePeriod === "daily"
+                    ? "bg-purple-600 text-white shadow-md"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
-                Search Documents
+                Today
               </button>
               <button
-                onClick={() => router.push('/connections')}
-                className="px-4 py-3 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+                onClick={() => setTimePeriod("weekly")}
+                className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                  timePeriod === "weekly"
+                    ? "bg-purple-600 text-white shadow-md"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
-                Manage Connections
+                This Week
               </button>
               <button
-                onClick={() => router.push('/search?q=summarize this week')}
-                className="px-4 py-3 bg-blue-50 text-blue-600 rounded-xl text-sm font-medium hover:bg-blue-100 transition-colors"
+                onClick={() => setTimePeriod("monthly")}
+                className={`px-5 py-2.5 rounded-lg text-sm font-semibold transition-all ${
+                  timePeriod === "monthly"
+                    ? "bg-purple-600 text-white shadow-md"
+                    : "text-gray-600 hover:bg-gray-100"
+                }`}
               >
-                Weekly Summary
+                This Month
               </button>
             </div>
           </div>
+
+          {/* Manufacturing Dashboard */}
+          <ManufacturingDashboard timePeriod={timePeriod} />
         </div>
       </div>
 
