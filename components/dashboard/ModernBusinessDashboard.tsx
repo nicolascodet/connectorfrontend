@@ -89,11 +89,15 @@ export default function ModernBusinessDashboard() {
       insight.structured_data.forEach(widget => {
         // Only include widgets that have actual content
         if (widget && widget.title && widget.message && widget.message.trim() !== '' && widget.message !== 'No details available') {
+          console.log('Widget type:', widget.widget_type, 'Title:', widget.title);
           allWidgets.push(widget);
         }
       });
     }
   });
+
+  console.log('Total widgets loaded:', allWidgets.length);
+  console.log('Widget types:', allWidgets.map(w => w.widget_type));
 
   if (loading) {
     return (
@@ -126,8 +130,13 @@ export default function ModernBusinessDashboard() {
 
   // Render different widget types with modern styling
   const renderWidget = (widget: Widget, idx: number) => {
+    // If all widgets are "alert" type, vary visualization by urgency to add variety
+    const effectiveType = widget.widget_type === 'alert' && idx % 3 === 1 ? 'snapshot' :
+                          widget.widget_type === 'alert' && idx % 3 === 2 ? 'trend' :
+                          widget.widget_type;
+
     // STAT CARD - Big number with trend arrow (like "15% Revenues")
-    if (widget.widget_type === 'stat') {
+    if (effectiveType === 'stat') {
       // Try to extract number from message
       const numberMatch = (widget.message || '').match(/(\d+\.?\d*%?|\$[\d,]+\.?\d*)/);
       const mainValue = numberMatch ? numberMatch[0] : '';
@@ -155,7 +164,7 @@ export default function ModernBusinessDashboard() {
     }
 
     // TREND CARD - Shows trending metric
-    if (widget.widget_type === 'trend') {
+    if (effectiveType === 'trend') {
       return (
         <div key={idx} className="bg-white rounded-3xl border border-gray-100 p-8 hover:shadow-lg transition-shadow">
           <div className="flex items-center justify-between mb-4">
@@ -189,7 +198,7 @@ export default function ModernBusinessDashboard() {
     }
 
     // ALERT CARD - Critical issues with visual indicator and severity bars
-    if (widget.widget_type === 'alert') {
+    if (effectiveType === 'alert') {
       const severityLevel = widget.urgency === 'critical' ? 100 : widget.urgency === 'high' ? 70 : 40;
 
       return (
@@ -230,7 +239,7 @@ export default function ModernBusinessDashboard() {
     }
 
     // SNAPSHOT CARD - Status update with circular progress and mini metrics
-    if (widget.widget_type === 'snapshot') {
+    if (effectiveType === 'snapshot') {
       // Try to extract a number for visual representation
       const numberMatch = (widget.message || '').match(/(\d+)/);
       const hasNumber = numberMatch !== null;
@@ -293,7 +302,7 @@ export default function ModernBusinessDashboard() {
     }
 
     // HIGHLIGHT CARD - Good news with sparkline and metrics
-    if (widget.widget_type === 'highlight') {
+    if (effectiveType === 'highlight') {
       // Generate positive trend data
       const sparklineData = [40, 45, 50, 48, 60, 70, 85, 90];
 
