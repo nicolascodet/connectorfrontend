@@ -126,7 +126,7 @@ export default function ReportsPage() {
       setReports(reports.filter(r => r.report_id !== reportId));
     } catch (error) {
       console.error("Failed to delete report:", error);
-      alert("Failed to delete report");
+      window.alert("Failed to delete report");
     }
   };
 
