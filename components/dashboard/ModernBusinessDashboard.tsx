@@ -201,10 +201,13 @@ export default function ModernBusinessDashboard({ user }: ModernBusinessDashboar
 
   // Render different widget types with modern styling
   const renderWidget = (widget: Widget, idx: number) => {
+    // Normalize widget type to lowercase for case-insensitive comparison
+    const widgetType = (widget.widget_type || '').toLowerCase().trim();
+
     // If all widgets are "alert" type, vary visualization by urgency to add variety
-    const effectiveType = widget.widget_type === 'alert' && idx % 3 === 1 ? 'snapshot' :
-                          widget.widget_type === 'alert' && idx % 3 === 2 ? 'trend' :
-                          widget.widget_type;
+    const effectiveType = widgetType === 'alert' && idx % 3 === 1 ? 'snapshot' :
+                          widgetType === 'alert' && idx % 3 === 2 ? 'trend' :
+                          widgetType;
 
     // STAT CARD - Big number with trend arrow
     if (effectiveType === 'stat') {
