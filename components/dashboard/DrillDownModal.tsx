@@ -64,6 +64,14 @@ interface ReportData {
   generation_time_ms?: number;
   error?: string;
   raw_analysis?: string;
+  alert_context?: {
+    alert_id: number;
+    urgency_level: string;
+    alert_type: string;
+    key_entities: string[];
+    detected_at: string;
+    source_document: any;
+  };
 }
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
