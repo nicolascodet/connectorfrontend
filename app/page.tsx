@@ -54,6 +54,8 @@ export default function DashboardPage() {
     } catch (err) {
       console.error("Failed to load insights:", err);
       setError(err instanceof Error ? err.message : "Failed to load insights");
+      // Don't block - just show empty state
+      setInsights([]);
     } finally {
       setLoading(false);
     }
@@ -72,48 +74,7 @@ export default function DashboardPage() {
     );
   }
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6">
-            <div className="flex items-start">
-              <AlertCircle className="w-5 h-5 text-red-600 mt-0.5 mr-3 flex-shrink-0" />
-              <div>
-                <h3 className="text-red-900 font-medium">Failed to load insights</h3>
-                <p className="text-red-700 text-sm mt-1">{error}</p>
-                <button
-                  onClick={loadInsights}
-                  className="mt-3 text-sm text-red-700 hover:text-red-900 font-medium"
-                >
-                  Try again
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (insights.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-50 p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
-            <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">No insights yet</h2>
-            <p className="text-gray-600 mb-6">
-              Business intelligence insights will appear here once they're generated from your documents.
-            </p>
-            <p className="text-sm text-gray-500">
-              Run the nightly insight generation job to populate this dashboard.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Show insights or empty state (don't block on error)
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -136,9 +97,100 @@ export default function DashboardPage() {
         </div>
       </div>
 
+      {/* Error Banner (dismissible, doesn't block) */}
+      {error && (
+        <div className="bg-yellow-50 border-b border-yellow-200">
+          <div className="max-w-7xl mx-auto px-8 py-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start">
+                <AlertCircle className="w-5 h-5 text-yellow-600 mt-0.5 mr-3 flex-shrink-0" />
+                <div>
+                  <h3 className="text-yellow-900 font-medium">Insights temporarily unavailable</h3>
+                  <p className="text-yellow-700 text-sm mt-1">
+                    {error.includes("relationship")
+                      ? "The backend is deploying. Refresh in a minute."
+                      : "Couldn't load insights. You can still use search and other features."}
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setError(null)}
+                className="text-yellow-600 hover:text-yellow-800"
+              >
+                <span className="text-xl">&times;</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Insights Grid */}
       <div className="max-w-7xl mx-auto p-8">
-        <div className="space-y-6">
+        {insights.length === 0 ? (
+          /* Empty State - Show Quick Actions */
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg border border-gray-200 p-12 text-center">
+              <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">No insights yet</h2>
+              <p className="text-gray-600 mb-6">
+                AI-generated business intelligence will appear here once the nightly job runs.
+              </p>
+              <p className="text-sm text-gray-500">
+                In the meantime, use the quick actions below to search or manage connections.
+              </p>
+            </div>
+
+            {/* Quick Actions - Always visible */}
+            <div className="bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a
+                  href="/search"
+                  className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Users className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">Search Documents</div>
+                    <div className="text-sm text-gray-500">Find specific information</div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
+                </a>
+
+                <a
+                  href="/connections"
+                  className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">Manage Connections</div>
+                    <div className="text-sm text-gray-500">Sync more data sources</div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
+                </a>
+
+                <button
+                  onClick={loadInsights}
+                  className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                >
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <RefreshCw className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">Refresh Insights</div>
+                    <div className="text-sm text-gray-500">Check for new data</div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          /* Show Insights */
+          <div className="space-y-6">
           {insights.map((insight, index) => {
             const Icon = insight.icon ? iconMap[insight.icon] || Calendar : Calendar;
             const isExpanded = expandedInsight === index;
@@ -231,55 +283,56 @@ export default function DashboardPage() {
               </div>
             );
           })}
-        </div>
 
-        {/* Quick Actions */}
-        <div className="mt-8 bg-white rounded-lg border border-gray-200 p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <a
-              href="/search"
-              className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
-            >
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Users className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <div className="font-medium text-gray-900">Search Documents</div>
-                <div className="text-sm text-gray-500">Find specific information</div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
-            </a>
+            {/* Quick Actions - Show when we have insights too */}
+            <div className="mt-8 bg-white rounded-lg border border-gray-200 p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Actions</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <a
+                  href="/search"
+                  className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <div className="p-2 bg-blue-100 rounded-lg">
+                    <Users className="w-5 h-5 text-blue-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">Search Documents</div>
+                    <div className="text-sm text-gray-500">Find specific information</div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
+                </a>
 
-            <a
-              href="/connections"
-              className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
-            >
-              <div className="p-2 bg-green-100 rounded-lg">
-                <TrendingUp className="w-5 h-5 text-green-600" />
-              </div>
-              <div>
-                <div className="font-medium text-gray-900">Manage Connections</div>
-                <div className="text-sm text-gray-500">Sync more data sources</div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
-            </a>
+                <a
+                  href="/connections"
+                  className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors"
+                >
+                  <div className="p-2 bg-green-100 rounded-lg">
+                    <TrendingUp className="w-5 h-5 text-green-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">Manage Connections</div>
+                    <div className="text-sm text-gray-500">Sync more data sources</div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
+                </a>
 
-            <button
-              onClick={loadInsights}
-              className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
-            >
-              <div className="p-2 bg-purple-100 rounded-lg">
-                <RefreshCw className="w-5 h-5 text-purple-600" />
+                <button
+                  onClick={loadInsights}
+                  className="flex items-center space-x-3 p-4 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 transition-colors text-left"
+                >
+                  <div className="p-2 bg-purple-100 rounded-lg">
+                    <RefreshCw className="w-5 h-5 text-purple-600" />
+                  </div>
+                  <div>
+                    <div className="font-medium text-gray-900">Refresh Insights</div>
+                    <div className="text-sm text-gray-500">Get latest analysis</div>
+                  </div>
+                  <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
+                </button>
               </div>
-              <div>
-                <div className="font-medium text-gray-900">Refresh Insights</div>
-                <div className="text-sm text-gray-500">Get latest analysis</div>
-              </div>
-              <ChevronRight className="w-5 h-5 text-gray-400 ml-auto" />
-            </button>
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
