@@ -30,8 +30,8 @@ export default function DashboardPage() {
     return (
       <div className="flex h-screen">
         <Sidebar user={user} />
-        <div className="flex-1 flex justify-center items-center bg-gray-50">
-          <Loader2 className="h-12 w-12 animate-spin text-blue-500" />
+        <div className="flex-1 flex justify-center items-center bg-background">
+          <Loader2 className="h-12 w-12 animate-spin text-primary" />
         </div>
       </div>
     );
@@ -40,12 +40,11 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen bg-background">
       <Sidebar user={user} />
 
       <div className="flex-1 overflow-y-auto pb-32">
         <div className="max-w-[1600px] mx-auto p-8 space-y-6">
-          {/* Business Intelligence Dashboard */}
           <ModernBusinessDashboard user={user} onModalOpenChange={setIsModalOpen} />
         </div>
       </div>

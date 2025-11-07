@@ -19,9 +19,10 @@ interface Alert {
 
 interface AlertsWidgetProps {
   onInvestigate: (alertId: number, summary: string) => void;
+  investigating?: boolean;
 }
 
-export default function AlertsWidget({ onInvestigate }: AlertsWidgetProps) {
+export default function AlertsWidget({ onInvestigate, investigating }: AlertsWidgetProps) {
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [loading, setLoading] = useState(true);
   const [dismissing, setDismissing] = useState<number | null>(null);
