@@ -18,6 +18,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface SavedReport {
   report_id: number;
@@ -145,16 +152,16 @@ export default function ReportsPage() {
   });
 
   return (
-    <div className="flex">
+    <div className="flex h-screen" style={{ backgroundColor: '#F9F9F9' }}>
       <Sidebar user={user} />
-      <div className="flex-1 min-h-screen bg-background p-8">
+      <div className="flex-1 overflow-y-auto p-8">
         <div className="max-w-7xl mx-auto">
           <div className="flex items-center justify-between mb-8">
             <div>
-              <h1 className="text-4xl font-bold mb-2">Saved Reports</h1>
-              <p className="text-muted-foreground">Access your saved intelligence reports</p>
+              <h1 className="text-4xl font-normal mb-2">Saved Reports</h1>
+              <p className="text-muted-foreground font-light">Access your saved intelligence reports</p>
             </div>
-            <Button onClick={() => router.push("/dash")}>
+            <Button onClick={() => router.push("/")} className="font-normal">
               Back to Dashboard
             </Button>
           </div>
@@ -173,16 +180,17 @@ export default function ReportsPage() {
                   />
                 </div>
 
-                <select
-                  value={filterType || ""}
-                  onChange={(e) => setFilterType(e.target.value || null)}
-                  className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
-                >
-                  <option value="">All Types</option>
-                  <option value="widget_drilldown">Widget Analysis</option>
-                  <option value="alert_investigation">Alert Investigation</option>
-                  <option value="manual_query">Manual Query</option>
-                </select>
+                <Select value={filterType || "all"} onValueChange={(value) => setFilterType(value === "all" ? null : value)}>
+                  <SelectTrigger className="w-[200px]">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="widget_drilldown">Widget Analysis</SelectItem>
+                    <SelectItem value="alert_investigation">Alert Investigation</SelectItem>
+                    <SelectItem value="manual_query">Manual Query</SelectItem>
+                  </SelectContent>
+                </Select>
 
                 <Button
                   variant={starredOnly ? "default" : "outline"}
@@ -202,15 +210,15 @@ export default function ReportsPage() {
           ) : filteredReports.length === 0 ? (
             <Card className="p-16 text-center">
               <FileText className="w-20 h-20 mx-auto mb-4 text-muted-foreground" />
-              <h3 className="text-2xl font-semibold mb-3">No Reports Found</h3>
-              <p className="text-muted-foreground mb-8">
+              <h3 className="text-2xl font-normal mb-3">No Reports Found</h3>
+              <p className="text-muted-foreground font-light mb-8 text-base">
                 {searchTerm
                   ? "No reports match your search"
                   : starredOnly
                   ? "You haven't starred any reports yet"
                   : "Save drill-down reports to access them here"}
               </p>
-              <Button onClick={() => router.push("/dash")}>
+              <Button onClick={() => router.push("/")} className="font-normal">
                 Go to Dashboard
               </Button>
             </Card>

@@ -208,20 +208,20 @@ export default function ConnectionsPage() {
   ], [status]);
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen" style={{ backgroundColor: '#F9F9F9' }}>
       <Sidebar user={user} />
 
       <div className="flex-1 overflow-y-auto">
         <div className="max-w-6xl mx-auto p-8">
           {/* Header */}
           <div className="mb-8">
-            <h1 className="text-3xl font-semibold text-gray-900 mb-2">Settings</h1>
-            <p className="text-gray-600">Manage your connections and account preferences</p>
+            <h1 className="text-3xl font-normal text-gray-900 mb-2">Settings</h1>
+            <p className="text-gray-600 font-light">Manage your connections and account preferences</p>
           </div>
 
           {/* Connections Section */}
           <div className="mb-12">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Data Connections</h2>
+            <h2 className="text-xl font-normal text-gray-900 mb-6">Data Connections</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {services.map((service) => {
               const Icon = service.icon;
@@ -239,8 +239,8 @@ export default function ConnectionsPage() {
                         <Icon className="h-7 w-7 text-white" />
                       </div>
                       <div>
-                        <h3 className="text-lg font-semibold text-gray-900">{service.name}</h3>
-                        <p className="text-sm text-gray-500 mt-1">{service.description}</p>
+                        <h3 className="text-lg font-normal text-gray-900">{service.name}</h3>
+                        <p className="text-sm text-gray-500 font-light mt-1">{service.description}</p>
                       </div>
                     </div>
                     {service.connected && (
@@ -256,7 +256,7 @@ export default function ConnectionsPage() {
                       <button
                         onClick={() => handleConnect(service.provider)}
                         disabled={isConnecting}
-                        className={`w-full py-3 px-4 rounded-xl text-white font-medium transition-all disabled:opacity-50 bg-gradient-to-r ${service.gradient} hover:opacity-90`}
+                        className={`w-full py-3 px-4 rounded-xl text-white font-normal transition-all disabled:opacity-50 bg-gradient-to-r ${service.gradient} hover:opacity-90`}
                       >
                         {isConnecting ? (
                           <div className="flex items-center justify-center gap-2">
@@ -271,7 +271,7 @@ export default function ConnectionsPage() {
                       <button
                         onClick={() => handleSync(service.syncKey)}
                         disabled={isSyncing}
-                        className="w-full py-3 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-900 font-medium transition-all disabled:opacity-50"
+                        className="w-full py-3 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-900 font-normal transition-all disabled:opacity-50"
                       >
                         {isSyncing ? (
                           <div className="flex items-center justify-center gap-2">
@@ -295,7 +295,7 @@ export default function ConnectionsPage() {
 
           {/* Settings Sections */}
           <div className="space-y-6 mt-8">
-            <h2 className="text-xl font-semibold text-gray-900">Account Settings</h2>
+            <h2 className="text-xl font-normal text-gray-900">Account Settings</h2>
 
             {/* Account Information */}
             <div className="bg-white rounded-3xl p-8 border border-gray-200">
@@ -304,8 +304,8 @@ export default function ConnectionsPage() {
                   <User className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Account Information</h3>
-                  <p className="text-sm text-gray-500">Your profile details</p>
+                  <h3 className="text-lg font-normal text-gray-900">Account Information</h3>
+                  <p className="text-sm text-gray-500 font-light">Your profile details</p>
                 </div>
               </div>
 
@@ -340,13 +340,13 @@ export default function ConnectionsPage() {
                   <Bell className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
-                  <p className="text-sm text-gray-500">Manage notification preferences</p>
+                  <h3 className="text-lg font-normal text-gray-900">Notifications</h3>
+                  <p className="text-sm text-gray-500 font-light">Manage notification preferences</p>
                 </div>
               </div>
 
               <div className="text-center py-8">
-                <p className="text-sm text-gray-400">Notification settings coming soon</p>
+                <p className="text-sm text-gray-400 font-light">Notification settings coming soon</p>
               </div>
             </div>
 
@@ -357,13 +357,13 @@ export default function ConnectionsPage() {
                   <Shield className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Privacy & Security</h3>
-                  <p className="text-sm text-gray-500">Manage your security settings</p>
+                  <h3 className="text-lg font-normal text-gray-900">Privacy & Security</h3>
+                  <p className="text-sm text-gray-500 font-light">Manage your security settings</p>
                 </div>
               </div>
 
               <div className="text-center py-8">
-                <p className="text-sm text-gray-400">Security settings coming soon</p>
+                <p className="text-sm text-gray-400 font-light">Security settings coming soon</p>
               </div>
             </div>
 
@@ -374,20 +374,20 @@ export default function ConnectionsPage() {
                   <Trash2 className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900">Danger Zone</h3>
-                  <p className="text-sm text-gray-500">Irreversible actions</p>
+                  <h3 className="text-lg font-normal text-gray-900">Danger Zone</h3>
+                  <p className="text-sm text-gray-500 font-light">Irreversible actions</p>
                 </div>
               </div>
 
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-4 bg-red-50 rounded-2xl border border-red-100">
                   <div>
-                    <p className="text-sm font-medium text-gray-900">Delete Account</p>
-                    <p className="text-xs text-gray-500 mt-1">Permanently delete your account and all data</p>
+                    <p className="text-sm font-normal text-gray-900">Delete Account</p>
+                    <p className="text-xs text-gray-500 font-light mt-1">Permanently delete your account and all data</p>
                   </div>
                   <button
                     disabled
-                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-medium rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm font-normal rounded-xl transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     Delete
                   </button>
