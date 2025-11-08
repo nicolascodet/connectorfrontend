@@ -306,8 +306,8 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-6">
-        <h1 className="text-3xl font-normal tracking-tight">
-          What are you working on today?
+        <h1 className="text-3xl font-semibold tracking-tight">
+          Let's get to work
         </h1>
 
         {/* Search Bar */}
