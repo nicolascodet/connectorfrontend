@@ -5,6 +5,7 @@ import { X, TrendingUp, TrendingDown, Users, DollarSign, Calendar, AlertCircle, 
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getDrillDownReport, getSourceDocument, saveReport } from '@/lib/api';
 import SmartMarkdown from '@/components/SmartMarkdown';
+import { Button } from '@/components/ui/button';
 
 interface DrillDownModalProps {
   isOpen: boolean;
@@ -229,8 +230,8 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
           {/* Header */}
           <div className="flex items-start justify-between p-8 border-b border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50">
             <div className="flex-1">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">{widgetTitle}</h2>
-              <p className="text-gray-600">{widgetMessage}</p>
+              <h2 className="text-3xl font-normal text-gray-900 mb-2">{widgetTitle}</h2>
+              <p className="text-gray-600 font-light">{widgetMessage}</p>
             </div>
             <button
               onClick={onClose}
@@ -247,8 +248,8 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
               <div className="flex items-center justify-center py-20">
                 <div className="text-center">
                   <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                  <p className="text-gray-600">Generating detailed report...</p>
-                  <p className="text-sm text-gray-400 mt-2">Analyzing documents and connecting the dots</p>
+                  <p className="text-gray-600 font-normal">Generating detailed report...</p>
+                  <p className="text-sm text-gray-400 font-light mt-2">Analyzing documents and connecting the dots</p>
                 </div>
               </div>
             )}
@@ -270,11 +271,13 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
                 {/* Executive Summary */}
                 {report.executive_summary && (
                   <div className="bg-gradient-to-br from-blue-50 to-purple-50 rounded-2xl p-8 border border-blue-100">
-                    <h3 className="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <h3 className="text-xl font-normal text-gray-900 mb-4 flex items-center gap-2">
                       <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
                       Executive Summary
                     </h3>
-                    <p className="text-gray-700 leading-relaxed text-base">{report.executive_summary}</p>
+                    <div className="text-gray-700 leading-relaxed text-base font-light">
+                      <SmartMarkdown content={report.executive_summary} />
+                    </div>
                   </div>
                 )}
 
@@ -562,52 +565,55 @@ export default function DrillDownModal({ isOpen, onClose, widgetTitle, widgetMes
           {/* Footer */}
           <div className="border-t border-gray-100 p-6 bg-gray-50 flex justify-between items-center">
             <div className="flex items-center gap-3">
-              <button
+              <Button
                 onClick={handleExportPDF}
                 disabled={exporting || loading}
-                className="px-6 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                size="lg"
+                className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 {exporting ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     Exporting...
                   </>
                 ) : (
                   <>
-                    <Download className="w-4 h-4" />
+                    <Download className="w-4 h-4 mr-2" />
                     Download PDF
                   </>
                 )}
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleSaveReport}
                 disabled={saving || loading || saved}
-                className="px-6 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-colors font-medium flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                size="lg"
+                className="bg-green-600 hover:bg-green-700 text-white"
               >
                 {saving ? (
                   <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
                     Saving...
                   </>
                 ) : saved ? (
                   <>
-                    <CheckCircle className="w-4 h-4" />
+                    <CheckCircle className="w-4 h-4 mr-2" />
                     Saved!
                   </>
                 ) : (
                   <>
-                    <Save className="w-4 h-4" />
+                    <Save className="w-4 h-4 mr-2" />
                     Save Report
                   </>
                 )}
-              </button>
+              </Button>
             </div>
-            <button
+            <Button
               onClick={onClose}
-              className="px-6 py-2.5 bg-gray-900 text-white rounded-xl hover:bg-gray-800 transition-colors font-medium"
+              size="lg"
+              className="bg-gray-900 hover:bg-gray-800 text-white"
             >
               Close
-            </button>
+            </Button>
           </div>
         </div>
       </div>

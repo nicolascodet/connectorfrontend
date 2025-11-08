@@ -216,7 +216,7 @@ function SearchPageContent() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-8 py-6">
-          <div className={`max-w-5xl mx-auto space-y-4 ${messages.length > 0 ? 'pt-20 pb-32' : ''}`}>
+          <div className={`max-w-5xl mx-auto space-y-4 ${messages.length > 0 ? 'pt-20 pb-40' : ''}`}>
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] pt-[10vh]">
                 <h2 className="text-2xl font-normal text-gray-900 mb-3">Ask me anything, {user?.email?.split('@')[0] || 'there'}</h2>
