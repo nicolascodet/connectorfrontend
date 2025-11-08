@@ -294,7 +294,7 @@ function SearchPageContent() {
             {messages.map((message, idx) => (
               <div key={idx} className={message.role === "user" ? "flex justify-end" : "flex justify-start"}>
                 {message.role === "user" ? (
-                  <div className="bg-blue-500 text-white rounded-3xl px-6 py-4 max-w-2xl">
+                  <div className="bg-black text-white rounded-3xl px-6 py-4 max-w-2xl">
                     <p className="text-sm">{message.content}</p>
                   </div>
                 ) : (
