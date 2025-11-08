@@ -306,14 +306,9 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-6">
-        <div>
-          <h1 className="text-3xl font-normal tracking-tight">
-            Hello, {user?.email?.split('@')[0] || 'there'}
-          </h1>
-          <p className="text-muted-foreground font-light">
-            What are you working on today?
-          </p>
-        </div>
+        <h1 className="text-3xl font-normal tracking-tight">
+          What are you working on today?
+        </h1>
 
         {/* Search Bar */}
         <form onSubmit={onChatSubmit}>

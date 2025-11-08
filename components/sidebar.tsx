@@ -158,11 +158,7 @@ export default function Sidebar({ user }: SidebarProps) {
               <MessageSquare className="h-4 w-4" />
               <span>Recent Chats</span>
             </div>
-            {historyExpanded ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
-            )}
+            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${historyExpanded ? '' : '-rotate-90'}`} />
           </Button>
 
           {historyExpanded && (
@@ -185,10 +181,10 @@ export default function Sidebar({ user }: SidebarProps) {
                     >
                       <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
                       <div className="flex-1 min-w-0 text-left pr-6">
-                        <p className="text-sm font-light truncate">
+                        <p className="text-sm font-normal truncate">
                           {chat.title || "Untitled Chat"}
                         </p>
-                        <p className="text-xs text-muted-foreground mt-0.5">
+                        <p className="text-xs text-muted-foreground font-light mt-0.5">
                           {formatTimestamp(chat.created_at)}
                         </p>
                       </div>
