@@ -216,7 +216,7 @@ function SearchPageContent() {
       <div className="flex-1 flex flex-col overflow-hidden">
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-8 py-6">
-          <div className={`max-w-3xl mx-auto space-y-4 ${messages.length > 0 ? 'pt-20' : ''}`}>
+          <div className={`max-w-5xl mx-auto space-y-4 ${messages.length > 0 ? 'pt-20 pb-32' : ''}`}>
             {messages.length === 0 && (
               <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] pt-[10vh]">
                 <h2 className="text-2xl font-normal text-gray-900 mb-3">Ask me anything, {user?.email?.split('@')[0] || 'there'}</h2>
@@ -225,7 +225,7 @@ function SearchPageContent() {
                 </p>
 
                 {/* Search Bar */}
-                <div className="w-full max-w-3xl mb-8 px-4">
+                <div className="w-full max-w-5xl mb-8 px-4">
                   <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
                     <div className="relative">
                       <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-gray-800/10 to-black/10 rounded-2xl blur-xl"></div>
@@ -401,7 +401,7 @@ function SearchPageContent() {
         {/* Input Area - Fixed at bottom (only show when there are messages) */}
         {messages.length > 0 && (
         <div className="fixed bottom-6 left-64 right-0 flex justify-center px-4 z-50 pointer-events-none">
-          <div className="w-full max-w-3xl pointer-events-auto">
+          <div className="w-full max-w-5xl pointer-events-auto">
             <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
               <div className="relative">
                 <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-gray-800/10 to-black/10 rounded-2xl blur-xl"></div>
