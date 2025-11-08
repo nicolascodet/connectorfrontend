@@ -92,44 +92,54 @@ export default function Sidebar({ user }: SidebarProps) {
   };
 
   return (
-    <div className="w-64 h-screen bg-background border-r flex flex-col">
+    <div className="w-64 h-screen bg-background border-r rounded-r-2xl shadow-xl flex flex-col">
       {/* Logo */}
-      <div className="px-5 py-0.5 border-b">
+      <div className="px-5 pt-4 pb-0.5">
         <Link href="/">
-          <div className="cursor-pointer hover:opacity-80 transition-opacity ml-3">
-            <img src="/highforce-logo.png" alt="HighForce" className="h-36 w-auto" style={{ objectFit: 'contain', objectPosition: 'left center' }} />
+          <div className="cursor-pointer hover:opacity-80 transition-opacity">
+            <img src="/highforce-logo-cropped.png" alt="HighForce" className="h-16 w-auto" style={{ objectFit: 'contain', objectPosition: 'left center' }} />
           </div>
         </Link>
       </div>
 
-      {/* Search Button */}
-      <div className="px-4 py-4">
-        <Button
-          onClick={() => router.push("/search")}
-          className="w-full"
-          size="sm"
-        >
-          <SearchIcon className="h-4 w-4 mr-2" />
-          Search
-        </Button>
-      </div>
-
       {/* Navigation */}
-      <ScrollArea className="flex-1 px-4">
-        <nav className="space-y-1 mb-6">
+      <ScrollArea className="flex-1 pl-0 pr-4">
+        <nav className="mb-6 mt-14">
+          {/* Search */}
+          <div className="relative pl-4 mb-3">
+            {pathname === "/search" && (
+              <div className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-black rounded-r-full z-10" style={{ left: '2px' }} />
+            )}
+            <Button
+              onClick={() => router.push("/search")}
+              variant={pathname === "/search" ? "secondary" : "ghost"}
+              className="w-full justify-start text-base font-light"
+              size="sm"
+            >
+              <SearchIcon className="h-4 w-4 mr-2" />
+              Search
+            </Button>
+          </div>
+
+          {/* Dashboard & Reports */}
           {navigation.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
             return (
               <Link key={item.name} href={item.href}>
-                <Button
-                  variant={isActive ? "secondary" : "ghost"}
-                  className="w-full justify-start"
-                  size="sm"
-                >
-                  <Icon className="h-4 w-4 mr-2" />
-                  {item.name}
-                </Button>
+                <div className="relative pl-4 mb-3">
+                  {isActive && (
+                    <div className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-black rounded-r-full z-10" style={{ left: '2px' }} />
+                  )}
+                  <Button
+                    variant={isActive ? "secondary" : "ghost"}
+                    className="w-full justify-start text-base font-light"
+                    size="sm"
+                  >
+                    <Icon className="h-4 w-4 mr-2" />
+                    {item.name}
+                  </Button>
+                </div>
               </Link>
             );
           })}
@@ -137,45 +147,45 @@ export default function Sidebar({ user }: SidebarProps) {
 
         {/* Chat History Section */}
         <Separator className="my-4" />
-        <div className="pt-2">
+        <div className="pt-2 pl-4">
           <Button
             variant="ghost"
             onClick={() => setHistoryExpanded(!historyExpanded)}
-            className="w-full justify-between px-3 h-8 text-xs font-semibold uppercase tracking-wide"
+            className="w-full justify-between text-base font-light"
             size="sm"
           >
             <div className="flex items-center gap-2">
-              <MessageSquare className="h-3 w-3" />
+              <MessageSquare className="h-4 w-4" />
               <span>Recent Chats</span>
             </div>
             {historyExpanded ? (
-              <ChevronDown className="h-3 w-3" />
+              <ChevronDown className="h-4 w-4" />
             ) : (
-              <ChevronRight className="h-3 w-3" />
+              <ChevronRight className="h-4 w-4" />
             )}
           </Button>
 
           {historyExpanded && (
-            <div className="mt-2 space-y-1">
+            <div className="mt-3 space-y-1">
               {loadingHistory ? (
-                <div className="px-3 py-2 text-xs text-muted-foreground">Loading...</div>
+                <div className="px-3 py-2 text-sm font-light text-muted-foreground">Loading...</div>
               ) : chatHistory.length === 0 ? (
-                <div className="px-3 py-2 text-xs text-muted-foreground">No chats yet</div>
+                <div className="px-3 py-2 text-sm font-light text-muted-foreground">No chats yet</div>
               ) : (
                 chatHistory.slice(0, 10).map((chat) => (
                   <div
                     key={chat.id}
-                    className="relative group/chat"
+                    className="relative group/chat mb-1"
                   >
                     <Button
                       variant="ghost"
                       onClick={() => router.push(`/search?chat_id=${chat.id}`)}
-                      className="w-full justify-start h-auto py-2 px-3"
+                      className="w-full justify-start h-auto py-2 px-3 text-base font-light"
                       size="sm"
                     >
-                      <Clock className="h-3 w-3 mr-2 flex-shrink-0" />
+                      <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
                       <div className="flex-1 min-w-0 text-left pr-6">
-                        <p className="text-xs font-medium truncate">
+                        <p className="text-sm font-light truncate">
                           {chat.title || "Untitled Chat"}
                         </p>
                         <p className="text-xs text-muted-foreground mt-0.5">
@@ -201,26 +211,26 @@ export default function Sidebar({ user }: SidebarProps) {
 
       {/* User Section */}
       <Separator />
-      <div className="p-4">
-        <div className="flex items-center gap-3 mb-3">
+      <div className="p-4 pl-4">
+        <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
             <span className="text-primary-foreground text-xs font-medium">
               {user?.email?.[0]?.toUpperCase() || "U"}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">
+            <p className="text-sm font-light truncate">
               {user?.email?.split("@")[0] || "User"}
             </p>
-            <p className="text-xs text-muted-foreground">Admin</p>
+            <p className="text-xs text-muted-foreground font-light">Admin</p>
           </div>
         </div>
 
-        <div className="space-y-1">
+        <div className="space-y-3">
           <Button
             variant="ghost"
             onClick={() => router.push("/connections")}
-            className="w-full justify-start"
+            className="w-full justify-start text-base font-light"
             size="sm"
           >
             <Settings className="h-4 w-4 mr-2" />
@@ -229,7 +239,7 @@ export default function Sidebar({ user }: SidebarProps) {
           <Button
             variant="ghost"
             onClick={() => signOut()}
-            className="w-full justify-start"
+            className="w-full justify-start text-base font-light"
             size="sm"
           >
             <LogOut className="h-4 w-4 mr-2" />

@@ -100,7 +100,7 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange }: Mod
       setGenerating(true);
 
       // Trigger alert detection on last 10 documents
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/alerts/backfill`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/alerts/backfill`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
