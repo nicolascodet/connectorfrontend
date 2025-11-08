@@ -46,11 +46,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const isDemoMode = isDemoModeEnabled();
 
   useEffect(() => {
-    // If demo mode is enabled, set a mock user and skip auth
+    // If demo mode is enabled, auto-login with demo credentials
     if (isDemoMode) {
-      setUser(createDemoUser());
-      setSession(null); // No real session in demo mode
-      setLoading(false);
+      const autoDemoLogin = async () => {
+        try {
+          // Try to sign in with demo credentials
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email: "demo@highforce.ai",
+            password: "demo123456",
+          });
+
+          if (error) {
+            console.error("❌ Demo auto-login failed:", error);
+            // Fallback to mock user if login fails
+            setUser(createDemoUser());
+            setSession(null);
+          } else {
+            console.log("✅ Demo auto-login successful");
+            setSession(data.session);
+            setUser(data.user);
+          }
+        } catch (err) {
+          console.error("❌ Demo auto-login error:", err);
+          // Fallback to mock user
+          setUser(createDemoUser());
+          setSession(null);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      autoDemoLogin();
       return;
     }
 
