@@ -209,49 +209,78 @@ function SearchPageContent() {
   if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-gray-50">
+    <div className="flex h-screen" style={{ backgroundColor: '#FAF9F4' }}>
       <Sidebar user={user} />
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
-        <div className="bg-white border-b border-gray-200 px-8 py-6">
-          <div className="max-w-5xl mx-auto">
-            <h1 className="text-2xl font-semibold text-gray-900 mb-2">Search</h1>
-            <p className="text-sm text-gray-600">Ask questions about your documents and data</p>
-          </div>
-        </div>
-
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto px-8 py-6">
           <div className="max-w-5xl mx-auto space-y-4">
             {messages.length === 0 && (
-              <div className="flex flex-col items-center justify-center py-20">
-                <div className="w-20 h-20 bg-blue-50 rounded-3xl flex items-center justify-center mb-6">
-                  <Sparkles className="h-10 w-10 text-blue-500" />
-                </div>
-                <h2 className="text-2xl font-semibold text-gray-900 mb-3">Ask me anything</h2>
-                <p className="text-gray-600 text-center max-w-md mb-8">
+              <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] pt-[10vh]">
+                <h2 className="text-2xl font-normal text-gray-900 mb-3">Ask me anything, {user?.email?.split('@')[0] || 'there'}</h2>
+                <p className="text-gray-600 text-center max-w-md mb-8 text-base font-light">
                   Search across all your connected documents, emails, and data sources
                 </p>
 
+                {/* Search Bar */}
+                <div className="w-full max-w-3xl mb-8 px-4">
+                  <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
+                    <div className="relative">
+                      <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-gray-800/10 to-black/10 rounded-2xl blur-xl"></div>
+                      <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-300">
+                        <div className="flex items-end gap-3 p-4">
+                          <textarea
+                            value={input}
+                            onChange={(e) => {
+                              setInput(e.target.value);
+                              const target = e.target as HTMLTextAreaElement;
+                              target.style.height = 'auto';
+                              target.style.height = Math.min(target.scrollHeight, 400) + 'px';
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter' && !e.shiftKey) {
+                                e.preventDefault();
+                                handleSearch();
+                              }
+                            }}
+                            placeholder="What can I help you with?"
+                            className="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-gray-900 placeholder-gray-400 text-sm resize-none max-h-[400px] overflow-y-auto leading-tight"
+                            disabled={loadingChat}
+                            rows={1}
+                            style={{ height: '20px', lineHeight: '20px' }}
+                          />
+                          <button
+                            type="submit"
+                            disabled={!input.trim() || loadingChat}
+                            className="w-10 h-10 flex-shrink-0 rounded-xl bg-black hover:bg-gray-800 text-white flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                          >
+                            <Send className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                </div>
+
                 {/* Suggestion chips */}
-                <div className="flex flex-wrap gap-3 justify-center max-w-2xl">
+                <div className={`flex flex-wrap gap-3 justify-center max-w-2xl transition-opacity duration-500 ${input.trim() ? 'opacity-0' : 'opacity-100'}`}>
                   <button
                     onClick={() => setInput("Summarize recent business emails")}
-                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-normal text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Recent business emails
                   </button>
                   <button
                     onClick={() => setInput("Show me financial documents")}
-                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-normal text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Financial docs
                   </button>
                   <button
                     onClick={() => setInput("What meetings do I have this week?")}
-                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm text-gray-700 hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-normal text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     This week's meetings
                   </button>
@@ -366,28 +395,49 @@ function SearchPageContent() {
           </div>
         </div>
 
-        {/* Input Area - Fixed at bottom */}
-        <div className="bg-white border-t border-gray-200 px-8 py-6">
-          <div className="max-w-5xl mx-auto">
-            <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }} className="relative">
-              <input
-                type="text"
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Ask a question..."
-                className="w-full px-6 py-4 pr-14 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
-                disabled={loadingChat}
-              />
-              <button
-                type="submit"
-                disabled={!input.trim() || loadingChat}
-                className="absolute right-2 top-2 w-10 h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                <Send className="h-4 w-4" />
-              </button>
+        {/* Input Area - Fixed at bottom (only show when there are messages) */}
+        {messages.length > 0 && (
+        <div className="fixed bottom-6 left-64 right-0 flex justify-center px-4 z-50 pointer-events-none">
+          <div className="w-full max-w-3xl pointer-events-auto">
+            <form onSubmit={(e) => { e.preventDefault(); handleSearch(); }}>
+              <div className="relative">
+                <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-gray-800/10 to-black/10 rounded-2xl blur-xl"></div>
+                <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-300">
+                  <div className="flex items-end gap-3 p-4">
+                    <textarea
+                      value={input}
+                      onChange={(e) => {
+                        setInput(e.target.value);
+                        const target = e.target as HTMLTextAreaElement;
+                        target.style.height = 'auto';
+                        target.style.height = Math.min(target.scrollHeight, 400) + 'px';
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && !e.shiftKey) {
+                          e.preventDefault();
+                          handleSearch();
+                        }
+                      }}
+                      placeholder="Ask a question..."
+                      className="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-gray-900 placeholder-gray-400 text-sm resize-none max-h-[400px] overflow-y-auto leading-tight"
+                      disabled={loadingChat}
+                      rows={1}
+                      style={{ height: '20px', lineHeight: '20px' }}
+                    />
+                    <button
+                      type="submit"
+                      disabled={!input.trim() || loadingChat}
+                      className="w-10 h-10 flex-shrink-0 rounded-xl bg-black hover:bg-gray-800 text-white flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                    >
+                      <Send className="h-4 w-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
             </form>
           </div>
         </div>
+        )}
       </div>
 
       {/* Preview Modal */}

@@ -113,7 +113,7 @@ export default function Sidebar({ user }: SidebarProps) {
             <Button
               onClick={() => router.push("/search")}
               variant={pathname === "/search" ? "secondary" : "ghost"}
-              className="w-full justify-start text-base font-light"
+              className="w-full justify-start text-sm font-normal"
               size="sm"
             >
               <SearchIcon className="h-4 w-4 mr-2" />
@@ -133,7 +133,7 @@ export default function Sidebar({ user }: SidebarProps) {
                   )}
                   <Button
                     variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start text-base font-light"
+                    className="w-full justify-start text-sm font-normal"
                     size="sm"
                   >
                     <Icon className="h-4 w-4 mr-2" />
@@ -151,7 +151,7 @@ export default function Sidebar({ user }: SidebarProps) {
           <Button
             variant="ghost"
             onClick={() => setHistoryExpanded(!historyExpanded)}
-            className="w-full justify-between text-base font-light"
+            className="w-full justify-between text-sm font-normal"
             size="sm"
           >
             <div className="flex items-center gap-2">
@@ -180,7 +180,7 @@ export default function Sidebar({ user }: SidebarProps) {
                     <Button
                       variant="ghost"
                       onClick={() => router.push(`/search?chat_id=${chat.id}`)}
-                      className="w-full justify-start h-auto py-2 px-3 text-base font-light"
+                      className="w-full justify-start h-auto py-2 px-3 text-sm font-normal"
                       size="sm"
                     >
                       <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -230,7 +230,7 @@ export default function Sidebar({ user }: SidebarProps) {
           <Button
             variant="ghost"
             onClick={() => router.push("/connections")}
-            className="w-full justify-start text-base font-light"
+            className="w-full justify-start text-sm font-normal"
             size="sm"
           >
             <Settings className="h-4 w-4 mr-2" />
@@ -239,7 +239,7 @@ export default function Sidebar({ user }: SidebarProps) {
           <Button
             variant="ghost"
             onClick={() => signOut()}
-            className="w-full justify-start text-base font-light"
+            className="w-full justify-start text-sm font-normal"
             size="sm"
           >
             <LogOut className="h-4 w-4 mr-2" />

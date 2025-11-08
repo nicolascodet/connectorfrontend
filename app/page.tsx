@@ -57,7 +57,7 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="flex h-screen" style={{ backgroundColor: '#F9F6F6' }}>
+    <div className="flex h-screen" style={{ backgroundColor: '#FAF9F4' }}>
       <Sidebar user={user} />
 
       <div className="flex-1 overflow-y-auto pb-32">

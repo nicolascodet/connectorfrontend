@@ -278,14 +278,15 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange }: Mod
     return (
       <Card className="p-16 text-center">
         <Brain className="w-20 h-20 mx-auto mb-4 text-muted-foreground" />
-        <h3 className="text-2xl font-semibold mb-3">No Insights Yet</h3>
-        <p className="text-muted-foreground mb-8 text-lg">
+        <h3 className="text-2xl font-normal mb-3">No Insights Yet</h3>
+        <p className="text-muted-foreground mb-8 text-base font-light">
           Generate AI-powered insights from your communications
         </p>
         <Button
           onClick={handleGenerate}
           disabled={generating}
           size="lg"
+          className="font-normal"
         >
           {generating ? (
             <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
