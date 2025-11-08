@@ -209,7 +209,7 @@ function SearchPageContent() {
   if (!user) return null;
 
   return (
-    <div className="flex h-screen" style={{ backgroundColor: '#FAF9F4' }}>
+    <div className="flex h-screen" style={{ backgroundColor: '#FAFDFD' }}>
       <Sidebar user={user} />
 
       {/* Main Content */}
@@ -268,19 +268,22 @@ function SearchPageContent() {
                 <div className={`flex flex-wrap gap-3 justify-center max-w-2xl transition-opacity duration-500 ${input.trim() ? 'opacity-0' : 'opacity-100'}`}>
                   <button
                     onClick={() => setInput("Summarize recent business emails")}
-                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-normal text-gray-700 hover:bg-gray-50 transition-colors"
+                    style={{ backgroundColor: '#FFFFFF', boxShadow: '0 0 20px rgba(255, 255, 255, 0.8)' }}
+                    className="px-4 py-2 border border-gray-300 rounded-xl text-sm font-normal text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Recent business emails
                   </button>
                   <button
                     onClick={() => setInput("Show me financial documents")}
-                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-normal text-gray-700 hover:bg-gray-50 transition-colors"
+                    style={{ backgroundColor: '#FFFFFF', boxShadow: '0 0 20px rgba(255, 255, 255, 0.8)' }}
+                    className="px-4 py-2 border border-gray-300 rounded-xl text-sm font-normal text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     Financial docs
                   </button>
                   <button
                     onClick={() => setInput("What meetings do I have this week?")}
-                    className="px-4 py-2 bg-white border border-gray-200 rounded-xl text-sm font-normal text-gray-700 hover:bg-gray-50 transition-colors"
+                    style={{ backgroundColor: '#FFFFFF', boxShadow: '0 0 20px rgba(255, 255, 255, 0.8)' }}
+                    className="px-4 py-2 border border-gray-300 rounded-xl text-sm font-normal text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     This week's meetings
                   </button>
