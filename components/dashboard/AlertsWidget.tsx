@@ -126,7 +126,7 @@ export default function AlertsWidget({ onInvestigate, investigating }: AlertsWid
         <CardHeader>
           <div className="flex items-center gap-3">
             <BellOff className="w-6 h-6 text-gray-400" />
-            <h2 className="text-2xl font-bold text-gray-900">Alerts</h2>
+            <h2 className="text-2xl font-semibold text-gray-900">Alerts</h2>
           </div>
         </CardHeader>
         <CardContent>
@@ -134,8 +134,8 @@ export default function AlertsWidget({ onInvestigate, investigating }: AlertsWid
             <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
               <BellOff className="w-8 h-8 text-green-600" />
             </div>
-            <p className="text-gray-600 font-medium">All clear!</p>
-            <p className="text-sm text-gray-500 mt-2">No urgent items detected</p>
+            <p className="text-gray-600 font-normal">All clear!</p>
+            <p className="text-sm text-gray-500 font-light mt-2">No urgent items detected</p>
           </div>
         </CardContent>
       </Card>
@@ -149,15 +149,15 @@ export default function AlertsWidget({ onInvestigate, investigating }: AlertsWid
         <div className="flex items-center gap-3">
           <div className="relative">
             <Bell className="w-6 h-6 text-red-600" />
-            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 rounded-full text-white text-xs flex items-center justify-center font-bold">
+            <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-600 rounded-full text-white text-xs flex items-center justify-center font-semibold">
               {alerts.length}
             </span>
           </div>
-          <h2 className="text-2xl font-bold text-gray-900">Active Alerts</h2>
+          <h2 className="text-2xl font-semibold text-gray-900">Active Alerts</h2>
         </div>
         <button
           onClick={loadAlerts}
-          className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+          className="text-sm text-blue-600 hover:text-blue-700 font-normal"
         >
           Refresh
         </button>
@@ -177,16 +177,16 @@ export default function AlertsWidget({ onInvestigate, investigating }: AlertsWid
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <div className={`w-2 h-2 rounded-full ${getUrgencyIndicator(alert.urgency_level)}`}></div>
-                  <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                  <span className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                     {getAlertTypeLabel(alert.alert_type)}
                   </span>
                   <span className="text-xs text-gray-400">•</span>
-                  <span className="text-xs text-gray-500 flex items-center gap-1">
+                  <span className="text-xs text-gray-500 font-light flex items-center gap-1">
                     <Clock className="w-3 h-3" />
                     {formatTime(alert.detected_at)}
                   </span>
                 </div>
-                <p className="text-sm text-gray-900 leading-relaxed font-medium">
+                <p className="text-sm text-gray-900 leading-relaxed font-normal">
                   {alert.summary}
                 </p>
               </div>
@@ -206,13 +206,13 @@ export default function AlertsWidget({ onInvestigate, investigating }: AlertsWid
                 {alert.key_entities.slice(0, 3).map((entity, idx) => (
                   <span
                     key={idx}
-                    className="px-2 py-1 bg-white rounded-lg text-xs font-medium text-gray-700 border border-gray-200"
+                    className="px-2 py-1 bg-white rounded-lg text-xs font-normal text-gray-700 border border-gray-200"
                   >
                     {entity}
                   </span>
                 ))}
                 {alert.key_entities.length > 3 && (
-                  <span className="px-2 py-1 text-xs text-gray-500">
+                  <span className="px-2 py-1 text-xs text-gray-500 font-light">
                     +{alert.key_entities.length - 3} more
                   </span>
                 )}
@@ -223,13 +223,13 @@ export default function AlertsWidget({ onInvestigate, investigating }: AlertsWid
             <div className="flex items-center gap-3 pt-3 border-t border-gray-200">
               <button
                 onClick={() => handleInvestigate(alert)}
-                className="flex-1 px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-xl font-medium text-sm transition-colors border border-blue-200 flex items-center justify-center gap-2"
+                className="flex-1 px-4 py-2 bg-white text-blue-600 hover:bg-blue-50 rounded-xl font-normal text-sm transition-colors border border-blue-200 flex items-center justify-center gap-2"
               >
                 <Search className="w-4 h-4" />
                 Investigate
               </button>
               {alert.investigation_count > 0 && (
-                <span className="text-xs text-gray-500 flex items-center gap-1">
+                <span className="text-xs text-gray-500 font-light flex items-center gap-1">
                   <TrendingUp className="w-3 h-3" />
                   Viewed {alert.investigation_count}x
                 </span>

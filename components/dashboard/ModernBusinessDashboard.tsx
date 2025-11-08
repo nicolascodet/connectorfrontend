@@ -209,26 +209,26 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
         <CardHeader className="pb-3">
           <div className="flex items-start justify-between">
             <div className="flex-1">
-              <CardTitle className="text-base group-hover:text-primary transition-colors">
+              <CardTitle className="text-base font-semibold group-hover:text-primary transition-colors">
                 {widget.title || 'Insight'}
               </CardTitle>
             </div>
             <Badge variant={getUrgencyVariant(widget.urgency)} className="flex items-center gap-1">
               {getUrgencyIcon(widget.urgency)}
-              <span className="capitalize">{widget.urgency || 'Medium'}</span>
+              <span className="capitalize font-medium">{widget.urgency || 'Medium'}</span>
             </Badge>
           </div>
         </CardHeader>
         <CardContent>
           {hasValue && (
             <div className="mb-4">
-              <div className="text-3xl font-bold">{widget.value}</div>
+              <div className="text-3xl font-semibold">{widget.value}</div>
               {widget.value_label && (
-                <p className="text-sm text-muted-foreground mt-1">{widget.value_label}</p>
+                <p className="text-sm text-muted-foreground font-light mt-1">{widget.value_label}</p>
               )}
             </div>
           )}
-          <div className="text-sm text-muted-foreground leading-relaxed">
+          <div className="text-sm text-muted-foreground leading-relaxed font-normal">
             <SmartMarkdown content={widget.message || 'No details available'} />
           </div>
         </CardContent>
@@ -282,7 +282,7 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
     return (
       <Card className="p-16 text-center">
         <Brain className="w-20 h-20 mx-auto mb-4 text-muted-foreground" />
-        <h3 className="text-2xl font-normal mb-3">No Insights Yet</h3>
+        <h3 className="text-2xl font-semibold mb-3">No Insights Yet</h3>
         <p className="text-muted-foreground mb-8 text-base font-light">
           Generate AI-powered insights from your communications
         </p>
@@ -290,7 +290,7 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
           onClick={handleGenerate}
           disabled={generating}
           size="lg"
-          className="font-normal"
+          className="font-medium"
         >
           {generating ? (
             <RefreshCw className="w-5 h-5 mr-2 animate-spin" />
@@ -366,6 +366,7 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
                 onClick={handleGenerate}
                 disabled={generating}
                 variant="outline"
+                className="font-medium"
               >
                 {generating ? (
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
