@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import DrillDownModal from "./DrillDownModal";
 import AlertsWidget from "./AlertsWidget";
+import SmartMarkdown from "@/components/SmartMarkdown";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -224,9 +225,9 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange }: Mod
               )}
             </div>
           )}
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            {widget.message || 'No details available'}
-          </p>
+          <div className="text-sm text-muted-foreground leading-relaxed">
+            <SmartMarkdown content={widget.message || 'No details available'} />
+          </div>
         </CardContent>
       </Card>
     );
@@ -303,10 +304,10 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange }: Mod
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
+          <h1 className="text-3xl font-normal tracking-tight">
             Dashboard
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-muted-foreground font-light">
             Welcome back, {user?.email?.split('@')[0] || 'there'}
           </p>
         </div>

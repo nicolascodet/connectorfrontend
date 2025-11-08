@@ -12,6 +12,7 @@ export default function DashboardPage() {
   const router = useRouter();
   const [chatInput, setChatInput] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   // Debug: Log demo mode status
   useEffect(() => {
@@ -35,6 +36,24 @@ export default function DashboardPage() {
       router.push("/login");
     }
   }, [user, loading, router, isDemoMode]);
+
+  useEffect(() => {
+    const handleScroll = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.scrollTop > 50) {
+        setScrolled(true);
+      } else {
+        setScrolled(false);
+      }
+    };
+
+    const scrollContainer = document.querySelector('.overflow-y-auto');
+    scrollContainer?.addEventListener('scroll', handleScroll);
+
+    return () => {
+      scrollContainer?.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
 
   const handleChatSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,7 +94,7 @@ export default function DashboardPage() {
 
       {/* Glassmorphism Chat Bar - Hidden when modal is open */}
       {!isModalOpen && (
-      <div className="fixed bottom-6 left-64 right-0 flex justify-center px-4 z-50 pointer-events-none">
+      <div className={`fixed bottom-6 left-64 right-0 flex justify-center px-4 z-50 pointer-events-none transition-all duration-500 ease-in-out ${scrolled ? 'scale-95 opacity-90' : 'scale-100 opacity-100'}`}>
         <div className="w-full max-w-3xl pointer-events-auto">
           <form onSubmit={handleChatSubmit}>
             <div className="relative">
