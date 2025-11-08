@@ -306,46 +306,44 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-normal tracking-tight">
-              Hello, {user?.email?.split('@')[0] || 'there'}
-            </h1>
-            <p className="text-muted-foreground font-light">
-              What are you working on today?
-            </p>
-          </div>
-          <Button
-            onClick={handleGenerate}
-            disabled={generating}
-            variant="outline"
-          >
-            {generating ? (
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Sparkles className="w-4 h-4 mr-2" />
-            )}
-            Regenerate
-          </Button>
+        <div>
+          <h1 className="text-3xl font-normal tracking-tight">
+            Hello, {user?.email?.split('@')[0] || 'there'}
+          </h1>
+          <p className="text-muted-foreground font-light">
+            What are you working on today?
+          </p>
         </div>
 
         {/* Search Bar */}
         <form onSubmit={onChatSubmit}>
-          <div className="relative">
+          <div className="relative transition-all duration-300 ease-in-out">
             <div className="absolute inset-0 bg-gradient-to-r from-black/10 via-gray-800/10 to-black/10 rounded-2xl blur-xl"></div>
             <div className="relative bg-white/95 backdrop-blur-xl rounded-2xl shadow-sm border border-gray-300">
-              <div className="flex items-center gap-3 p-4">
-                <input
-                  type="text"
+              <div className="flex items-end gap-3 p-4">
+                <textarea
                   value={chatInput}
-                  onChange={(e) => setChatInput(e.target.value)}
-                  placeholder="Ask anything about your business, documents, or data..."
-                  className="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-gray-900 placeholder-gray-400 text-sm"
+                  onChange={(e) => {
+                    setChatInput(e.target.value);
+                    const target = e.target as HTMLTextAreaElement;
+                    target.style.height = 'auto';
+                    target.style.height = Math.min(target.scrollHeight, 400) + 'px';
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault();
+                      onChatSubmit(e);
+                    }
+                  }}
+                  placeholder="Search across emails, documents, financials, meetings, and your entire company knowledge..."
+                  className="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-gray-900 placeholder-gray-400 text-sm resize-none max-h-[400px] overflow-y-auto leading-tight"
+                  rows={1}
+                  style={{ height: '20px', lineHeight: '20px' }}
                 />
                 <button
                   type="submit"
                   disabled={!chatInput.trim()}
-                  className="w-10 h-10 rounded-xl bg-black hover:bg-gray-800 text-white flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
+                  className="w-10 h-10 flex-shrink-0 rounded-xl bg-black hover:bg-gray-800 text-white flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm"
                 >
                   <Send className="h-4 w-4" />
                 </button>
@@ -358,11 +356,25 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         <div className="lg:col-span-2">
           <Tabs defaultValue="all" className="space-y-4">
-            <TabsList>
-              <TabsTrigger value="all">All Insights</TabsTrigger>
-              <TabsTrigger value="critical">Critical</TabsTrigger>
-              <TabsTrigger value="high">High Priority</TabsTrigger>
-            </TabsList>
+            <div className="flex items-center justify-between">
+              <TabsList>
+                <TabsTrigger value="all">All Insights</TabsTrigger>
+                <TabsTrigger value="critical">Critical</TabsTrigger>
+                <TabsTrigger value="high">High Priority</TabsTrigger>
+              </TabsList>
+              <Button
+                onClick={handleGenerate}
+                disabled={generating}
+                variant="outline"
+              >
+                {generating ? (
+                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
+                ) : (
+                  <Sparkles className="w-4 h-4 mr-2" />
+                )}
+                Regenerate
+              </Button>
+            </div>
             <TabsContent value="all" className="space-y-4">
               <div className="grid gap-6 md:grid-cols-2">
                 {displayWidgets.map((widget, idx) => renderWidget(widget, idx))}
@@ -382,9 +394,7 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
         </div>
 
         <div className="lg:col-span-1">
-          <div className="mt-14">
-            <AlertsWidget onInvestigate={handleAlertInvestigate} investigating={investigating} />
-          </div>
+          <AlertsWidget onInvestigate={handleAlertInvestigate} investigating={investigating} />
         </div>
       </div>
 

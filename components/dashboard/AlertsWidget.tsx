@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { AlertTriangle, Bell, BellOff, X, Search, Clock, TrendingUp } from "lucide-react";
 import { getActiveAlerts, dismissAlert, investigateAlert } from "@/lib/api";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface Alert {
   alert_id: number;
@@ -109,36 +110,42 @@ export default function AlertsWidget({ onInvestigate, investigating }: AlertsWid
 
   if (loading) {
     return (
-      <div className="bg-white rounded-3xl border border-gray-100 p-8">
-        <div className="flex items-center justify-center py-12">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-        </div>
-      </div>
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-center py-12">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   if (alerts.length === 0) {
     return (
-      <div className="bg-white rounded-3xl border border-gray-100 p-8">
-        <div className="flex items-center gap-3 mb-6">
-          <BellOff className="w-6 h-6 text-gray-400" />
-          <h2 className="text-2xl font-bold text-gray-900">Alerts</h2>
-        </div>
-        <div className="text-center py-12">
-          <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-            <BellOff className="w-8 h-8 text-green-600" />
+      <Card>
+        <CardHeader>
+          <div className="flex items-center gap-3">
+            <BellOff className="w-6 h-6 text-gray-400" />
+            <h2 className="text-2xl font-bold text-gray-900">Alerts</h2>
           </div>
-          <p className="text-gray-600 font-medium">All clear!</p>
-          <p className="text-sm text-gray-500 mt-2">No urgent items detected</p>
-        </div>
-      </div>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-12">
+            <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
+              <BellOff className="w-8 h-8 text-green-600" />
+            </div>
+            <p className="text-gray-600 font-medium">All clear!</p>
+            <p className="text-sm text-gray-500 mt-2">No urgent items detected</p>
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="bg-white rounded-3xl border border-gray-100 p-8">
-      {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+    <Card>
+      <CardHeader className="pb-3">
+        <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <div className="relative">
             <Bell className="w-6 h-6 text-red-600" />
@@ -154,10 +161,12 @@ export default function AlertsWidget({ onInvestigate, investigating }: AlertsWid
         >
           Refresh
         </button>
-      </div>
+        </div>
+      </CardHeader>
 
-      {/* Alerts List */}
-      <div className="space-y-4">
+      <CardContent>
+        {/* Alerts List */}
+        <div className="space-y-4">
         {alerts.map((alert) => (
           <div
             key={alert.alert_id}
@@ -228,14 +237,15 @@ export default function AlertsWidget({ onInvestigate, investigating }: AlertsWid
             </div>
           </div>
         ))}
-      </div>
+        </div>
 
-      {/* Footer Note */}
-      <div className="mt-6 pt-6 border-t border-gray-200">
-        <p className="text-xs text-gray-500 text-center">
-          Real-time intelligence • Updates every 30 seconds
-        </p>
-      </div>
-    </div>
+        {/* Footer Note */}
+        <div className="mt-6 pt-6 border-t border-gray-200">
+          <p className="text-xs text-gray-500 text-center">
+            Real-time intelligence • Updates every 30 seconds
+          </p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }
