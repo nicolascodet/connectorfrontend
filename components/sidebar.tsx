@@ -97,7 +97,7 @@ export default function Sidebar({ user }: SidebarProps) {
       <div className="px-5 pt-4 pb-0.5">
         <Link href="/">
           <div className="cursor-pointer hover:opacity-80 transition-opacity">
-            <img src="/highforce-logo-cropped.png" alt="HighForce" className="h-16 w-auto" style={{ objectFit: 'contain', objectPosition: 'left center' }} />
+            <img src="/highforce-logo-black.png" alt="HighForce" className="h-16 w-auto" style={{ objectFit: 'contain', objectPosition: 'left center' }} />
           </div>
         </Link>
       </div>
