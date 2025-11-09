@@ -306,7 +306,7 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-6">
-        <h1 className="text-3xl font-normal tracking-tight">
+        <h1 className="text-3xl font-normal tracking-tight" style={{ fontFamily: '"anthropicSans", "anthropicSans Fallback", system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif' }}>
           What are you working on today?
         </h1>
 
