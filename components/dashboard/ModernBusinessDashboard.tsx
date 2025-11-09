@@ -306,9 +306,14 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
   return (
     <div className="space-y-6">
       <div className="flex flex-col gap-6">
-        <h1 className="text-4xl tracking-tight" style={{ fontFamily: 'Libre Baskerville, serif', fontWeight: 360 }}>
-          What are you working on today?
-        </h1>
+        <div>
+          <h1 className="text-4xl font-semibold tracking-tight">
+            What are you working on today?
+          </h1>
+          <p className="text-sm text-muted-foreground font-light mt-2">
+            Search, analyze, and discover insights across your entire business
+          </p>
+        </div>
 
         {/* Search Bar */}
         <form onSubmit={onChatSubmit}>
