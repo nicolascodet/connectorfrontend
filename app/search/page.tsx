@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { sendChatMessage, getChatMessages } from "@/lib/api";
+import { sendChatMessage, getChatMessages, getSourceDocument } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
@@ -67,6 +67,8 @@ function SearchPageContent() {
   const [currentChatId, setCurrentChatId] = useState<string | null>(null);
   const [expandedSources, setExpandedSources] = useState<Set<number>>(new Set());
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
+  const [loadingDocument, setLoadingDocument] = useState(false);
   const [loadingTextIndex, setLoadingTextIndex] = useState(0);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -333,11 +335,24 @@ function SearchPageContent() {
                           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-1.5">
                             {message.sources.slice(0, expandedSources.has(idx) ? message.sources.length : 2).map((source, sourceIdx) => {
                               const isClickable = source.file_url || source.document_id;
-                              const handleClick = () => {
+                              const handleClick = async () => {
                                 if (source.file_url) {
                                   setPreviewUrl(source.file_url);
                                 } else if (source.document_id) {
-                                  console.log('Document ID:', source.document_id);
+                                  setLoadingDocument(true);
+                                  try {
+                                    const doc = await getSourceDocument(source.document_id);
+                                    setSelectedDocument(doc);
+                                  } catch (error) {
+                                    console.error('Failed to load document:', error);
+                                    toast({
+                                      variant: "destructive",
+                                      title: "Failed to load document",
+                                      description: "Could not fetch document content"
+                                    });
+                                  } finally {
+                                    setLoadingDocument(false);
+                                  }
                                 }
                               };
 
@@ -443,10 +458,10 @@ function SearchPageContent() {
         )}
       </div>
 
-      {/* Preview Modal */}
+      {/* File Preview Modal */}
       {previewUrl && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setPreviewUrl(null)}>
-          <div className="bg-white rounded-3xl w-full max-w-5xl max-h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+          <div className="bg-white rounded-3xl w-[70vw] h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
             <div className="flex items-center justify-between p-6 border-b border-gray-200">
               <h3 className="text-lg font-semibold text-gray-900">Document Preview</h3>
               <div className="flex items-center gap-2">
@@ -477,6 +492,86 @@ function SearchPageContent() {
                 />
               </div>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Document Content Modal (for emails/text documents) */}
+      {selectedDocument && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4" onClick={() => setSelectedDocument(null)}>
+          <div className="bg-white rounded-3xl w-[70vw] h-[90vh] flex flex-col" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+              <div className="flex-1 mr-4">
+                <h3 className="text-xl font-semibold text-gray-900 mb-1">{selectedDocument.title}</h3>
+                <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <span className="capitalize">{selectedDocument.source}</span>
+                  {selectedDocument.sender_name && (
+                    <span className="flex items-center gap-1">
+                      <Mail className="w-4 h-4" />
+                      {selectedDocument.sender_name}
+                    </span>
+                  )}
+                  {selectedDocument.created_at && (
+                    <span>{new Date(selectedDocument.created_at).toLocaleDateString()}</span>
+                  )}
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedDocument(null)}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 max-w-4xl mx-auto">
+                {selectedDocument.metadata?.subject && (
+                  <div className="mb-4 pb-4 border-b border-gray-200">
+                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">Subject</div>
+                    <div className="font-semibold text-gray-900">{selectedDocument.metadata.subject}</div>
+                  </div>
+                )}
+
+                {selectedDocument.sender_address && (
+                  <div className="mb-4 pb-4 border-b border-gray-200">
+                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">From</div>
+                    <div className="text-gray-900">
+                      {selectedDocument.sender_name ? (
+                        <span>{selectedDocument.sender_name} &lt;{selectedDocument.sender_address}&gt;</span>
+                      ) : (
+                        <span>{selectedDocument.sender_address}</span>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {selectedDocument.to_addresses && (
+                  <div className="mb-4 pb-4 border-b border-gray-200">
+                    <div className="text-xs text-gray-500 uppercase tracking-wide mb-1">To</div>
+                    <div className="text-gray-900">
+                      {Array.isArray(selectedDocument.to_addresses)
+                        ? selectedDocument.to_addresses.join(', ')
+                        : selectedDocument.to_addresses}
+                    </div>
+                  </div>
+                )}
+
+                <div className="prose prose-sm max-w-none">
+                  <SmartMarkdown content={selectedDocument.content || 'No content available'} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {loadingDocument && (
+        <div className="fixed inset-0 z-[60] bg-black bg-opacity-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl p-6 flex items-center gap-3">
+            <Loader2 className="w-5 h-5 animate-spin text-blue-600" />
+            <span className="text-gray-700 font-medium">Loading document...</span>
           </div>
         </div>
       )}
