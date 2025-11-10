@@ -335,7 +335,7 @@ export default function ModernBusinessDashboard({ user, onModalOpenChange, chatI
                       onChatSubmit(e);
                     }
                   }}
-                  placeholder="Search across emails, documents, financials, meetings, and your entire company knowledge..."
+                  placeholder="Ask me anything"
                   className="flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-gray-900 placeholder-gray-400 text-sm resize-none max-h-[400px] overflow-y-auto leading-tight"
                   rows={1}
                   style={{ height: '20px', lineHeight: '20px' }}
