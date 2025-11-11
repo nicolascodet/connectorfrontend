@@ -29,7 +29,7 @@ interface SidebarProps {
 export default function Sidebar({ user }: SidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { signOut } = useAuth();
+  const { signOut, isDemoMode } = useAuth();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
@@ -223,15 +223,18 @@ export default function Sidebar({ user }: SidebarProps) {
         </div>
 
         <div className="space-y-3">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/connections")}
-            className="w-full justify-start text-sm font-normal"
-            size="sm"
-          >
-            <Settings className="h-4 w-4 mr-2" />
-            Settings
-          </Button>
+          {/* Hide Settings in demo mode */}
+          {!isDemoMode && (
+            <Button
+              variant="ghost"
+              onClick={() => router.push("/connections")}
+              className="w-full justify-start text-sm font-normal"
+              size="sm"
+            >
+              <Settings className="h-4 w-4 mr-2" />
+              Settings
+            </Button>
+          )}
           <Button
             variant="ghost"
             onClick={() => signOut()}
