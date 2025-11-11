@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { X, ArrowRight, Loader2, Sparkles, BarChart3, Zap, Brain } from "lucide-react";
+import { ArrowRight, Loader2, Sparkles, BarChart3, Zap, Brain } from "lucide-react";
 
 interface DemoWelcomeTourProps {
   onComplete: () => void;
@@ -65,29 +65,15 @@ export default function DemoWelcomeTour({ onComplete }: DemoWelcomeTourProps) {
     }
   };
 
-  const handleSkip = () => {
-    // Mark as captured without email
-    localStorage.setItem("demo_email_captured", "skipped");
-    onComplete();
-  };
-
   if (step === 1) {
     return (
       <>
         {/* Dark overlay */}
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50" />
 
         {/* Welcome modal - centered */}
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-xl w-full pointer-events-auto relative">
-            {/* Close button */}
-            <button
-              onClick={handleSkip}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
             {/* Logo */}
             <div className="flex justify-center mb-6">
               <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center shadow-lg">
@@ -131,13 +117,6 @@ export default function DemoWelcomeTour({ onComplete }: DemoWelcomeTourProps) {
               Start Tour
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
-
-            <button
-              onClick={handleSkip}
-              className="block w-full text-center mt-4 text-sm text-gray-500 hover:text-gray-700"
-            >
-              Skip tour
-            </button>
           </div>
         </div>
       </>
@@ -148,19 +127,11 @@ export default function DemoWelcomeTour({ onComplete }: DemoWelcomeTourProps) {
     return (
       <>
         {/* Dark overlay */}
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50" />
 
         {/* How it works modal */}
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-xl w-full pointer-events-auto relative">
-            {/* Close button */}
-            <button
-              onClick={handleSkip}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-5 w-5" />
-            </button>
-
             {/* Icon */}
             <div className="flex justify-center mb-6">
               <div className="relative">
@@ -218,20 +189,12 @@ export default function DemoWelcomeTour({ onComplete }: DemoWelcomeTourProps) {
               <ArrowRight className="ml-2 h-5 w-5" />
             </Button>
 
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={() => setStep(1)}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                ← Back
-              </button>
-              <button
-                onClick={handleSkip}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Skip tour
-              </button>
-            </div>
+            <button
+              onClick={() => setStep(1)}
+              className="block w-full text-center mt-4 text-sm text-gray-500 hover:text-gray-700"
+            >
+              ← Back
+            </button>
           </div>
         </div>
       </>
@@ -242,7 +205,7 @@ export default function DemoWelcomeTour({ onComplete }: DemoWelcomeTourProps) {
     return (
       <>
         {/* Dark overlay */}
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50" />
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-[2px] z-50" />
 
         {/* Email capture modal */}
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
