@@ -145,64 +145,68 @@ export default function Sidebar({ user }: SidebarProps) {
           })}
         </nav>
 
-        {/* Chat History Section */}
-        <Separator className="my-4" />
-        <div className="pt-2 pl-4">
-          <Button
-            variant="ghost"
-            onClick={() => setHistoryExpanded(!historyExpanded)}
-            className="w-full justify-between text-sm font-normal"
-            size="sm"
-          >
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-4 w-4" />
-              <span>Recent Chats</span>
-            </div>
-            <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${historyExpanded ? '' : '-rotate-90'}`} />
-          </Button>
+        {/* Chat History Section - Hidden in demo mode */}
+        {!isDemoMode && (
+          <>
+            <Separator className="my-4" />
+            <div className="pt-2 pl-4">
+              <Button
+                variant="ghost"
+                onClick={() => setHistoryExpanded(!historyExpanded)}
+                className="w-full justify-between text-sm font-normal"
+                size="sm"
+              >
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="h-4 w-4" />
+                  <span>Recent Chats</span>
+                </div>
+                <ChevronDown className={`h-4 w-4 transition-transform duration-200 ${historyExpanded ? '' : '-rotate-90'}`} />
+              </Button>
 
-          {historyExpanded && (
-            <div className="mt-3 space-y-1">
-              {loadingHistory ? (
-                <div className="px-3 py-2 text-sm font-light text-muted-foreground">Loading...</div>
-              ) : chatHistory.length === 0 ? (
-                <div className="px-3 py-2 text-sm font-light text-muted-foreground">No chats yet</div>
-              ) : (
-                chatHistory.slice(0, 10).map((chat) => (
-                  <div
-                    key={chat.id}
-                    className="relative group/chat mb-1"
-                  >
-                    <Button
-                      variant="ghost"
-                      onClick={() => router.push(`/search?chat_id=${chat.id}`)}
-                      className="w-full justify-start h-auto py-2 px-3 text-sm font-normal"
-                      size="sm"
-                    >
-                      <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
-                      <div className="flex-1 min-w-0 text-left pr-6">
-                        <p className="text-sm font-normal truncate">
-                          {chat.title || "Untitled Chat"}
-                        </p>
-                        <p className="text-xs text-muted-foreground font-light mt-0.5">
-                          {formatTimestamp(chat.created_at)}
-                        </p>
+              {historyExpanded && (
+                <div className="mt-3 space-y-1">
+                  {loadingHistory ? (
+                    <div className="px-3 py-2 text-sm font-light text-muted-foreground">Loading...</div>
+                  ) : chatHistory.length === 0 ? (
+                    <div className="px-3 py-2 text-sm font-light text-muted-foreground">No chats yet</div>
+                  ) : (
+                    chatHistory.slice(0, 10).map((chat) => (
+                      <div
+                        key={chat.id}
+                        className="relative group/chat mb-1"
+                      >
+                        <Button
+                          variant="ghost"
+                          onClick={() => router.push(`/search?chat_id=${chat.id}`)}
+                          className="w-full justify-start h-auto py-2 px-3 text-sm font-normal"
+                          size="sm"
+                        >
+                          <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
+                          <div className="flex-1 min-w-0 text-left pr-6">
+                            <p className="text-sm font-normal truncate">
+                              {chat.title || "Untitled Chat"}
+                            </p>
+                            <p className="text-xs text-muted-foreground font-light mt-0.5">
+                              {formatTimestamp(chat.created_at)}
+                            </p>
+                          </div>
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={(e) => handleDeleteChat(chat.id, e)}
+                          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 h-6 w-6 hover:bg-destructive hover:text-destructive-foreground"
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
                       </div>
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={(e) => handleDeleteChat(chat.id, e)}
-                      className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 h-6 w-6 hover:bg-destructive hover:text-destructive-foreground"
-                    >
-                      <Trash2 className="h-3 w-3" />
-                    </Button>
-                  </div>
-                ))
+                    ))
+                  )}
+                </div>
               )}
             </div>
-          )}
-        </div>
+          </>
+        )}
       </ScrollArea>
 
       {/* User Section */}

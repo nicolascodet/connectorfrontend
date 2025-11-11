@@ -247,13 +247,6 @@ export default function DemoWelcomeTour({ onComplete }: DemoWelcomeTourProps) {
         {/* Email capture modal */}
         <div className="fixed inset-0 z-50 flex items-center justify-center p-6 pointer-events-none">
           <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full pointer-events-auto relative">
-            {/* Close button */}
-            <button
-              onClick={handleSkip}
-              className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
-            >
-              <X className="h-5 w-5" />
-            </button>
 
             {/* Icon */}
             <div className="flex justify-center mb-6">
@@ -316,21 +309,6 @@ export default function DemoWelcomeTour({ onComplete }: DemoWelcomeTourProps) {
             <p className="text-xs text-center text-gray-500 mt-4">
               We'll never spam you. This is just to show you what HighForce can do.
             </p>
-
-            <div className="flex justify-between mt-4">
-              <button
-                onClick={() => setStep(2)}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                ← Back
-              </button>
-              <button
-                onClick={handleSkip}
-                className="text-sm text-gray-500 hover:text-gray-700"
-              >
-                Skip
-              </button>
-            </div>
           </div>
         </div>
       </>
