@@ -110,7 +110,7 @@ function SearchPageContent() {
     if (loadingChat) {
       const interval = setInterval(() => {
         setLoadingTextIndex((prev) => (prev + 1) % loadingTexts.length);
-      }, 800);
+      }, 5000);
       return () => clearInterval(interval);
     } else {
       setLoadingTextIndex(0);
