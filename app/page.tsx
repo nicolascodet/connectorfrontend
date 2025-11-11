@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
 import { Loader2, Send } from "lucide-react";
 import ModernBusinessDashboard from "@/components/dashboard/ModernBusinessDashboard";
+import DemoWelcomeFlow from "@/components/demo/DemoWelcomeFlow";
 
 export default function DashboardPage() {
   const { user, loading, isDemoMode } = useAuth();
@@ -13,6 +14,17 @@ export default function DashboardPage() {
   const [chatInput, setChatInput] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [showDemoWelcome, setShowDemoWelcome] = useState(false);
+
+  // Check if user needs to see demo welcome flow
+  useEffect(() => {
+    if (isDemoMode && !loading) {
+      const emailCaptured = localStorage.getItem("demo_email_captured");
+      if (!emailCaptured) {
+        setShowDemoWelcome(true);
+      }
+    }
+  }, [isDemoMode, loading]);
 
   // Debug: Log demo mode status
   useEffect(() => {
@@ -74,6 +86,11 @@ export default function DashboardPage() {
   }
 
   if (!user) return null;
+
+  // Show demo welcome flow if needed
+  if (showDemoWelcome) {
+    return <DemoWelcomeFlow onComplete={() => setShowDemoWelcome(false)} />;
+  }
 
   return (
     <div className="flex h-screen" style={{ backgroundColor: '#F9F9F9' }}>
