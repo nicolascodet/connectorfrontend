@@ -41,6 +41,8 @@ export default function TeamPage() {
   }, [user, router]);
 
   const fetchUsers = async () => {
+    if (!user) return; // Early return if user is not authenticated
+
     try {
       setLoading(true);
       setError('');
