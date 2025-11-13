@@ -126,6 +126,17 @@ export async function fetchStatus(skipCache: boolean = false): Promise<{
   return withCache("connection-status", () => apiGet("/status"), 10); // Cache for 10 seconds (reduced from 30)
 }
 
+// Initial sync (one-time, 1-year backfill) - locks manual sync after use
+export async function triggerInitialSync(provider: "outlook" | "gmail" | "drive" | "quickbooks"): Promise<any> {
+  const result = await apiPost(`/sync/initial/${provider}`);
+  cache.invalidate("connection-status");
+  if (provider === "quickbooks") {
+    cache.invalidatePattern("quickbooks-");
+  }
+  return result;
+}
+
+// Legacy manual sync endpoints (still available for testing)
 export async function syncOutlookOnce(): Promise<any> {
   const result = await apiGet("/sync/once");
   cache.invalidate("connection-status");

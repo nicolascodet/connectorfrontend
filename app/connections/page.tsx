@@ -3,10 +3,11 @@
 import { useEffect, useState, useMemo } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
-import { fetchStatus, startConnect, syncOutlookOnce, syncGmailOnce, syncGoogleDriveOnce, syncQuickBooksOnce } from "@/lib/api";
+import { fetchStatus, startConnect, triggerInitialSync } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import Sidebar from "@/components/sidebar";
-import { Loader2, Mail, HardDrive, DollarSign, RefreshCw, Check, User, Bell, Shield, Trash2 } from "lucide-react";
+import InitialSyncModal from "@/components/connections/InitialSyncModal";
+import { Loader2, Mail, HardDrive, DollarSign, RefreshCw, Check, User, Bell, Shield, Trash2, CheckCircle2 } from "lucide-react";
 
 interface ConnectionStatus {
   tenant_id: string;
@@ -15,21 +16,29 @@ interface ConnectionStatus {
       configured: boolean;
       connected: boolean;
       connection_id: string | null;
+      can_manual_sync?: boolean;
+      initial_sync_completed?: boolean;
     };
     gmail?: {
       configured: boolean;
       connected: boolean;
       connection_id: string | null;
+      can_manual_sync?: boolean;
+      initial_sync_completed?: boolean;
     };
     google_drive?: {
       configured: boolean;
       connected: boolean;
       connection_id: string | null;
+      can_manual_sync?: boolean;
+      initial_sync_completed?: boolean;
     };
     quickbooks?: {
       configured: boolean;
       connected: boolean;
       connection_id: string | null;
+      can_manual_sync?: boolean;
+      initial_sync_completed?: boolean;
     };
   };
 }
@@ -40,6 +49,7 @@ export default function ConnectionsPage() {
   const [status, setStatus] = useState<ConnectionStatus | null>(null);
   const [connecting, setConnecting] = useState<Record<string, boolean>>({});
   const [syncing, setSyncing] = useState<Record<string, boolean>>({});
+  const [syncModalProvider, setSyncModalProvider] = useState<string | null>(null);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -123,33 +133,34 @@ export default function ConnectionsPage() {
     }
   };
 
-  const handleSync = async (provider: "outlook" | "gmail" | "google_drive" | "quickbooks") => {
-    setSyncing({ ...syncing, [provider]: true });
-    try {
-      let result;
-      if (provider === "outlook") {
-        result = await syncOutlookOnce();
-      } else if (provider === "gmail") {
-        result = await syncGmailOnce();
-      } else if (provider === "google_drive") {
-        result = await syncGoogleDriveOnce();
-      } else if (provider === "quickbooks") {
-        result = await syncQuickBooksOnce();
-      }
+  const handleSyncClick = (provider: string) => {
+    setSyncModalProvider(provider);
+  };
 
+  const handleSyncConfirm = async () => {
+    if (!syncModalProvider) return;
+
+    const provider = syncModalProvider as "outlook" | "gmail" | "drive" | "quickbooks";
+    const syncKey = provider === "drive" ? "google_drive" : provider;
+
+    setSyncModalProvider(null);
+    setSyncing({ ...syncing, [syncKey]: true });
+
+    try {
+      const result = await triggerInitialSync(provider);
       toast({
-        title: "Sync Complete",
-        description: result?.message || "Data synced successfully",
+        title: "Sync Started",
+        description: result.message || "Historical sync has been started. You'll receive an email when complete (4-8 hours).",
       });
       loadConnectionStatus();
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Sync Failed",
-        description: error instanceof Error ? error.message : "Failed to sync",
+        description: error instanceof Error ? error.message : "Failed to start sync",
       });
     } finally {
-      setSyncing({ ...syncing, [provider]: false });
+      setSyncing({ ...syncing, [syncKey]: false });
     }
   };
 
@@ -173,7 +184,10 @@ export default function ConnectionsPage() {
       gradient: "from-blue-500 to-blue-600",
       provider: "microsoft" as const,
       syncKey: "outlook" as const,
+      syncProvider: "outlook" as const,
       connected: status?.providers?.outlook?.connected || false,
+      canManualSync: status?.providers?.outlook?.can_manual_sync ?? true,
+      initialSyncCompleted: status?.providers?.outlook?.initial_sync_completed ?? false,
     },
     {
       id: "gmail",
@@ -183,7 +197,10 @@ export default function ConnectionsPage() {
       gradient: "from-red-500 to-pink-500",
       provider: "gmail" as const,
       syncKey: "gmail" as const,
+      syncProvider: "gmail" as const,
       connected: status?.providers?.gmail?.connected || false,
+      canManualSync: status?.providers?.gmail?.can_manual_sync ?? true,
+      initialSyncCompleted: status?.providers?.gmail?.initial_sync_completed ?? false,
     },
     {
       id: "google-drive",
@@ -193,7 +210,10 @@ export default function ConnectionsPage() {
       gradient: "from-green-500 to-emerald-500",
       provider: "google-drive" as const,
       syncKey: "google_drive" as const,
+      syncProvider: "drive" as const,
       connected: status?.providers?.google_drive?.connected || false,
+      canManualSync: status?.providers?.google_drive?.can_manual_sync ?? true,
+      initialSyncCompleted: status?.providers?.google_drive?.initial_sync_completed ?? false,
     },
     {
       id: "quickbooks",
@@ -203,7 +223,10 @@ export default function ConnectionsPage() {
       gradient: "from-green-600 to-teal-600",
       provider: "quickbooks" as const,
       syncKey: "quickbooks" as const,
+      syncProvider: "quickbooks" as const,
       connected: status?.providers?.quickbooks?.connected || false,
+      canManualSync: status?.providers?.quickbooks?.can_manual_sync ?? true,
+      initialSyncCompleted: status?.providers?.quickbooks?.initial_sync_completed ?? false,
     },
   ], [status]);
 
@@ -267,24 +290,29 @@ export default function ConnectionsPage() {
                           `Connect ${service.name}`
                         )}
                       </button>
-                    ) : (
+                    ) : service.canManualSync ? (
                       <button
-                        onClick={() => handleSync(service.syncKey)}
+                        onClick={() => handleSyncClick(service.syncProvider)}
                         disabled={isSyncing}
                         className="w-full py-3 px-4 rounded-xl bg-gray-100 hover:bg-gray-200 text-gray-900 font-normal transition-all disabled:opacity-50"
                       >
                         {isSyncing ? (
                           <div className="flex items-center justify-center gap-2">
                             <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>Syncing...</span>
+                            <span>Starting Sync...</span>
                           </div>
                         ) : (
                           <div className="flex items-center justify-center gap-2">
                             <RefreshCw className="h-4 w-4" />
-                            <span>Sync Now</span>
+                            <span>Sync Now (1 Year - One Time)</span>
                           </div>
                         )}
                       </button>
+                    ) : (
+                      <div className="flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-green-50 text-green-700">
+                        <CheckCircle2 className="h-4 w-4" />
+                        <span className="text-sm font-normal">Initial Sync Complete • Auto-Sync Enabled</span>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -397,6 +425,15 @@ export default function ConnectionsPage() {
           </div>
         </div>
       </div>
+
+      {/* Sync Confirmation Modal */}
+      {syncModalProvider && (
+        <InitialSyncModal
+          providerName={services.find(s => s.syncProvider === syncModalProvider)?.name || syncModalProvider}
+          onConfirm={handleSyncConfirm}
+          onCancel={() => setSyncModalProvider(null)}
+        />
+      )}
     </div>
   );
 }
