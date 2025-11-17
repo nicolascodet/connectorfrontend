@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useRouter } from "next/navigation";
 import { fetchStatus, startConnect, triggerInitialSync } from "@/lib/api";
@@ -174,8 +174,8 @@ export default function ConnectionsPage() {
 
   if (!user) return null;
 
-  // Build services array inside render so it updates when status changes
-  const services = useMemo(() => [
+  // Build services array - recalculates on each render but that's fine for this small array
+  const services = [
     {
       id: "outlook",
       name: "Outlook",
@@ -228,7 +228,7 @@ export default function ConnectionsPage() {
       canManualSync: status?.providers?.quickbooks?.can_manual_sync ?? true,
       initialSyncCompleted: status?.providers?.quickbooks?.initial_sync_completed ?? false,
     },
-  ], [status]);
+  ];
 
   return (
     <div className="flex h-screen" style={{ backgroundColor: '#F9F9F9' }}>
