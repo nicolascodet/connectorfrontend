@@ -18,9 +18,11 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
+      <body className={inter.className} style={{ backgroundColor: '#24374A', padding: '12px' }}>
         <AuthProvider>
-          {children}
+          <div className="rounded-2xl overflow-hidden" style={{ backgroundColor: '#ffffff', minHeight: 'calc(100vh - 24px)' }}>
+            {children}
+          </div>
           <Toaster />
         </AuthProvider>
       </body>

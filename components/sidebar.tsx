@@ -96,7 +96,7 @@ export default function Sidebar({ user }: SidebarProps) {
   };
 
   return (
-    <div className="w-64 h-screen border-r rounded-r-2xl shadow-xl flex flex-col" style={{ backgroundColor: '#24374A' }}>
+    <div className="w-64 h-full border-r flex flex-col" style={{ backgroundColor: '#24374A', borderColor: '#1a2635' }}>
       {/* Logo */}
       <div className="px-5 pt-4 pb-0.5">
         <Link href="/">
