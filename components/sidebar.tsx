@@ -96,12 +96,12 @@ export default function Sidebar({ user }: SidebarProps) {
   };
 
   return (
-    <div className="w-64 h-screen bg-background border-r rounded-r-2xl shadow-xl flex flex-col">
+    <div className="w-64 h-screen border-r rounded-r-2xl shadow-xl flex flex-col" style={{ backgroundColor: '#24374A' }}>
       {/* Logo */}
       <div className="px-5 pt-4 pb-0.5">
         <Link href="/">
           <div className="cursor-pointer hover:opacity-80 transition-opacity">
-            <img src="/highforce-logo-cropped.png" alt="HighForce" className="h-16 w-auto" style={{ objectFit: 'contain', objectPosition: 'left center' }} />
+            <img src="/highforce-logo-cropped.png" alt="HighForce" className="h-16 w-auto brightness-0 invert" style={{ objectFit: 'contain', objectPosition: 'left center' }} />
           </div>
         </Link>
       </div>
@@ -112,12 +112,16 @@ export default function Sidebar({ user }: SidebarProps) {
           {/* Search */}
           <div className="relative pl-4 mb-3">
             {pathname === "/search" && (
-              <div className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-black rounded-r-full z-10" style={{ left: '2px' }} />
+              <div className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full z-10" style={{ left: '2px' }} />
             )}
             <Button
               onClick={() => router.push("/search")}
               variant={pathname === "/search" ? "secondary" : "ghost"}
-              className="w-full justify-start text-sm font-normal"
+              className={`w-full justify-start text-sm font-normal ${
+                pathname === "/search"
+                  ? "bg-white/20 text-white hover:bg-white/30"
+                  : "text-white/80 hover:bg-white/10 hover:text-white"
+              }`}
               size="sm"
             >
               <SearchIcon className="h-4 w-4 mr-2" />
@@ -133,11 +137,15 @@ export default function Sidebar({ user }: SidebarProps) {
               <Link key={item.name} href={item.href}>
                 <div className="relative pl-4 mb-3">
                   {isActive && (
-                    <div className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-black rounded-r-full z-10" style={{ left: '2px' }} />
+                    <div className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full z-10" style={{ left: '2px' }} />
                   )}
                   <Button
                     variant={isActive ? "secondary" : "ghost"}
-                    className="w-full justify-start text-sm font-normal"
+                    className={`w-full justify-start text-sm font-normal ${
+                      isActive
+                        ? "bg-white/20 text-white hover:bg-white/30"
+                        : "text-white/80 hover:bg-white/10 hover:text-white"
+                    }`}
                     size="sm"
                   >
                     <Icon className="h-4 w-4 mr-2" />
@@ -152,12 +160,12 @@ export default function Sidebar({ user }: SidebarProps) {
         {/* Chat History Section - Hidden in demo mode */}
         {!isDemoMode && (
           <>
-            <Separator className="my-4" />
+            <Separator className="my-4 bg-white/20" />
             <div className="pt-2 pl-4">
               <Button
                 variant="ghost"
                 onClick={() => setHistoryExpanded(!historyExpanded)}
-                className="w-full justify-between text-sm font-normal"
+                className="w-full justify-between text-sm font-normal text-white/80 hover:bg-white/10 hover:text-white"
                 size="sm"
               >
                 <div className="flex items-center gap-2">
@@ -170,9 +178,9 @@ export default function Sidebar({ user }: SidebarProps) {
               {historyExpanded && (
                 <div className="mt-3 space-y-1">
                   {loadingHistory ? (
-                    <div className="px-3 py-2 text-sm font-light text-muted-foreground">Loading...</div>
+                    <div className="px-3 py-2 text-sm font-light text-white/60">Loading...</div>
                   ) : chatHistory.length === 0 ? (
-                    <div className="px-3 py-2 text-sm font-light text-muted-foreground">No chats yet</div>
+                    <div className="px-3 py-2 text-sm font-light text-white/60">No chats yet</div>
                   ) : (
                     chatHistory.slice(0, 10).map((chat) => (
                       <div
@@ -182,7 +190,7 @@ export default function Sidebar({ user }: SidebarProps) {
                         <Button
                           variant="ghost"
                           onClick={() => router.push(`/search?chat_id=${chat.id}`)}
-                          className="w-full justify-start h-auto py-2 px-3 text-sm font-normal"
+                          className="w-full justify-start h-auto py-2 px-3 text-sm font-normal text-white/80 hover:bg-white/10 hover:text-white"
                           size="sm"
                         >
                           <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
@@ -190,7 +198,7 @@ export default function Sidebar({ user }: SidebarProps) {
                             <p className="text-sm font-normal truncate">
                               {chat.title || "Untitled Chat"}
                             </p>
-                            <p className="text-xs text-muted-foreground font-light mt-0.5">
+                            <p className="text-xs text-white/60 font-light mt-0.5">
                               {formatTimestamp(chat.created_at)}
                             </p>
                           </div>
@@ -199,7 +207,7 @@ export default function Sidebar({ user }: SidebarProps) {
                           variant="ghost"
                           size="icon"
                           onClick={(e) => handleDeleteChat(chat.id, e)}
-                          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 h-6 w-6 hover:bg-destructive hover:text-destructive-foreground"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 opacity-0 group-hover/chat:opacity-100 h-6 w-6 text-white hover:bg-red-500 hover:text-white"
                         >
                           <Trash2 className="h-3 w-3" />
                         </Button>
@@ -214,19 +222,19 @@ export default function Sidebar({ user }: SidebarProps) {
       </ScrollArea>
 
       {/* User Section */}
-      <Separator />
+      <Separator className="bg-white/20" />
       <div className="p-4 pl-4">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground text-xs font-medium">
+          <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+            <span className="text-white text-xs font-medium">
               {user?.email?.[0]?.toUpperCase() || "U"}
             </span>
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-light truncate">
+            <p className="text-sm font-light truncate text-white">
               {user?.email?.split("@")[0] || "User"}
             </p>
-            <p className="text-xs text-muted-foreground font-light">Admin</p>
+            <p className="text-xs text-white/60 font-light">Admin</p>
           </div>
         </div>
 
@@ -236,7 +244,7 @@ export default function Sidebar({ user }: SidebarProps) {
             <Button
               variant="ghost"
               onClick={() => router.push("/connections")}
-              className="w-full justify-start text-sm font-normal"
+              className="w-full justify-start text-sm font-normal text-white/80 hover:bg-white/10 hover:text-white"
               size="sm"
             >
               <Settings className="h-4 w-4 mr-2" />
@@ -246,7 +254,7 @@ export default function Sidebar({ user }: SidebarProps) {
           <Button
             variant="ghost"
             onClick={() => signOut()}
-            className="w-full justify-start text-sm font-normal"
+            className="w-full justify-start text-sm font-normal text-white/80 hover:bg-white/10 hover:text-white"
             size="sm"
           >
             <LogOut className="h-4 w-4 mr-2" />

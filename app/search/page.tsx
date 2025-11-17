@@ -211,7 +211,7 @@ function SearchPageContent() {
   if (!user) return null;
 
   return (
-    <div className="flex h-screen" style={{ backgroundColor: '#F9F9F9' }}>
+    <div className="flex h-screen bg-white">
       <Sidebar user={user} />
 
       {/* Main Content */}

@@ -231,7 +231,7 @@ export default function ConnectionsPage() {
   ];
 
   return (
-    <div className="flex h-screen" style={{ backgroundColor: '#F9F9F9' }}>
+    <div className="flex h-screen bg-white">
       <Sidebar user={user} />
 
       <div className="flex-1 overflow-y-auto">

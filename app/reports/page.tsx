@@ -152,7 +152,7 @@ export default function ReportsPage() {
   });
 
   return (
-    <div className="flex h-screen" style={{ backgroundColor: '#F9F9F9' }}>
+    <div className="flex h-screen bg-white">
       <Sidebar user={user} />
       <div className="flex-1 overflow-y-auto p-8">
         <div className="max-w-7xl mx-auto">
