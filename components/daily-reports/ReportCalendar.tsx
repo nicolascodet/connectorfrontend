@@ -68,7 +68,18 @@ export default function ReportCalendar({
 
   const hasReport = (day: number): boolean => {
     const dateString = formatDateString(day);
-    return datesWithReports.includes(dateString);
+    const hasIt = datesWithReports.includes(dateString);
+
+    // Debug logging (development only)
+    if (process.env.NODE_ENV === 'development' && day === 28) {
+      console.log('Day 28 check:', {
+        dateString,
+        datesWithReports,
+        hasIt
+      });
+    }
+
+    return hasIt;
   };
 
   const isToday = (day: number): boolean => {

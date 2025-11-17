@@ -90,13 +90,26 @@ export default function DailyReportsPage() {
       setLoading(true);
       const result = await getLatestDailyReports(30);
 
+      if (process.env.NODE_ENV === 'development') {
+        console.log('API Response:', result);
+      }
+
       // Extract unique dates from reports
       const dates = [...new Set(result.reports?.map((r: any) => r.report_date as string) || [])] as string[];
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Extracted dates:', dates);
+      }
+
       setReportsIndex(dates);
 
       // Default to most recent date
       if (dates.length > 0) {
         setSelectedDate(dates[0]);
+
+        // Set calendar to the month of the most recent report
+        const mostRecentDate = new Date(dates[0] + 'T00:00:00');
+        setCurrentMonth(new Date(mostRecentDate.getFullYear(), mostRecentDate.getMonth(), 1));
       }
     } catch (error) {
       console.error("Failed to load reports index:", error);
