@@ -79,7 +79,7 @@ export default function ConnectionsPage() {
   };
 
   const handleConnect = async (provider: "microsoft" | "gmail" | "google-drive" | "quickbooks") => {
-    setConnecting({ ...connecting, [provider]: true });
+    setConnecting(prev => ({ ...prev, [provider]: true }));
     try {
       const result = await startConnect(provider);
       const popup = window.open(result.auth_url, "oauth", "width=600,height=700");
@@ -87,7 +87,7 @@ export default function ConnectionsPage() {
       const checkInterval = setInterval(() => {
         if (!popup || popup.closed) {
           clearInterval(checkInterval);
-          setConnecting({ ...connecting, [provider]: false });
+          setConnecting(prev => ({ ...prev, [provider]: false }));
           loadConnectionStatus();
         }
       }, 500);
@@ -97,7 +97,7 @@ export default function ConnectionsPage() {
 
         if (event.data.type === "oauth-success") {
           clearInterval(checkInterval);
-          setConnecting({ ...connecting, [provider]: false });
+          setConnecting(prev => ({ ...prev, [provider]: false }));
           toast({
             title: "Connected!",
             description: `${provider} connected successfully`,
@@ -106,7 +106,7 @@ export default function ConnectionsPage() {
           window.removeEventListener("message", messageHandler);
         } else if (event.data.type === "oauth-error") {
           clearInterval(checkInterval);
-          setConnecting({ ...connecting, [provider]: false });
+          setConnecting(prev => ({ ...prev, [provider]: false }));
           toast({
             variant: "destructive",
             title: "Connection Failed",
@@ -121,10 +121,10 @@ export default function ConnectionsPage() {
       setTimeout(() => {
         clearInterval(checkInterval);
         window.removeEventListener("message", messageHandler);
-        setConnecting({ ...connecting, [provider]: false });
+        setConnecting(prev => ({ ...prev, [provider]: false }));
       }, 300000);
     } catch (error) {
-      setConnecting({ ...connecting, [provider]: false });
+      setConnecting(prev => ({ ...prev, [provider]: false }));
       toast({
         variant: "destructive",
         title: "Error",
@@ -144,7 +144,7 @@ export default function ConnectionsPage() {
     const syncKey = provider === "drive" ? "google_drive" : provider;
 
     setSyncModalProvider(null);
-    setSyncing({ ...syncing, [syncKey]: true });
+    setSyncing(prev => ({ ...prev, [syncKey]: true }));
 
     try {
       const result = await triggerInitialSync(provider);
@@ -160,7 +160,7 @@ export default function ConnectionsPage() {
         description: error instanceof Error ? error.message : "Failed to start sync",
       });
     } finally {
-      setSyncing({ ...syncing, [syncKey]: false });
+      setSyncing(prev => ({ ...prev, [syncKey]: false }));
     }
   };
 
