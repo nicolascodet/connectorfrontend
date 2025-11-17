@@ -576,3 +576,23 @@ export async function searchReports(query: string, limit?: number): Promise<any>
 export async function getReportStats(): Promise<any> {
   return apiGet("/api/v1/reports/stats");
 }
+
+// ============================================================================
+// Daily Reports API
+// ============================================================================
+
+export async function generateDailyReport(reportType: string, reportDate?: string): Promise<any> {
+  return apiPost("/api/v1/reports/daily/generate", {
+    report_type: reportType,
+    report_date: reportDate
+  });
+}
+
+export async function getDailyReport(reportDate: string, reportType: string): Promise<any> {
+  const params: Record<string, string> = { report_type: reportType };
+  return apiGet(`/api/v1/reports/daily/${reportDate}`, params);
+}
+
+export async function getLatestDailyReports(limit: number = 7): Promise<any> {
+  return apiGet("/api/v1/reports/daily/latest", { limit: limit.toString() });
+}

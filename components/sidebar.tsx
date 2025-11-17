@@ -15,6 +15,7 @@ import {
   Trash2,
   FileText,
   Users,
+  Calendar,
 } from "lucide-react";
 import { useAuth } from "@/contexts/auth-context";
 import { getChatHistory, deleteChat, type ChatHistoryItem } from "@/lib/api";
@@ -40,6 +41,7 @@ export default function Sidebar({ user }: SidebarProps) {
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
     { name: "Reports", href: "/reports", icon: FileText },
     { name: "Team", href: "/team", icon: Users },
+    { name: "Daily Reports", href: "/daily-reports", icon: Calendar },
   ];
 
   // Load chat history only once when user is available
