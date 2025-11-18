@@ -136,7 +136,7 @@ export default function Sidebar({ user }: SidebarProps) {
               variant={pathname === "/search" ? "secondary" : "ghost"}
               className={`w-full justify-start text-sm font-normal ${
                 pathname === "/search"
-                  ? "bg-white/20 text-white hover:bg-white/30"
+                  ? "bg-white/20 text-white hover:bg-white/30 rounded-l-md rounded-r-md"
                   : "text-white/80 hover:bg-white/10 hover:text-white"
               }`}
               size="sm"
@@ -160,7 +160,7 @@ export default function Sidebar({ user }: SidebarProps) {
                     variant={isActive ? "secondary" : "ghost"}
                     className={`w-full justify-start text-sm font-normal ${
                       isActive
-                        ? "bg-white/20 text-white hover:bg-white/30"
+                        ? "bg-white/20 text-white hover:bg-white/30 rounded-l-md rounded-r-md"
                         : "text-white/80 hover:bg-white/10 hover:text-white"
                     }`}
                     size="sm"

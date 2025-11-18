@@ -37,9 +37,9 @@ function BodyContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isLoginPage = pathname === "/login";
 
-  const bodyStyle = isLoginPage
+  const bodyStyle: React.CSSProperties = isLoginPage
     ? {}
-    : { backgroundColor: '#30465C', padding: '12px 12px 0 0', margin: 0, height: '100vh', overflow: 'hidden', boxSizing: 'border-box' };
+    : { backgroundColor: '#30465C', padding: '12px 12px 0 0', margin: 0, height: '100vh', overflow: 'hidden', boxSizing: 'border-box' as const };
 
   return (
     <body className={inter.className} style={bodyStyle}>
