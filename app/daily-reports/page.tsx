@@ -112,11 +112,15 @@ export default function DailyReportsPage() {
       ]);
 
       if (clientResult.status === "fulfilled" && clientResult.value.success) {
-        setClientReport(clientResult.value.report);
+        // Map the API response to our component structure
+        const apiReport = clientResult.value.report;
+        setClientReport(apiReport.full_report);
       }
 
       if (opsResult.status === "fulfilled" && opsResult.value.success) {
-        setOpsReport(opsResult.value.report);
+        // Map the API response to our component structure
+        const apiReport = opsResult.value.report;
+        setOpsReport(apiReport.full_report);
       }
     } catch (error) {
       console.error("Failed to load reports for date:", error);
@@ -195,10 +199,6 @@ export default function DailyReportsPage() {
                   captionLayout="dropdown"
                   modifiers={modifiers}
                   modifiersStyles={modifiersStyles}
-                  disabled={(date) => {
-                    const dateStr = formatDateToString(date);
-                    return !reportsIndex.includes(dateStr);
-                  }}
                 />
               </PopoverContent>
             </Popover>
