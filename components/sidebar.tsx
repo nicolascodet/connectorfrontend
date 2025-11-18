@@ -36,6 +36,12 @@ export default function Sidebar({ user }: SidebarProps) {
   const [chatHistory, setChatHistory] = useState<ChatHistoryItem[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [historyExpanded, setHistoryExpanded] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  // Prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const navigation = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -96,7 +102,18 @@ export default function Sidebar({ user }: SidebarProps) {
   };
 
   return (
-    <div className="w-64 h-full border-r flex flex-col" style={{ backgroundColor: '#24374A', borderColor: '#1a2635' }}>
+    <div className="w-64 border-r flex flex-col relative" style={{ backgroundColor: '#24374A', borderColor: '#1a2635', borderBottomRightRadius: '16px', height: '100%' }}>
+      {/* Top-right convex curve - creates "r" shape using radial gradient */}
+      <div
+        className="absolute top-0"
+        style={{
+          right: '-16px',
+          width: '16px',
+          height: '16px',
+          background: 'radial-gradient(circle at bottom right, transparent 15.5px, #24374A 16.5px)',
+          zIndex: 10
+        }}
+      ></div>
       {/* Logo */}
       <div className="px-5 pt-4 pb-0.5">
         <Link href="/">
@@ -112,7 +129,7 @@ export default function Sidebar({ user }: SidebarProps) {
           {/* Search */}
           <div className="relative pl-4 mb-3">
             {pathname === "/search" && (
-              <div className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full z-10" style={{ left: '2px' }} />
+              <div className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full z-10" style={{ left: 0 }} />
             )}
             <Button
               onClick={() => router.push("/search")}
@@ -137,7 +154,7 @@ export default function Sidebar({ user }: SidebarProps) {
               <Link key={item.name} href={item.href}>
                 <div className="relative pl-4 mb-3">
                   {isActive && (
-                    <div className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full z-10" style={{ left: '2px' }} />
+                    <div className="absolute top-1/2 -translate-y-1/2 w-1 h-6 bg-white rounded-r-full z-10" style={{ left: 0 }} />
                   )}
                   <Button
                     variant={isActive ? "secondary" : "ghost"}
@@ -160,7 +177,7 @@ export default function Sidebar({ user }: SidebarProps) {
         {/* Chat History Section - Hidden in demo mode */}
         {!isDemoMode && (
           <>
-            <Separator className="my-4 bg-white/20" />
+            <Separator className="my-4 mx-4 bg-white/20" />
             <div className="pt-2 pl-4">
               <Button
                 variant="ghost"
@@ -222,7 +239,6 @@ export default function Sidebar({ user }: SidebarProps) {
       </ScrollArea>
 
       {/* User Section */}
-      <Separator className="bg-white/20" />
       <div className="p-4 pl-4">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
@@ -232,7 +248,7 @@ export default function Sidebar({ user }: SidebarProps) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-light truncate text-white">
-              {user?.email?.split("@")[0] || "User"}
+              {mounted && user?.email ? user.email.split("@")[0] : "Loading..."}
             </p>
             <p className="text-xs text-white/60 font-light">Admin</p>
           </div>

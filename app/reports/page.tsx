@@ -152,7 +152,7 @@ export default function ReportsPage() {
   });
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-full">
       <Sidebar user={user} />
       <div className="flex-1 overflow-y-auto p-8">
         <div className="max-w-7xl mx-auto">

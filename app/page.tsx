@@ -88,7 +88,7 @@ export default function DashboardPage() {
   if (!user) return null;
 
   return (
-    <div className="flex h-screen bg-white">
+    <div className="flex h-full">
       <Sidebar user={user} />
 
       <div className="flex-1 overflow-y-auto">
