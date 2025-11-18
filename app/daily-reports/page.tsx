@@ -102,6 +102,8 @@ export default function DailyReportsPage() {
       setOpsReport(null);
 
       console.log('🔍 Loading all reports for date:', date);
+      console.log('👤 Current user:', user);
+      console.log('🔑 User ID:', user?.id);
 
       // Fetch all reports for this date in one call
       const result = await getAllDailyReportsForDate(date);
