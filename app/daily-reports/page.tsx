@@ -2,13 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import Sidebar from "@/components/sidebar";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Calendar } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { getLatestDailyReports, getDailyReport } from "@/lib/api";
-import ReportCalendar from "@/components/daily-reports/ReportCalendar";
 import ReportCards from "@/components/daily-reports/ReportCards";
 import ReportModal from "@/components/daily-reports/ReportModal";
 
@@ -34,8 +34,8 @@ export default function DailyReportsPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [reportsIndex, setReportsIndex] = useState<string[]>([]); // dates with reports
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [currentMonth, setCurrentMonth] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [calendarOpen, setCalendarOpen] = useState(false);
 
   // Reports for selected date
   const [clientReport, setClientReport] = useState<DailyReport | null>(null);
@@ -52,43 +52,22 @@ export default function DailyReportsPage() {
 
   useEffect(() => {
     if (selectedDate) {
-      loadReportsForDate(selectedDate);
+      const dateString = formatDateToString(selectedDate);
+      loadReportsForDate(dateString);
     }
   }, [selectedDate]);
 
-  // Keyboard shortcuts
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Escape to close modal
-      if (e.key === 'Escape' && modalOpen) {
-        setModalOpen(false);
-        setModalReport(null);
-        return;
-      }
-
-      // Don't handle shortcuts if modal is open or if typing in an input
-      if (modalOpen || (e.target as HTMLElement).tagName === 'INPUT') {
-        return;
-      }
-
-      // Arrow keys for date navigation
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        navigateDay('prev');
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        navigateDay('next');
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedDate, reportsIndex, modalOpen]);
+  const formatDateToString = (date: Date): string => {
+    const yyyy = date.getFullYear();
+    const mm = String(date.getMonth() + 1).padStart(2, '0');
+    const dd = String(date.getDate()).padStart(2, '0');
+    return `${yyyy}-${mm}-${dd}`;
+  };
 
   const loadReportsIndex = async () => {
     try {
       setLoading(true);
-      const result = await getLatestDailyReports(30);
+      const result = await getLatestDailyReports(90);
 
       if (process.env.NODE_ENV === 'development') {
         console.log('API Response:', result);
@@ -105,11 +84,8 @@ export default function DailyReportsPage() {
 
       // Default to most recent date
       if (dates.length > 0) {
-        setSelectedDate(dates[0]);
-
-        // Set calendar to the month of the most recent report
         const mostRecentDate = new Date(dates[0] + 'T00:00:00');
-        setCurrentMonth(new Date(mostRecentDate.getFullYear(), mostRecentDate.getMonth(), 1));
+        setSelectedDate(mostRecentDate);
       }
     } catch (error) {
       console.error("Failed to load reports index:", error);
@@ -124,6 +100,10 @@ export default function DailyReportsPage() {
       setLoadingReports(true);
       setClientReport(null);
       setOpsReport(null);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log('Loading reports for date:', date);
+      }
 
       // Fetch both report types
       const [clientResult, opsResult] = await Promise.allSettled([
@@ -145,8 +125,11 @@ export default function DailyReportsPage() {
     }
   };
 
-  const handleDateSelect = (date: string) => {
-    setSelectedDate(date);
+  const handleDateSelect = (date: Date | undefined) => {
+    if (date) {
+      setSelectedDate(date);
+      setCalendarOpen(false);
+    }
   };
 
   const handleViewReport = (report: DailyReport) => {
@@ -157,16 +140,35 @@ export default function DailyReportsPage() {
   const navigateDay = (direction: 'prev' | 'next') => {
     if (!selectedDate) return;
 
-    const currentIndex = reportsIndex.indexOf(selectedDate);
+    const currentDateString = formatDateToString(selectedDate);
+    const currentIndex = reportsIndex.indexOf(currentDateString);
+
     if (direction === 'prev' && currentIndex < reportsIndex.length - 1) {
-      setSelectedDate(reportsIndex[currentIndex + 1]);
+      const prevDate = new Date(reportsIndex[currentIndex + 1] + 'T00:00:00');
+      setSelectedDate(prevDate);
     } else if (direction === 'next' && currentIndex > 0) {
-      setSelectedDate(reportsIndex[currentIndex - 1]);
+      const nextDate = new Date(reportsIndex[currentIndex - 1] + 'T00:00:00');
+      setSelectedDate(nextDate);
     }
   };
 
-  const canNavigatePrev = selectedDate && reportsIndex.indexOf(selectedDate) < reportsIndex.length - 1;
-  const canNavigateNext = selectedDate && reportsIndex.indexOf(selectedDate) > 0;
+  const canNavigatePrev = selectedDate && reportsIndex.indexOf(formatDateToString(selectedDate)) < reportsIndex.length - 1;
+  const canNavigateNext = selectedDate && reportsIndex.indexOf(formatDateToString(selectedDate)) > 0;
+
+  // Modifier for dates with reports
+  const modifiers = {
+    hasReport: reportsIndex.map(dateStr => new Date(dateStr + 'T00:00:00'))
+  };
+
+  const modifiersStyles = {
+    hasReport: {
+      fontWeight: 'bold',
+      textDecoration: 'underline',
+      textDecorationColor: '#007AFF',
+      textDecorationThickness: '2px',
+      textUnderlineOffset: '4px'
+    }
+  };
 
   return (
     <div className="flex h-full">
@@ -178,9 +180,28 @@ export default function DailyReportsPage() {
               <h1 className="text-4xl font-normal mb-2">Daily Reports</h1>
               <p className="text-muted-foreground font-light">Automated daily intelligence reports</p>
             </div>
-            <Button onClick={() => router.push("/")} className="font-normal">
-              Back to Dashboard
-            </Button>
+            <Popover open={calendarOpen} onOpenChange={setCalendarOpen}>
+              <PopoverTrigger asChild>
+                <Button variant="outline" className="font-normal">
+                  <CalendarIcon className="h-4 w-4 mr-2" />
+                  {selectedDate ? selectedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : "Select date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0" align="end">
+                <Calendar
+                  mode="single"
+                  selected={selectedDate}
+                  onSelect={handleDateSelect}
+                  captionLayout="dropdown"
+                  modifiers={modifiers}
+                  modifiersStyles={modifiersStyles}
+                  disabled={(date) => {
+                    const dateStr = formatDateToString(date);
+                    return !reportsIndex.includes(dateStr);
+                  }}
+                />
+              </PopoverContent>
+            </Popover>
           </div>
 
           {loading ? (
@@ -189,25 +210,12 @@ export default function DailyReportsPage() {
             </div>
           ) : (
             <>
-              {/* Calendar Component */}
-              <Card className="mb-6">
-                <CardContent className="pt-6">
-                  <ReportCalendar
-                    currentMonth={currentMonth}
-                    onMonthChange={setCurrentMonth}
-                    selectedDate={selectedDate}
-                    onDateSelect={handleDateSelect}
-                    datesWithReports={reportsIndex}
-                  />
-                </CardContent>
-              </Card>
-
               {/* Selected Date Reports */}
               {selectedDate && (
                 <>
                   <div className="flex items-center justify-between mb-4">
                     <h2 className="text-2xl font-normal">
-                      {new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', {
+                      {selectedDate.toLocaleDateString('en-US', {
                         weekday: 'long',
                         year: 'numeric',
                         month: 'long',
@@ -241,16 +249,16 @@ export default function DailyReportsPage() {
                       <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                     </div>
                   ) : !clientReport && !opsReport ? (
-                    <Card className="p-16 text-center">
-                      <Calendar className="w-20 h-20 mx-auto mb-4 text-muted-foreground" />
+                    <div className="p-16 text-center border rounded-lg">
+                      <CalendarIcon className="w-20 h-20 mx-auto mb-4 text-muted-foreground" />
                       <h3 className="text-2xl font-normal mb-3">No Reports for This Date</h3>
                       <p className="text-muted-foreground font-light mb-8 text-base">
                         Reports are generated automatically at 6:00 AM each business day
                       </p>
-                      <Button onClick={() => setSelectedDate(reportsIndex[0] || null)} variant="outline">
-                        View Latest Reports
+                      <Button onClick={() => setCalendarOpen(true)} variant="outline">
+                        Pick Another Date
                       </Button>
-                    </Card>
+                    </div>
                   ) : (
                     <ReportCards
                       clientReport={clientReport}
@@ -263,13 +271,13 @@ export default function DailyReportsPage() {
 
               {/* Empty State - No reports at all */}
               {!loading && reportsIndex.length === 0 && (
-                <Card className="p-16 text-center">
-                  <Calendar className="w-20 h-20 mx-auto mb-4 text-muted-foreground" />
+                <div className="p-16 text-center border rounded-lg">
+                  <CalendarIcon className="w-20 h-20 mx-auto mb-4 text-muted-foreground" />
                   <h3 className="text-2xl font-normal mb-3">No Daily Reports Yet</h3>
                   <p className="text-muted-foreground font-light mb-8 text-base">
                     Daily reports are generated automatically at 6:00 AM each day
                   </p>
-                </Card>
+                </div>
               )}
             </>
           )}

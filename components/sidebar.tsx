@@ -102,7 +102,7 @@ export default function Sidebar({ user }: SidebarProps) {
   };
 
   return (
-    <div className="w-64 border-r flex flex-col relative" style={{ backgroundColor: '#24374A', borderColor: '#1a2635', borderBottomRightRadius: '16px', height: '100%' }}>
+    <div className="w-64 border-r flex flex-col relative" style={{ backgroundColor: '#30465C', borderColor: '#1a2635', borderBottomRightRadius: '16px', height: '100%' }}>
       {/* Top-right convex curve - creates "r" shape using radial gradient */}
       <div
         className="absolute top-0"
@@ -110,7 +110,7 @@ export default function Sidebar({ user }: SidebarProps) {
           right: '-16px',
           width: '16px',
           height: '16px',
-          background: 'radial-gradient(circle at bottom right, transparent 15.5px, #24374A 16.5px)',
+          background: 'radial-gradient(circle at bottom right, transparent 15.5px, #30465C 16.5px)',
           zIndex: 10
         }}
       ></div>
