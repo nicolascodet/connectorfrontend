@@ -593,6 +593,10 @@ export async function getDailyReport(reportDate: string, reportType: string): Pr
   return apiGet(`/api/v1/reports/daily/${reportDate}`, params);
 }
 
+export async function getAllDailyReportsForDate(reportDate: string): Promise<any> {
+  return apiGet(`/api/v1/reports/daily/${reportDate}/all`);
+}
+
 export async function getLatestDailyReports(limit: number = 7): Promise<any> {
   return apiGet("/api/v1/reports/daily/latest", { limit: limit.toString() });
 }

@@ -8,7 +8,7 @@ import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { getLatestDailyReports, getDailyReport } from "@/lib/api";
+import { getLatestDailyReports, getAllDailyReportsForDate } from "@/lib/api";
 import ReportCards from "@/components/daily-reports/ReportCards";
 import ReportModal from "@/components/daily-reports/ReportModal";
 
@@ -101,50 +101,43 @@ export default function DailyReportsPage() {
       setClientReport(null);
       setOpsReport(null);
 
-      console.log('🔍 Loading reports for date:', date);
+      console.log('🔍 Loading all reports for date:', date);
 
-      // Fetch both report types
-      const [clientResult, opsResult] = await Promise.allSettled([
-        getDailyReport(date, "client_relationships"),
-        getDailyReport(date, "operations")
-      ]);
+      // Fetch all reports for this date in one call
+      const result = await getAllDailyReportsForDate(date);
 
-      console.log('📊 Client result:', clientResult);
-      console.log('📊 Operations result:', opsResult);
+      console.log('📊 API response:', result);
 
-      if (clientResult.status === "fulfilled") {
-        console.log('✅ Client fulfilled, success:', clientResult.value.success);
-        console.log('📄 Client data:', clientResult.value);
+      if (result.success && result.reports) {
+        console.log(`✅ Found ${result.reports.length} report(s) for ${date}`);
 
-        if (clientResult.value.success && clientResult.value.report) {
-          const apiReport = clientResult.value.report;
-          console.log('🔗 Client report structure:', {
-            has_full_report: !!apiReport.full_report,
-            report_keys: Object.keys(apiReport)
+        // Parse reports by type
+        result.reports.forEach((report: any) => {
+          console.log('📄 Report:', {
+            type: report.report_type,
+            date: report.report_date,
+            has_full_report: !!report.full_report,
+            full_report_type: typeof report.full_report
           });
-          setClientReport(apiReport.full_report);
-        }
+
+          if (report.full_report) {
+            // Parse full_report if it's a string
+            const fullReport = typeof report.full_report === 'string'
+              ? JSON.parse(report.full_report)
+              : report.full_report;
+
+            console.log('✅ Parsed full_report:', fullReport);
+
+            if (report.report_type === "client_relationships") {
+              setClientReport(fullReport);
+            } else if (report.report_type === "operations") {
+              setOpsReport(fullReport);
+            }
+          }
+        });
       } else {
-        console.log('❌ Client rejected:', clientResult.reason);
+        console.log('ℹ️ No reports found for this date');
       }
-
-      if (opsResult.status === "fulfilled") {
-        console.log('✅ Ops fulfilled, success:', opsResult.value.success);
-        console.log('📄 Ops data:', opsResult.value);
-
-        if (opsResult.value.success && opsResult.value.report) {
-          const apiReport = opsResult.value.report;
-          console.log('🔗 Ops report structure:', {
-            has_full_report: !!apiReport.full_report,
-            report_keys: Object.keys(apiReport)
-          });
-          setOpsReport(apiReport.full_report);
-        }
-      } else {
-        console.log('❌ Ops rejected:', opsResult.reason);
-      }
-
-      console.log('📌 Final state - Client:', !!clientReport, 'Ops:', !!opsReport);
     } catch (error) {
       console.error("❌ Failed to load reports for date:", error);
     } finally {
