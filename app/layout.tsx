@@ -33,6 +33,21 @@ function LayoutContent({ children }: { children: React.ReactNode }) {
   );
 }
 
+function BodyContent({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/login";
+
+  const bodyStyle = isLoginPage
+    ? {}
+    : { backgroundColor: '#30465C', padding: '12px 12px 0 0', margin: 0, height: '100vh', overflow: 'hidden', boxSizing: 'border-box' };
+
+  return (
+    <body className={inter.className} style={bodyStyle}>
+      {children}
+    </body>
+  );
+}
+
 export default function RootLayout({
   children,
 }: {
@@ -40,12 +55,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <AuthProvider>
+      <AuthProvider>
+        <BodyContent>
           <LayoutContent>{children}</LayoutContent>
           <Toaster />
-        </AuthProvider>
-      </body>
+        </BodyContent>
+      </AuthProvider>
     </html>
   );
 }
