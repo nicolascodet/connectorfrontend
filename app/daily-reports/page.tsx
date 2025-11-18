@@ -101,9 +101,7 @@ export default function DailyReportsPage() {
       setClientReport(null);
       setOpsReport(null);
 
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Loading reports for date:', date);
-      }
+      console.log('🔍 Loading reports for date:', date);
 
       // Fetch both report types
       const [clientResult, opsResult] = await Promise.allSettled([
@@ -111,19 +109,44 @@ export default function DailyReportsPage() {
         getDailyReport(date, "operations")
       ]);
 
-      if (clientResult.status === "fulfilled" && clientResult.value.success) {
-        // Map the API response to our component structure
-        const apiReport = clientResult.value.report;
-        setClientReport(apiReport.full_report);
+      console.log('📊 Client result:', clientResult);
+      console.log('📊 Operations result:', opsResult);
+
+      if (clientResult.status === "fulfilled") {
+        console.log('✅ Client fulfilled, success:', clientResult.value.success);
+        console.log('📄 Client data:', clientResult.value);
+
+        if (clientResult.value.success && clientResult.value.report) {
+          const apiReport = clientResult.value.report;
+          console.log('🔗 Client report structure:', {
+            has_full_report: !!apiReport.full_report,
+            report_keys: Object.keys(apiReport)
+          });
+          setClientReport(apiReport.full_report);
+        }
+      } else {
+        console.log('❌ Client rejected:', clientResult.reason);
       }
 
-      if (opsResult.status === "fulfilled" && opsResult.value.success) {
-        // Map the API response to our component structure
-        const apiReport = opsResult.value.report;
-        setOpsReport(apiReport.full_report);
+      if (opsResult.status === "fulfilled") {
+        console.log('✅ Ops fulfilled, success:', opsResult.value.success);
+        console.log('📄 Ops data:', opsResult.value);
+
+        if (opsResult.value.success && opsResult.value.report) {
+          const apiReport = opsResult.value.report;
+          console.log('🔗 Ops report structure:', {
+            has_full_report: !!apiReport.full_report,
+            report_keys: Object.keys(apiReport)
+          });
+          setOpsReport(apiReport.full_report);
+        }
+      } else {
+        console.log('❌ Ops rejected:', opsResult.reason);
       }
+
+      console.log('📌 Final state - Client:', !!clientReport, 'Ops:', !!opsReport);
     } catch (error) {
-      console.error("Failed to load reports for date:", error);
+      console.error("❌ Failed to load reports for date:", error);
     } finally {
       setLoadingReports(false);
     }
