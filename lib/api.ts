@@ -186,6 +186,15 @@ export async function handleOAuthCallback(data: {
   return response.json();
 }
 
+// Sync connection from Nango (fallback if webhook didn't fire)
+export async function syncConnectionFromNango(
+  provider: "microsoft" | "gmail"
+): Promise<any> {
+  const result = await apiPost(`/connect/sync-from-nango?provider=${provider}`);
+  cache.invalidate("connection-status");
+  return result;
+}
+
 export async function searchOptimized(data: {
   query: string;
   vector_limit?: number;
