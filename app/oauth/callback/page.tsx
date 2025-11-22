@@ -1,104 +1,37 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
-import { syncConnectionFromNango } from "@/lib/api";
-import { Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Loader2, CheckCircle2 } from "lucide-react";
 
 export default function OAuthCallbackPage() {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [status, setStatus] = useState<"loading" | "success" | "error">("loading");
-  const [message, setMessage] = useState("Processing OAuth connection...");
-  const [provider, setProvider] = useState<string>("");
+  const [status, setStatus] = useState<"loading" | "success">("loading");
 
   useEffect(() => {
     const handleCallback = async () => {
-      try {
-        // Extract provider from URL parameters
-        // Nango may pass connectionId, hmac, or other params
-        const connectionId = searchParams.get("connectionId");
-        const providerConfigKey = searchParams.get("providerConfigKey");
+      // Wait a moment for webhook to process
+      await new Promise(resolve => setTimeout(resolve, 1500));
 
-        // Determine provider from config key or connection ID
-        let detectedProvider: "microsoft" | "gmail" = "microsoft";
-        if (providerConfigKey?.includes("gmail") || providerConfigKey?.includes("google")) {
-          detectedProvider = "gmail";
-        }
+      setStatus("success");
 
-        setProvider(detectedProvider === "microsoft" ? "Outlook" : "Gmail");
-
-        // Call sync endpoint to ensure connection is saved
-        const result = await syncConnectionFromNango(detectedProvider);
-
-        if (result.status === "synced" || result.status === "already_synced") {
-          setStatus("success");
-          setMessage(
-            result.status === "synced"
-              ? "Connection successfully saved!"
-              : "Connection already exists!"
-          );
-
-          // Notify parent window (if opened as popup)
-          if (window.opener) {
-            window.opener.postMessage({ type: "oauth-success" }, window.location.origin);
-          }
-
-          // Redirect to connections page after 2 seconds
-          setTimeout(() => {
-            router.push("/connections");
-          }, 2000);
-        } else if (result.status === "no_connection") {
-          setStatus("error");
-          setMessage("No connection found in Nango. Please try connecting again.");
-
-          // Notify parent window of error
-          if (window.opener) {
-            window.opener.postMessage(
-              { type: "oauth-error", error: "No connection found" },
-              window.location.origin
-            );
-          }
-
-          setTimeout(() => {
-            router.push("/connections");
-          }, 3000);
-        } else {
-          setStatus("success");
-          setMessage("Connection processed successfully!");
-
-          if (window.opener) {
-            window.opener.postMessage({ type: "oauth-success" }, window.location.origin);
-          }
-
-          setTimeout(() => {
-            router.push("/connections");
-          }, 2000);
-        }
-      } catch (error) {
-        console.error("OAuth callback error:", error);
-        setStatus("error");
-        setMessage(
-          error instanceof Error ? error.message : "Failed to process OAuth callback"
-        );
-
-        // Notify parent window of error
-        if (window.opener) {
-          window.opener.postMessage(
-            { type: "oauth-error", error: error instanceof Error ? error.message : "Unknown error" },
-            window.location.origin
-          );
-        }
-
-        // Redirect even on error
+      // Notify parent window (if opened as popup)
+      if (window.opener) {
+        window.opener.postMessage({ type: "oauth-success" }, window.location.origin);
+        // Close popup after notifying parent
+        setTimeout(() => {
+          window.close();
+        }, 1000);
+      } else {
+        // If not a popup, redirect to connections page
         setTimeout(() => {
           router.push("/connections");
-        }, 3000);
+        }, 2000);
       }
     };
 
     handleCallback();
-  }, [searchParams, router]);
+  }, [router]);
 
   return (
     <div className="flex h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -113,7 +46,7 @@ export default function OAuthCallbackPage() {
                 <h1 className="text-2xl font-normal text-gray-900 mb-2">
                   Processing Connection
                 </h1>
-                <p className="text-gray-600 font-light">{message}</p>
+                <p className="text-gray-600 font-light">Please wait while we complete your OAuth connection...</p>
               </>
             )}
 
@@ -123,23 +56,12 @@ export default function OAuthCallbackPage() {
                   <CheckCircle2 className="h-8 w-8 text-green-600" />
                 </div>
                 <h1 className="text-2xl font-normal text-gray-900 mb-2">
-                  {provider} Connected!
+                  Connected Successfully!
                 </h1>
-                <p className="text-gray-600 font-light mb-4">{message}</p>
-                <p className="text-sm text-gray-500">Redirecting to connections...</p>
-              </>
-            )}
-
-            {status === "error" && (
-              <>
-                <div className="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center mb-6">
-                  <XCircle className="h-8 w-8 text-red-600" />
-                </div>
-                <h1 className="text-2xl font-normal text-gray-900 mb-2">
-                  Connection Failed
-                </h1>
-                <p className="text-gray-600 font-light mb-4">{message}</p>
-                <p className="text-sm text-gray-500">Redirecting to connections...</p>
+                <p className="text-gray-600 font-light mb-4">Your connection has been established.</p>
+                <p className="text-sm text-gray-500">
+                  {window.opener ? "You can close this window..." : "Redirecting to connections..."}
+                </p>
               </>
             )}
           </div>
