@@ -38,7 +38,7 @@ export default function InviteUserModal({ onClose, onSuccess, session }: InviteU
 
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/users/invite`,
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/api/v1/users/invite`,
         {
           method: 'POST',
           headers: {
