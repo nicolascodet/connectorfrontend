@@ -14,6 +14,8 @@ export default function LoginPage() {
   const { user, loading, isDemoMode } = useAuth();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [companyName, setCompanyName] = useState("");
+  const [fullName, setFullName] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
@@ -57,7 +59,8 @@ export default function LoginPage() {
           body: JSON.stringify({
             email,
             password,
-            full_name: email.split("@")[0], // Use email prefix as name
+            full_name: fullName || email.split("@")[0],
+            company_name: companyName,
           }),
         });
 
@@ -117,6 +120,36 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {!isLogin && (
+              <>
+                <div className="space-y-2">
+                  <label htmlFor="fullName" className="text-sm font-medium">
+                    Full Name
+                  </label>
+                  <Input
+                    id="fullName"
+                    type="text"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                    placeholder="John Doe"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label htmlFor="companyName" className="text-sm font-medium">
+                    Company Name
+                  </label>
+                  <Input
+                    id="companyName"
+                    type="text"
+                    value={companyName}
+                    onChange={(e) => setCompanyName(e.target.value)}
+                    placeholder="Acme Inc."
+                    required
+                  />
+                </div>
+              </>
+            )}
             <div className="space-y-2">
               <label htmlFor="email" className="text-sm font-medium">
                 Email
