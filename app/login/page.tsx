@@ -47,16 +47,36 @@ export default function LoginPage() {
           description: "Redirecting to dashboard...",
         });
       } else {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
+        // NEW: Use backend signup endpoint instead of Supabase direct
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL;
+        const response = await fetch(`${backendUrl}/api/v1/signup`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            full_name: email.split("@")[0], // Use email prefix as name
+          }),
         });
 
-        if (error) throw error;
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ detail: "Signup failed" }));
+          throw new Error(errorData.detail || "Signup failed");
+        }
+
+        const data = await response.json();
+
+        // Set the session with returned tokens
+        await supabase.auth.setSession({
+          access_token: data.access_token,
+          refresh_token: data.refresh_token,
+        });
 
         toast({
-          title: "Account created",
-          description: "Please check your email to verify your account.",
+          title: "Account created successfully!",
+          description: "You're now logged in.",
         });
       }
     } catch (error: any) {
