@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
+import Sidebar from '@/components/sidebar';
 import InviteUserModal from '@/components/team/InviteUserModal';
 import { Users, Mail, Shield, Clock, UserPlus, Trash2 } from 'lucide-react';
 
@@ -146,9 +147,10 @@ export default function TeamPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="text-center py-20">
+      <div className="flex h-full">
+        <Sidebar user={user} />
+        <div className="flex-1 flex justify-center items-center bg-gradient-to-br from-gray-50 to-gray-100">
+          <div className="text-center">
             <div className="inline-block animate-spin rounded-full h-12 w-12 border-4 border-gray-200 border-t-blue-600"></div>
             <p className="mt-6 text-gray-600 text-lg">Loading your team...</p>
           </div>
@@ -161,8 +163,10 @@ export default function TeamPage() {
   const pendingUsers = users.filter(u => !u.is_active);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-      <div className="max-w-6xl mx-auto">
+    <div className="flex h-full">
+      <Sidebar user={user} />
+      <div className="flex-1 overflow-y-auto bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="max-w-6xl mx-auto p-8">
         {/* Header */}
         <div className="mb-8">
           <div className="flex justify-between items-start mb-4">
@@ -383,6 +387,7 @@ export default function TeamPage() {
             )}
           </div>
         )}
+        </div>
       </div>
 
       {/* Invite Modal */}
