@@ -5,7 +5,8 @@ import { useAuth } from '@/contexts/auth-context';
 import { useRouter } from 'next/navigation';
 import Sidebar from '@/components/sidebar';
 import InviteUserModal from '@/components/team/InviteUserModal';
-import { Users, Mail, Shield, Clock, UserPlus, Trash2 } from 'lucide-react';
+import ManageTeamModal from '@/components/team/ManageTeamModal';
+import { Users, Mail, Shield, Clock, UserPlus, Trash2, UsersRound, Building2 } from 'lucide-react';
 
 interface CompanyUser {
   id: string;
@@ -17,6 +18,8 @@ interface CompanyUser {
   invited_at: string | null;
   last_login_at: string | null;
   created_at: string;
+  managed_by: string | null;
+  department: string | null;
 }
 
 interface UsersListResponse {
@@ -32,6 +35,7 @@ export default function TeamPage() {
   const [error, setError] = useState('');
   const [currentUserRole, setCurrentUserRole] = useState('');
   const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showManageTeamModal, setShowManageTeamModal] = useState(false);
 
   useEffect(() => {
     if (!user) {
@@ -180,13 +184,24 @@ export default function TeamPage() {
               </p>
             </div>
             {canManageUsers && (
-              <button
-                onClick={() => setShowInviteModal(true)}
-                className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl font-medium"
-              >
-                <UserPlus className="w-5 h-5" />
-                Invite User
-              </button>
+              <div className="flex gap-3">
+                {(currentUserRole === 'admin' || currentUserRole === 'owner') && (
+                  <button
+                    onClick={() => setShowManageTeamModal(true)}
+                    className="flex items-center gap-2 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all shadow-lg hover:shadow-xl font-medium"
+                  >
+                    <UsersRound className="w-5 h-5" />
+                    Manage Team
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowInviteModal(true)}
+                  className="flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all shadow-lg hover:shadow-xl font-medium"
+                >
+                  <UserPlus className="w-5 h-5" />
+                  Invite User
+                </button>
+              </div>
             )}
           </div>
 
@@ -278,6 +293,9 @@ export default function TeamPage() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                       Joined
                     </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                      Team/Dept
+                    </th>
                     {canManageUsers && (
                       <th className="px-6 py-4 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Actions
@@ -340,6 +358,24 @@ export default function TeamPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600">
                           {formatDate(companyUser.created_at)}
                         </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          {companyUser.managed_by ? (
+                            <div className="flex flex-col gap-1">
+                              <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium inline-flex items-center gap-1 w-fit">
+                                <UsersRound className="w-3 h-3" />
+                                On Team
+                              </span>
+                              {companyUser.department && (
+                                <span className="text-xs text-gray-600 flex items-center gap-1">
+                                  <Building2 className="w-3 h-3" />
+                                  {companyUser.department}
+                                </span>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-xs text-gray-400 italic">—</span>
+                          )}
+                        </td>
                         {canManageUsers && (
                           <td className="px-6 py-4 whitespace-nowrap text-right">
                             {!isCurrentUser && (
@@ -396,6 +432,16 @@ export default function TeamPage() {
           onClose={() => setShowInviteModal(false)}
           onSuccess={handleInviteSuccess}
           session={session}
+        />
+      )}
+
+      {/* Manage Team Modal */}
+      {showManageTeamModal && (
+        <ManageTeamModal
+          onClose={() => setShowManageTeamModal(false)}
+          onSuccess={fetchUsers}
+          session={session}
+          currentUserRole={currentUserRole}
         />
       )}
     </div>
