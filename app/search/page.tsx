@@ -6,8 +6,9 @@ import { sendChatMessage, getChatMessages, getSourceDocument } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
-import { Send, Loader2, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, FileText, ExternalLink, Sparkles, ChevronDown, ChevronRight, Download, X } from "lucide-react";
+import { Send, Loader2, Mail, HardDrive, File, Sheet, Presentation, FileImage, Database, MessageSquare, Building2, DollarSign, FileText, ExternalLink, Sparkles, ChevronDown, ChevronRight, Download, X, Upload } from "lucide-react";
 import SmartMarkdown from '@/components/SmartMarkdown';
+import UploadModal from '@/components/upload/UploadModal';
 
 interface Source {
   index: number;
@@ -70,6 +71,7 @@ function SearchPageContent() {
   const [selectedDocument, setSelectedDocument] = useState<any | null>(null);
   const [loadingDocument, setLoadingDocument] = useState(false);
   const [loadingTextIndex, setLoadingTextIndex] = useState(0);
+  const [uploadModalOpen, setUploadModalOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const loadingTexts = [
@@ -288,6 +290,18 @@ function SearchPageContent() {
                     className="px-4 py-2 border border-gray-300 rounded-xl text-sm font-normal text-gray-700 hover:bg-gray-50 transition-colors"
                   >
                     This week's meetings
+                  </button>
+                </div>
+
+                {/* Upload button */}
+                <div className="mt-6">
+                  <button
+                    onClick={() => setUploadModalOpen(true)}
+                    style={{ backgroundColor: '#FFFFFF', boxShadow: '0 0 20px rgba(255, 255, 255, 0.8)' }}
+                    className="px-5 py-2.5 border border-gray-300 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center space-x-2"
+                  >
+                    <Upload className="h-4 w-4" />
+                    <span>Upload Document</span>
                   </button>
                 </div>
               </div>
@@ -575,6 +589,19 @@ function SearchPageContent() {
           </div>
         </div>
       )}
+
+      {/* Upload Modal */}
+      <UploadModal 
+        isOpen={uploadModalOpen}
+        onClose={() => setUploadModalOpen(false)}
+        userRole={(user as any)?.role || 'user'}
+        onUploadSuccess={() => {
+          toast({
+            title: "Upload successful",
+            description: "Your document has been uploaded and will be searchable shortly.",
+          });
+        }}
+      />
     </div>
   );
 }
