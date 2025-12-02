@@ -2,7 +2,7 @@
 
 import { Suspense, useEffect, useState, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { sendChatMessage, getChatMessages, getSourceDocument } from "@/lib/api";
+import { sendChatMessage, getChatMessages, getSourceDocument, searchV2 } from "@/lib/api";
 import { toast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/auth-context";
 import Sidebar from "@/components/sidebar";
@@ -173,21 +173,33 @@ function SearchPageContent() {
     setLoadingChat(true);
 
     try {
-      const result = await sendChatMessage(searchQuery, searchParams.get("chat_id") || undefined);
-
-      const currentChatIdParam = searchParams.get("chat_id");
-      if (!currentChatIdParam && result.chat_id) {
-        setCurrentChatId(result.chat_id);
-        const url = new URL(window.location.href);
-        url.searchParams.set("chat_id", result.chat_id);
-        window.history.replaceState({}, '', url.toString());
-      }
+      const result = await searchV2({
+        query: searchQuery,
+        search_scope: "self",
+        chat_id: currentChatId || undefined,
+      });
 
       if (result.answer && result.answer.trim()) {
+        // Transform v2 sources to match existing Message interface
+        const transformedSources = result.sources.map((source, index) => ({
+          index,
+          document_id: source.doc_id.toString(),
+          document_name: source.title,
+          source: source.metadata?.source || 'document',
+          document_type: source.metadata?.document_type || 'document',
+          timestamp: source.metadata?.created_at || new Date().toISOString(),
+          text_preview: source.text_preview,
+          score: source.score,
+          file_url: source.metadata?.file_url || null,
+          mime_type: source.metadata?.mime_type || null,
+          file_size_bytes: source.metadata?.file_size_bytes || null,
+          parent_document_id: source.metadata?.parent_document_id || null,
+        }));
+
         const assistantMessage: Message = {
           role: "assistant",
           content: result.answer,
-          sources: result.sources || [],
+          sources: transformedSources,
         };
         setMessages((prev) => [...prev, assistantMessage]);
       }

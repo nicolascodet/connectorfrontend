@@ -246,6 +246,56 @@ export async function searchOptimized(data: {
   return response.json();
 }
 
+// V2 Search - Production-ready hybrid search with multi-query generation, fusion, and reranking
+export async function searchV2(data: {
+  query: string;
+  search_scope?: "self" | "team" | "company";
+  time_filter_days?: number;
+  chat_id?: string;
+}): Promise<{
+  success: boolean;
+  query: string;
+  answer: string;
+  sources: Array<{
+    doc_id: number;
+    document_id: string;
+    title: string;
+    text_preview: string;
+    score: number;
+    metadata: Record<string, any>;
+  }>;
+  source_count: number;
+  debug?: {
+    fusion_num_queries: number;
+    fusion_mode: string;
+    rerank_model: string;
+    memory_enabled: boolean;
+  };
+}> {
+  const url = new URL("/api/v2/search", BACKEND_URL);
+  const headers = await getAuthHeaders();
+
+  const response = await fetch(url.toString(), {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      query: data.query,
+      search_scope: data.search_scope || "self",
+      time_filter_days: data.time_filter_days,
+      chat_id: data.chat_id,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorText = await response.text().catch(() => "Unknown error");
+    throw new Error(
+      `Search failed: ${response.status} ${response.statusText} - ${errorText}`
+    );
+  }
+
+  return response.json();
+}
+
 // Chat History APIs
 export async function getChatHistory(): Promise<{ chats: ChatHistoryItem[] }> {
   return withCache("chat-history", () => apiGet("/api/v1/chats"), 60); // Cache for 60 seconds
